@@ -6,9 +6,7 @@
 using namespace std;
 
 void turnOffWifi();
-
 void turnOnWifi();
-
-void load_module(string path);
+void loadModule(string path);
 
 #endif

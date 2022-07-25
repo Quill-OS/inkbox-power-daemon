@@ -7,13 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <unistd.h>
 
 #include "fbink.h"
 
 extern int fbfd;
-
 extern FBInkDump dump;
-
 extern string model;
 
 void initFbink() {
@@ -23,23 +22,14 @@ void initFbink() {
     exit(EXIT_FAILURE);
   }
   log("Loaded FBInk version: " + (string)fbink_version());
-  /*
-    if (fbink_close(fbfd) < 0) {
-    printf("Failed to close the framebuffer, aborting . . .\n");
-    return EXIT_FAILURE;
-  }
-  */
 }
 
-int fbinkWriteCenter(string stringToWrite, bool darkmode) {
+int fbinkWriteCenter(string stringToWrite, bool darkMode) {
 
   FBInkConfig fbink_cfg = {0};
   fbink_cfg.is_centered = true;
   fbink_cfg.is_halfway = true;
-  if (darkmode == true) {
-    // doesnt work?
-    //fbink_cfg.bg_color = BG_BLACK;
-    //fbink_cfg.fg_color = FG_WHITE;
+  if (darkMode == true) {
     fbink_cfg.is_inverted = true;
   }
 
@@ -48,8 +38,7 @@ int fbinkWriteCenter(string stringToWrite, bool darkmode) {
     return EXIT_FAILURE;
   }
 
-  fbink_add_ot_font("/etc/init.d/splash.d/fonts/resources/inter-b.ttf",
-                    FNT_REGULAR);
+  fbink_add_ot_font("/etc/init.d/splash.d/fonts/resources/inter-b.ttf", FNT_REGULAR);
 
   FBInkOTConfig fbinkOT_cfg = {0};
   fbinkOT_cfg.is_centered = true;
@@ -58,25 +47,22 @@ int fbinkWriteCenter(string stringToWrite, bool darkmode) {
 
   FBInkOTFit ot_fit = {0};
 
-  if (fbink_print_ot(fbfd, stringToWrite.c_str(), &fbinkOT_cfg, &fbink_cfg,
-                     &ot_fit) < 0) {
-    log("Failed to print to fbink");
+  if (fbink_print_ot(fbfd, stringToWrite.c_str(), &fbinkOT_cfg, &fbink_cfg, &ot_fit) < 0) {
+    log("FBInk: Failed to print string");
   }
 
   return EXIT_SUCCESS;
 }
 
-void clearScreen(bool darkmodeset) {
+void clearScreen(bool darkModeSet) {
   FBInkConfig fbink_cfg = {0};
-  fbink_cfg.is_inverted = darkmodeset;
+  fbink_cfg.is_inverted = darkModeSet;
 
   if (fbink_init(fbfd, &fbink_cfg) < 0) {
     log("Failed to initialize FBInk, aborting");
     exit(EXIT_FAILURE);
   }
 
-  // clear_screen(fbfd, fbink_cfg.is_inverted ? penBGColor ^ 0xFFu : penBGColor,
-  // fbink_cfg.is_flashing);
   FBInkRect cls_rect = {0};
   cls_rect.left = (unsigned short int)0;
   cls_rect.top = (unsigned short int)0;
@@ -92,30 +78,23 @@ int printImage(string path) {
 }
 
 void screenshotFbink() {
-  /*
-  string mainString = "/usr/bin/chroot /kobo /usr/bin/fbgrab ";
-  mainString = mainString + "\"" + path + "\"";
-  system(mainString.c_str());
-  */
   FBInkConfig fbink_cfg = {0};
 
   if (fbink_init(fbfd, &fbink_cfg) < 0) {
-    log("Failed to initialize FBInk, aborting");
+    log("Failed to initialize FBInk in screenshotFbink");
+  } else {
+    log("FBInk was initialized successfully in screenshotFbink");
   }
 
-  log("Inited fbink in screenshotFbink");
-
   if (fbink_dump(fbfd, &dump) < 0) {
-    log("something went wrong with bump");
+    log("FBInk: Something went wrong while trying to dump the screen");
   };
-  log("screenshot done");
+  log("Screen dump done");
 }
 
-void restoreFbink(bool darkmode) {
+void restoreFbink(bool darkMode) {
   FBInkConfig fbink_cfg = {0};
-  if (darkmode == true) {
-    // doesnt work
-    //fbink_cfg.is_inverted = true;
+  if (darkMode == true) {
     fbink_cfg.is_nightmode = true;
   }
 
@@ -124,13 +103,11 @@ void restoreFbink(bool darkmode) {
   }
 
   fbink_restore(fbfd, &fbink_cfg, &dump);
-  // free(dump.data);
 }
 
 void closeFbink() { fbink_close(fbfd); }
 
 void restoreFbDepth() {
-  // fbdepth.c is a pretty complicated file so
   if (model == "n437" or model == "kt") {
     if (fileExists("/kobo/tmp/inkbox_running") == true) {
       system("/opt/bin/fbink/fbdepth -d 8");

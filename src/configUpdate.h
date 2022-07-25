@@ -2,10 +2,7 @@
 #define CONFIG_UPDATE_H
 
 void startMonitoringConfig();
-
 void checkUpdateFile();
-
 void sleepInotifyCall();
-
 
 #endif

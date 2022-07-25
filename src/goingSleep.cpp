@@ -20,38 +20,35 @@
 #include "goingSleep.h"
 #include "devices.h"
 
-// var
-
-// 4-ChargerWakeUp
-extern bool ChargerWakeUp;
+// Variables
+// 4 - chargerWakeUp
+extern bool chargerWakeUp;
 bool savedChargerState;
-
-//
 
 extern sleepBool sleepJob;
 extern mutex sleep_mtx;
 
-extern sleepBool CurrentActiveThread;
-extern mutex CurrentActiveThread_mtx;
+extern sleepBool currentActiveThread;
+extern mutex currentActiveThread_mtx;
 
 extern sleepBool watchdogNextStep;
 
-extern mutex OccupyLed;
+extern mutex occupyLed;
 
-// there is no way to stop the threat... so i will use this bool
+// There is no way to stop the thread, so use this bool
 bool dieGoing;
 
 // Some notes
 /*
 
-to be able to go so fast in time without delays, before setting 1 to
-state-extended, there needs to be a 0. In other words, if there is a 1 full time
-it wont work. for the nia it works like that. adjust it for other devices if it
-doesnt work
+To be able to go so fast in time without delays, before setting 1 to
+state-extended, there needs to be a 0. In other words, if there is a 1 full-time
+it won't work. For the Nia it works like that. Adjust it for other devices if it
+doesn't work
 
-also code explanation:
-this thread doesnt set watchdogNextStep or sleepJob becouse monitor events sends
-a signal after being waked up, so watchdog knows what to do;
+Code explanation:
+This thread doesn't set watchdogNextStep or sleepJob because monitor events send
+a signal after waking up, so watchdog knows what to do;
 
 */
 
@@ -72,9 +69,9 @@ void CEG() {
 void goSleep() {
   log("Started goSleep");
   dieGoing = false;
-  waitMutex(&OccupyLed);
+  waitMutex(&occupyLed);
 
-  system("/bin/sync");
+  sync();
 
   CEG();
   if (dieGoing == false) {
@@ -92,19 +89,16 @@ void goSleep() {
   bool continueSleeping = true;
   int count = 0;
   while (continueSleeping == true and dieGoing == false) {
-    // 4-ChargerWakeUp. Actually we need this variable anyway becouse to know if
-    // to wakeup the device after it or not
-    // if (ChargerWakeUp == true) {
+    // 4 - chargerWakeUp. Actually we need this variable anyway to know whether we need to wakeup the device after it or not
     savedChargerState = getChargerStatus();
-    // }
 
     // https://linux.die.net/man/3/klogctl
     klogctl(5, NULL, 0);
 
-    // Manage the led here
-    OccupyLed.unlock();
+    // Manage the LED here
+    occupyLed.unlock();
     ledManager();
-    waitMutex(&OccupyLed);
+    waitMutex(&occupyLed);
 
     log("Trying sleep");
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -116,82 +110,72 @@ void goSleep() {
 
     log("Got back from suspend");
 
-    // get dmesg, and then only lines containing <3>
+    // Read kernel ring buffer, and then keep only lines containing <3>
     char *logs_data;
     ssize_t len = klogctl(10, NULL, 0);
     logs_data = (char *)malloc(len);
     klogctl(3, logs_data, len);
     vector<string> dmesgErrorsVec;
-    boost::split(dmesgErrorsVec, logs_data, boost::is_any_of("\n"),
-                 boost::token_compress_on);
-
-    // to show whole dmesg
-    // log("dmesg: " + (string)logs_data);
+    boost::split(dmesgErrorsVec, logs_data, boost::is_any_of("\n"), boost::token_compress_on);
 
     free(logs_data);
     string dmesgErrors;
     for (string line : dmesgErrorsVec) {
       if (line.find("<3>") != std::string::npos) {
-        // tesdt
         dmesgErrors.append(line);
         dmesgErrors.append("\n");
       }
     }
     dmesgErrorsVec.clear();
-    if (status == -1 or
-        dmesgErrors.find("PM: Some devices failed to suspend") !=
-            std::string::npos) {
-      log("Failed to suspend, dmesg errors:\n" + dmesgErrors);
+    if (status == -1 or dmesgErrors.find("PM: Some devices failed to suspend") != std::string::npos) {
+      log("Failed to suspend, kernel ring buffer errors:\n" + dmesgErrors);
       log("\nstatus of writing to /sys/power/state: " + to_string(status));
       CEG();
       count = count + 1;
       if (count == 5) {
-        log("5 failed attemts at suspending, sleep a little longer...");
+        log("5 failed attempts at suspending, sleep a little longer ...");
         smartWait(10000);
       } else if (count == 15) {
-        log("15 failed attempts at sleeping...");
-        // Write to fbink here a sad message
+        log("15 failed attempts at sleeping ...");
+        // TODO: Display an error splash screen with FBInk
       } else {
         smartWait(3000);
       }
     } else {
       // Exiting this sleeping hell
-      log("Sleeping finished. Tryied going to sleep " + to_string(count) +
-          " times");
+      log("FATAL error: stopping suspend attempts after " + to_string(count) +
+          " failed attempts");
       continueSleeping = false;
 
-      // 4-ChargerWakeUp
+      // 4 - chargerWakeUp
       if (savedChargerState != getChargerStatus()) {
-        if (ChargerWakeUp == true) {
-          log("4-ChargerWakeUp option is enabled, and the charger state is "
-              "diffrent. going to sleep one more time");
+        if (chargerWakeUp == true) {
+          log("4 - chargerWakeUp option is enabled, and the charger state is different. Going to sleep one more time");
           count = 0;
           continueSleeping = true;
         } else {
-          // Becouse the charger doesnt trigger a anything in monitorEvents
-          log("The device waked up becouse of a charger, but 4-ChargerWakeUp "
-              "is disabled so it will continue to wake up");
+          // Because the charger doesn't trigger anything in monitorEvents
+          log("The device woke up becouse of a charger, but option '4 - chargerWakeUp' is disabled, so it will continue to wake up");
         }
       }
     }
   }
 
-  OccupyLed.unlock();
+  occupyLed.unlock();
   watchdogNextStep = After;
-  waitMutex(&CurrentActiveThread_mtx);
-  CurrentActiveThread = Nothing;
-  CurrentActiveThread_mtx.unlock();
-  log("Exiting going to sleep");
+  waitMutex(&currentActiveThread_mtx);
+  currentActiveThread = Nothing;
+  currentActiveThread_mtx.unlock();
+  log("Exiting goSleep");
 }
 
-// Sometimes i regret using such a simple multi threading, but then i remember
-// that this is safe
+// Sometimes I regret using such a simple multi-threading approach, but then I remember that it is safe
 void smartWait(int timeToWait) {
   int time = timeToWait / 20;
   int count = 0;
   while (count < 20 and dieGoing == false) {
     count = count + 1;
-    // Now that im thinking, the ceg isin't here needed that much. but the LED flickers more so its cool
+    // Now that I'm thinking, CEG isn't needed that much here, but the LED flickers more, so it's cool
     CEG();
     std::this_thread::sleep_for(std::chrono::milliseconds(time));
   }

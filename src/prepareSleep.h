@@ -3,11 +3,8 @@
 
 #include "functions.h"
 void prepareSleep();
-
 void CEP();
-
 void sleepScreen();
-
 void deepSleepGo();
 
 #endif

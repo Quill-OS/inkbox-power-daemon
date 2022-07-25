@@ -27,16 +27,14 @@ extern mutex newSleepCondition_mtx;
 extern sleepBool sleepJob;
 extern mutex sleep_mtx;
 
-extern sleepBool CurrentActiveThread;
-extern mutex CurrentActiveThread_mtx;
+extern sleepBool currentActiveThread;
+extern mutex currentActiveThread_mtx;
 
 extern bool deepSleep;
 extern bool deepSleepPermission;
 
-// this isin't the best implementation, and i dont understand some things
-
 void startMonitoringConfig() {
-  log("Starting monitoring for config updates");
+  log("Starting inotify monitoring for system configuration updates");
 
   int fd;
   int wd;
@@ -44,58 +42,47 @@ void startMonitoringConfig() {
 
   fd = inotify_init();
   if (fd < 0) {
-    log("inotify_init failed (old kernel?)");
+    log("inotify_init failed (kernel too old?)");
   }
 
-  wd = inotify_add_watch(fd, "/data/config/20-sleep_daemon",
-                         IN_MODIFY | IN_CREATE | IN_DELETE);
+  wd = inotify_add_watch(fd, "/data/config/20-sleep_daemon", IN_MODIFY | IN_CREATE | IN_DELETE);
 
   while (true) {
     int length, i = 0;
     length = read(fd, buffer, BUF_LEN);
-    log("inotify readed up");
+    log("inotify read up");
 
     if (length < 0) {
-      log("failed to read from buffer");
+      log("Failed to read from buffer");
     }
 
-    /*
-    while ( i < length ) {
-        struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];
-        if(event->len) {
-            if ( event->mask & IN_MODIFY ) {
-                log("/tmp/power was modified");
-            }
-        }
-    }
-    */
-    // this loop goes through all changes
+    // This loop goes through all changes
     while (i < length) {
-      log("Inotify loop executed");
+      log("inotify loop executed");
       struct inotify_event *event = (struct inotify_event *)&buffer[i];
       if (event->len) {
         if (event->mask & IN_CREATE) {
           string evenNameString = event->name;
-          log("Inotify: detected a create event of name: " + evenNameString);
+          log("inotify: Detected a create event of name: " + evenNameString);
 
           if (evenNameString == "updateConfig") {
             checkUpdateFile();
           }
-          if (evenNameString == "SleepCall") {
+          if (evenNameString == "sleepCall") {
             sleepInotifyCall();
           }
         } else if (event->mask & IN_DELETE) {
-          string message = "What are you doing? this file / dir was deleted:";
+          string message = "What are you doing? This file or directory was deleted: ";
           message.append(event->name);
           log(message);
         } else if (event->mask & IN_MODIFY) {
           string evenNameString = event->name;
-          log("Inotify: detected a modification event of name: " +
+          log("inotify: Detected a modification event of name: " +
               evenNameString);
           if (evenNameString == "updateConfig") {
             checkUpdateFile();
           }
-          if (evenNameString == "SleepCall") {
+          if (evenNameString == "sleepCall") {
             sleepInotifyCall();
           }
         }
@@ -103,7 +90,7 @@ void startMonitoringConfig() {
       i += EVENT_SIZE + event->len;
       
     }
-    log("All events readed");
+    log("All events read");
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
   log("inotify crashed");
@@ -122,12 +109,12 @@ void checkUpdateFile() {
 }
 
 void sleepInotifyCall() {
-  log("sleepInotifyCall() called, going to sleep, propably");
+  log("sleepInotifyCall() called, going to sleep (probably)");
   if (deepSleepPermission == true) {
     string deepSleepFile =
-        readConfigString("/data/config/20-sleep_daemon/SleepCall");
+        readConfigString("/data/config/20-sleep_daemon/sleepCall");
     bool go = false;
-    if (deepSleepFile == "deepsleep") {
+    if (deepSleepFile == "deepSleep") {
       deepSleep = true;
       go = true;
     } else if (deepSleepFile == "sleep") {
@@ -135,8 +122,8 @@ void sleepInotifyCall() {
     }
     if (go == true) {
       deepSleepPermission = false;
-      log("Going to sleep becouse of inotify call");
-      CurrentActiveThread_mtx.unlock();
+      log("Going to sleep, trigger: inotify call");
+      currentActiveThread_mtx.unlock();
 
       waitMutex(&watchdogStartJob_mtx);
       watchdogStartJob = true;

@@ -7,19 +7,12 @@
 using namespace std;
 
 void initFbink();
-
-int fbinkWriteCenter(string stringToWrite, bool darkmode);
-
-void clearScreen(bool darkmodeset);
-
+int fbinkWriteCenter(string stringToWrite, bool darkMode);
+void clearScreen(bool darkModeSet);
 int printImage(string path);
-
 void screenshotFbink();
-
-void restoreFbink(bool darkmode);
-
+void restoreFbink(bool darkMode);
 void closeFbink();
-
 void restoreFbDepth();
 
 #endif

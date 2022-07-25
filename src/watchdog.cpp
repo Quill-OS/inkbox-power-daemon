@@ -13,7 +13,7 @@ using namespace std;
 
 // var
 
-extern bool WhenChargerSleep;
+extern bool whenChargerSleep;
 
 //
 extern bool watchdogStartJob;
@@ -27,21 +27,11 @@ extern mutex sleep_mtx;
 
 extern sleepBool watchdogNextStep;
 
-// this variable says what thread is currently active, to know which to kill
-extern sleepBool CurrentActiveThread;
-extern mutex CurrentActiveThread_mtx;
+// This variable tells us what thread is currently active, to know which to kill
+extern sleepBool currentActiveThread;
+extern mutex currentActiveThread_mtx;
 
-// I wanted to write a function for all those joins:
-/*
-void join_smarter(thread threadArg)
-{
-  if(threadArg.joinable() == true)
-  {
-    threadArg.join();
-  }
-}
-*/
-// but it doesnt work, some weird error so...
+// TODO: Implement smarter join function
 
 void startWatchdog() {
   std::chrono::milliseconds timespan(200);
@@ -57,174 +47,171 @@ void startWatchdog() {
     watchdogStartJob = false;
     watchdogStartJob_mtx.unlock();
 
-    // this here takes signals from monitorEvents and assigns them to do things
+    // This takes signals from monitorEvents and assigns them to actions
     if (saveWatchdogState == true) {
       log("Watchdog event received");
 
-      // Handling 3-WhenChargerSleep
-      if (WhenChargerSleep == false) {
+      // Handling 3 - whenChargerSleep
+      if (whenChargerSleep == false) {
         if (getChargerStatus() == true) {
-          log("Skipping watchdog event becouse of 3-WhenChargerSleep");
+          log("Skipping watchdog event because of option  '3 - WhenChargerSleep'");
           sleepJob = Skip;
         }
       }
 
-      // Proritise user events over next steps - actually no. maybe
-      // watchdogNextStep = Nothing;
+      // Proritise user events over next steps
 
       waitMutex(&sleep_mtx);
 
       if (sleepJob == Nothing) {
-        log("Launching prepare thread becouse of nothing sleep job");
-        // This is here to avoid waiting too long after
-        waitMutex(&CurrentActiveThread_mtx);
+        log("Launching 'prepare' thread because of 'Nothing' sleep job");
+        // This is here to avoid waiting too long afterwards
+        waitMutex(&currentActiveThread_mtx);
         sleepJob = Prepare;
         sleep_mtx.unlock();
 
-        if (CurrentActiveThread != Nothing) {
+        if (currentActiveThread != Nothing) {
           bool check = false;
-          CurrentActiveThread_mtx.unlock();
+          currentActiveThread_mtx.unlock();
           while (check == false) {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            waitMutex(&CurrentActiveThread_mtx);
-            if (CurrentActiveThread == Nothing) {
+            waitMutex(&currentActiveThread_mtx);
+            if (currentActiveThread == Nothing) {
               check = true;
             }
-            CurrentActiveThread_mtx.unlock();
+            currentActiveThread_mtx.unlock();
           }
         } else {
-          CurrentActiveThread_mtx.unlock();
+          currentActiveThread_mtx.unlock();
         }
 
-        waitMutex(&CurrentActiveThread_mtx);
-        CurrentActiveThread = Prepare;
-        CurrentActiveThread_mtx.unlock();
+        waitMutex(&currentActiveThread_mtx);
+        currentActiveThread = Prepare;
+        currentActiveThread_mtx.unlock();
         prepareThread = thread(prepareSleep);
         prepareThread.detach();
 
         //
       } else if (sleepJob == Prepare) {
-        log("Launching after thread becouse of prepare sleep job");
-        waitMutex(&CurrentActiveThread_mtx);
+        log("Launching 'after' thread because of prepareSleep job");
+        waitMutex(&currentActiveThread_mtx);
         sleepJob = After;
         sleep_mtx.unlock();
 
-        if (CurrentActiveThread != Nothing) {
+        if (currentActiveThread != Nothing) {
           bool check = false;
-          CurrentActiveThread_mtx.unlock();
+          currentActiveThread_mtx.unlock();
           while (check == false) {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            waitMutex(&CurrentActiveThread_mtx);
-            if (CurrentActiveThread == Nothing) {
+            waitMutex(&currentActiveThread_mtx);
+            if (currentActiveThread == Nothing) {
               check = true;
             }
-            CurrentActiveThread_mtx.unlock();
+            currentActiveThread_mtx.unlock();
           }
         } else {
-          CurrentActiveThread_mtx.unlock();
+          currentActiveThread_mtx.unlock();
         }
 
-        waitMutex(&CurrentActiveThread_mtx);
-        CurrentActiveThread = After;
-        CurrentActiveThread_mtx.unlock();
+        waitMutex(&currentActiveThread_mtx);
+        currentActiveThread = After;
+        currentActiveThread_mtx.unlock();
 
         afterThread = thread(afterSleep);
         afterThread.detach();
 
         //
       } else if (sleepJob == After) {
-        log("Launching prepare thread becouse of after sleep job");
-        waitMutex(&CurrentActiveThread_mtx);
+        log("Launching 'prepare' thread because of afterSleep job");
+        waitMutex(&currentActiveThread_mtx);
         sleepJob = Prepare;
         sleep_mtx.unlock();
 
-        if (CurrentActiveThread != Nothing) {
+        if (currentActiveThread != Nothing) {
           bool check = false;
-          CurrentActiveThread_mtx.unlock();
+          currentActiveThread_mtx.unlock();
           while (check == false) {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            waitMutex(&CurrentActiveThread_mtx);
-            if (CurrentActiveThread == Nothing) {
+            waitMutex(&currentActiveThread_mtx);
+            if (currentActiveThread == Nothing) {
               check = true;
             }
-            CurrentActiveThread_mtx.unlock();
+            currentActiveThread_mtx.unlock();
           }
         } else {
-          CurrentActiveThread_mtx.unlock();
+          currentActiveThread_mtx.unlock();
         }
 
-        waitMutex(&CurrentActiveThread_mtx);
-        CurrentActiveThread = Prepare;
-        CurrentActiveThread_mtx.unlock();
+        waitMutex(&currentActiveThread_mtx);
+        currentActiveThread = Prepare;
+        currentActiveThread_mtx.unlock();
 
         prepareThread = thread(prepareSleep);
         prepareThread.detach();
 
         //
       } else if (sleepJob == GoingSleep) {
-        log("Launching after thread becouse of goingsleep sleep job");
-        // To be sure a new thread isin't launching anyway
+        log("Launching 'after' thread because of goingSleep job");
+        // To be sure a new thread isn't launching anyway
         std::this_thread::sleep_for(std::chrono::milliseconds(400));
 
         if (watchdogNextStep != After) {
-          waitMutex(&CurrentActiveThread_mtx);
+          waitMutex(&currentActiveThread_mtx);
           sleepJob = After;
           sleep_mtx.unlock();
 
-          if (CurrentActiveThread != Nothing) {
+          if (currentActiveThread != Nothing) {
             bool check = false;
-            CurrentActiveThread_mtx.unlock();
+            currentActiveThread_mtx.unlock();
             while (check == false) {
               std::this_thread::sleep_for(std::chrono::milliseconds(50));
-              waitMutex(&CurrentActiveThread_mtx);
-              if (CurrentActiveThread == Nothing) {
+              waitMutex(&currentActiveThread_mtx);
+              if (currentActiveThread == Nothing) {
                 check = true;
               }
-              CurrentActiveThread_mtx.unlock();
+              currentActiveThread_mtx.unlock();
             }
           } else {
-            CurrentActiveThread_mtx.unlock();
+            currentActiveThread_mtx.unlock();
           }
 
-          waitMutex(&CurrentActiveThread_mtx);
-          CurrentActiveThread = After;
-          CurrentActiveThread_mtx.unlock();
+          waitMutex(&currentActiveThread_mtx);
+          currentActiveThread = After;
+          currentActiveThread_mtx.unlock();
 
           afterThread = thread(afterSleep);
           afterThread.detach();
 
           //
         } else {
-          log("A event from monitorevents requested after thread, but watchdogNextStep already wanted it, so skipping the monitorevent request");
+          log("Event from monitorEvents requested after thread, but watchdogNextStep already wanted it: skipping monitorEvents request");
           sleep_mtx.unlock();
         }
       } else {
-        log("This will never happen: watchdog");
         sleep_mtx.unlock();
       }
     }
     if (watchdogNextStep != Nothing) {
-      log("launching watchdogNextStep request");
-      // Make sure all jobs exit. they propably already are, becouse they called
-      // it
+      log("Launching watchdogNextStep request");
+      // Make sure all jobs exit. they propably already are, because they called it
       waitMutex(&sleep_mtx);
       sleepJob = Nothing;
       sleep_mtx.unlock();
 
-      waitMutex(&CurrentActiveThread_mtx);
-      if (CurrentActiveThread != Nothing) {
+      waitMutex(&currentActiveThread_mtx);
+      if (currentActiveThread != Nothing) {
         bool check = false;
-        CurrentActiveThread_mtx.unlock();
+        currentActiveThread_mtx.unlock();
         while (check == false) {
           std::this_thread::sleep_for(std::chrono::milliseconds(50));
-          waitMutex(&CurrentActiveThread_mtx);
-          if (CurrentActiveThread == Nothing) {
+          waitMutex(&currentActiveThread_mtx);
+          if (currentActiveThread == Nothing) {
             check = true;
           }
-          CurrentActiveThread_mtx.unlock();
+          currentActiveThread_mtx.unlock();
         }
       } else {
-        CurrentActiveThread_mtx.unlock();
+        currentActiveThread_mtx.unlock();
       }
 
       if (watchdogNextStep == After) {
@@ -233,27 +220,25 @@ void startWatchdog() {
         sleepJob = After;
         sleep_mtx.unlock();
 
-        waitMutex(&CurrentActiveThread_mtx);
-        CurrentActiveThread = After;
-        CurrentActiveThread_mtx.unlock();
+        waitMutex(&currentActiveThread_mtx);
+        currentActiveThread = After;
+        currentActiveThread_mtx.unlock();
 
         afterThread = thread(afterSleep);
         afterThread.detach();
       } else if (watchdogNextStep == GoingSleep) {
-        log("Launching goingsleep thread becouse of a request of "
-            "watchdogNextStep");
+        log("Launching goingSleep thread from request by watchdogNextStep");
         waitMutex(&sleep_mtx);
         sleepJob = GoingSleep;
         sleep_mtx.unlock();
 
-        waitMutex(&CurrentActiveThread_mtx);
-        CurrentActiveThread = GoingSleep;
-        CurrentActiveThread_mtx.unlock();
+        waitMutex(&currentActiveThread_mtx);
+        currentActiveThread = GoingSleep;
+        currentActiveThread_mtx.unlock();
 
         goingThread = thread(goSleep);
         goingThread.detach();
       } else {
-        log("Its impossible. you will never see this log");
         exit(EXIT_FAILURE);
       }
       watchdogNextStep = Nothing;

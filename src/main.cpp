@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <string>
 #include <thread>
+#include <string.h>
 
 #include "AppsFreeze.h"
 #include "configUpdate.h"
@@ -19,22 +20,19 @@ extern int fbfd;
 using namespace std;
 
 int main() {
-  // Some weird bugs, this is the fix, but i lost the link to the fix
+  // Some weird bugs, this is the fix, but I lost the link to the fix
+  // TODO: Find link describing fix
   static_cast<void>(pthread_create);
   static_cast<void>(pthread_cancel);
 
   std::cout << "Starting..." << std::endl;
 
-  const char *tmp = std::getenv("DEBUG");
-  std::string envVar;
+  const char * debugEnv = std::getenv("DEBUG");
 
-  if (tmp != NULL) {
-    envVar = tmp;
-    if (envVar == "true") {
-      logEnabled = true;
-      log("Debug mode is activated");
-      log("Saving logs to /tmp/PowerDaemonLogs.txt");
-    }
+  if (debugEnv != NULL && strcmp(debugEnv, "true") == 0) {
+    logEnabled = true;
+    log("Debug mode is activated");
+    log("Saving logs to /tmp/PowerDaemonLogs.txt");
   }
 
   prepareVariables();
@@ -52,6 +50,6 @@ int main() {
   watchConfig.join();
   idleSleep.join();
   
-  log("How did this ended");
+  log("How did this end?");
   return -1;
 }

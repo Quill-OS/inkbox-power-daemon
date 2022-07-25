@@ -2,9 +2,7 @@
 #define PIPE_HANDLER_H
 
 void startPipeServer();
-
 void sleepPipeSend();
-
 void restorePipeSend();
 
 #endif

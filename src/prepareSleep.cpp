@@ -25,26 +25,18 @@ extern FBInkDump dump;
 
 extern sleepBool watchdogNextStep;
 
-extern bool darkmode;
+extern bool darkMode;
 
-extern sleepBool CurrentActiveThread;
-extern mutex CurrentActiveThread_mtx;
+extern sleepBool currentActiveThread;
+extern mutex currentActiveThread_mtx;
 
-extern mutex OccupyLed;
+extern mutex occupyLed;
 
 extern bool deepSleep;
 
-// there is no way to stop the threat... so i will use this bool
 bool diePrepare;
 
-// Explanation why this code looks garbage
-// threads in cpp cant be killed from outside, so its needed to check every step
-// for a variable change. -Use another library! no. thats such a simple program
-// that it doesnt need it + other libraries do the same, for example
-// boost::thread does exactly what i have described above, just in the
-// background ~Szybet
-
-// checkExitPrepare
+// void checkExitPrepare()
 void CEP() {
   if (diePrepare == false) {
     manageChangeLedState();
@@ -59,7 +51,7 @@ void CEP() {
 }
 
 void prepareSleep() {
-  waitMutex(&OccupyLed);
+  waitMutex(&occupyLed);
   log("Launching prepareSleep");
   diePrepare = false;
 
@@ -82,7 +74,7 @@ void prepareSleep() {
 
   CEP();
   if (diePrepare == false) {
-    clearScreen(darkmode);
+    clearScreen(darkMode);
     sleepScreen();
   }
 
@@ -106,7 +98,7 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     writeFileString("/kobo/inkbox/remount", "false");
-    system("/sbin/hwclock --systohc -u"); // why not?
+    system("/sbin/hwclock --systohc -u");
   }
 
   CEP();
@@ -126,50 +118,48 @@ void prepareSleep() {
     }
   }
 
-  // and yes, this will be always executed
-  OccupyLed.unlock();
+  // Yes, this will always be executed
+  occupyLed.unlock();
 
-  waitMutex(&CurrentActiveThread_mtx);
-  CurrentActiveThread = Nothing;
-  CurrentActiveThread_mtx.unlock();
+  waitMutex(&currentActiveThread_mtx);
+  currentActiveThread = Nothing;
+  currentActiveThread_mtx.unlock();
   log("Exiting prepareSleep");
 }
 
-// Show a text Sleeping, but also enable with a config a screensaver, and
-// writing Sleeping anyway with background
+// Show a splash with the text 'Sleeping', but also allow custom screensavers
+// Writing Sleeping anyway with background
+// TODO: Don't write 'Sleeping' when custom screensaver is active
 void sleepScreen() {
-  // printImage("/image.jpg");
   string screenSaverPath = "/data/onboard/.screensaver";
   if (dirExists(screenSaverPath) == true) {
     vector<string> imageList;
-    for (const auto &entry :
-         experimental::filesystem::directory_iterator(screenSaverPath)) {
+    for (const auto &entry : experimental::filesystem::directory_iterator(screenSaverPath)) {
       if (string(entry.path()).find(".png") != std::string::npos) {
         imageList.push_back(string(entry.path()));
         log("Found screensaver image: " + string(entry.path()));
       }
     }
     if (imageList.empty() == false) {
-      string choosedScreensaver = imageList.at(rand() % imageList.size());
-      if (fileExists(choosedScreensaver) == true) {
-        log("Writing image to fbink: " + choosedScreensaver);
-        int status = printImage(choosedScreensaver);
+      string chosenScreensaver = imageList.at(rand() % imageList.size());
+      if (fileExists(chosenScreensaver) == true) {
+        log("Writing image to fbink: " + chosenScreensaver);
+        int status = printImage(chosenScreensaver);
         if (status < 0) {
-          log("Failed to decode the screensaver image, propably");
-          fbinkWriteCenter("Sleeping", darkmode);
+          log("Error: Failed to display the screensaver image (is it really a picture?)");
+          fbinkWriteCenter("Sleeping", darkMode);
         }
         return;
       }
     }
   }
-  log("Something went wrong with screensaver, writing normal message");
-  fbinkWriteCenter("Sleeping", darkmode);
+  log("Something went wrong with custom screensaver option, displaying normal message");
+  fbinkWriteCenter("Sleeping", darkMode);
 }
 
 void deepSleepGo() {
   log("Going to deep sleep");
-  // cpu governor power save
   setCpuGovernor("powersave");
 
-  // for now only this
+  // TODO
 }

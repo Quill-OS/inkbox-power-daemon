@@ -23,114 +23,72 @@
 
 using namespace std;
 
-// Variables ( that there is no risk that they will be readed at the same tame
-// by many threads ). Used by fbink, internal things
+// Variables (there is no risk that they will be read at the same time by many threads). Used by: FBInk, internal things
 
 bool logEnabled = false;
-
 string model;
-
 int fbfd;
-
 FBInkDump dump;
-
-vector<int> AppsPids;
-
+vector<int> appsPids;
 bool wasUsbNetOn;
 
 // Config var
-
-int CinematicBrightnessdelayMs;
-
+int cinematicBrightnessDelayMs;
 bool lockscreen;
-
-bool darkmode;
-
+bool darkMode;
 string cpuGovernorToSet;
-
-bool WhenChargerSleep;
-
-bool ChargerWakeUp;
-
-bool recconectWifi;
-
-bool LedUsage;
-
+bool whenChargerSleep;
+bool chargerWakeUp;
+bool reconnectWifi;
+bool ledUsage;
 int idleSleepTime;
 
 bool customCase;
-// When 2 it resets to 0 and triggers the watchdog. so 1 is ignored
+// When 2 it resets to 0 and triggers the watchdog, so 1 is ignored
 int customCaseCount = 0;
 
 bool deepSleep;
-bool deepSleepPermission = true; // Becouse inotify is weird, if false it will ignore the call. its called true in after sleep
+bool deepSleepPermission = true; // Because inotify is weird, if false it will ignore the call. It's called true in afterSleep
 
 // Internal variables used by watchdog and threads
-
-// im not sure if this one doesnt need a mutex. will leave it for now
+// TODO: Find out if this needs a mutex or not
 sleepBool watchdogNextStep = Nothing;
 
 // Mutex variables
-
 bool watchdogStartJob = false;
 mutex watchdogStartJob_mtx;
-
 goSleepCondition newSleepCondition = None;
 mutex newSleepCondition_mtx;
-
 sleepBool sleepJob = Nothing;
 mutex sleep_mtx;
-
-sleepBool CurrentActiveThread;
-mutex CurrentActiveThread_mtx;
-
-// To avoid confusion with the led control ( if this is locked, then it other
-// things are done beside charging indicator, like flickering)
-mutex OccupyLed;
+sleepBool currentActiveThread;
+mutex currentActiveThread_mtx;
+// To avoid confusion with the LED control (if this is locked, then it other things are done besides charging indicator, like flickering)
+mutex occupyLed;
 
 // Avoid writing to the led if not needed
-bool ledstate = false;
-
+bool ledState = false;
 // Count for idle
 int countIdle = 0;
 
-//
-
+// Functions
 void log(string to_log) {
   if (logEnabled == true) {
     std::cout << to_log << std::endl;
 
-    // I wonder if its better to not close it every time
+    // TODO: Improve efficiency (don't close it every time)
     ofstream logFile("/tmp/PowerDaemonLogs.txt", ios::app);
     logFile << to_log << std::endl;
     logFile.close();
   }
 }
 
-void waitMutex(mutex *exampleMutex) {
-  // Ok, now here look how stupid i was when i started writing this
-  /*
-  bool continueBool = false;
-  std::chrono::milliseconds timespan(150);
-
-  while (continueBool == false) {
-    // https://en.cppreference.com/w/cpp/thread/mutex/try_lock
-    if (exampleMutex->try_lock() == false) {
-      std::this_thread::sleep_for(timespan);
-    } else {
-      continueBool = true;
-    }
-  }
-  */
-  // All this can be, and should be made like this:
+void waitMutex(mutex * exampleMutex) {
   exampleMutex->lock();
-  // now this function doesnt have any sense, maybe looks better
-  // could be replaced in the future, but maybe adding some logging which thread
-  // occupies which mutex would be cool leave for now
 }
 
 void prepareVariables() {
-  log("Reading variables");
+  log("Reading system variables");
   model = readConfigString("/opt/inkbox_device");
   log("Running on: " + model);
 
@@ -143,32 +101,31 @@ void prepareVariables() {
   }
   log("lockscreen is: " + stringRead1);
 
-  // Simply it, for fbink dump
+  // Simply it, for FBInk dump
   dump = {0};
 
   // dark mode
   string stringRead2 = readConfigString("/opt/config/10-dark_mode/config");
   if (stringRead2 == "true") {
     log("darkmode is: true");
-    darkmode = true;
+    darkMode = true;
   } else {
     log("darkmode is: false");
-    darkmode = false;
+    darkMode = false;
   }
 
-  // usb net
+  // USB networking
   string commandOutput = executeCommand("service usbnet status");
   if (commandOutput.find("status: started") != std::string::npos) {
-    log("Usb net is started");
+    log("USB networking system service is started");
     wasUsbNetOn = true;
   } else {
-    log("Usb net isin't started");
+    log("USB networking system service is not running");
     wasUsbNetOn = false;
   }
 
   // Specific daemon configs:
-  // in the future set it through config file
-
+  // TODO: Set it through a configuration file
   // /data/config/20-sleep_daemon
   string mainPath = "/data/config/20-sleep_daemon";
   if (dirExists(mainPath) == false) {
@@ -181,17 +138,16 @@ void prepareVariables() {
     writeFileString("/data/config/20-sleep_daemon/updateConfig", "false");
   }
 
-  // 1-CinematicBrightnessdelayMs
-  string cinematicPath =
-      "/data/config/20-sleep_daemon/1-CinematicBrightnessdelayMs";
+  // 1 - cinematicBrightnessDelayMs
+  string cinematicPath = "/data/config/20-sleep_daemon/1-cinematicBrightnessDelayMs";
   if (fileExists(cinematicPath) == true) {
-    CinematicBrightnessdelayMs = stoi(readConfigString(cinematicPath));
+    cinematicBrightnessDelayMs = stoi(readConfigString(cinematicPath));
   } else {
     writeFileString(cinematicPath, "50");
-    CinematicBrightnessdelayMs = 50;
+    cinematicBrightnessDelayMs = 50;
   }
 
-  // 2-cpuGovernor
+  // 2 - cpuGovernor
   string cpuGovernorPath = "/data/config/20-sleep_daemon/2-cpuGovernor";
   if (fileExists(cpuGovernorPath) == true) {
     cpuGovernorToSet = readConfigString(cpuGovernorPath);
@@ -201,84 +157,83 @@ void prepareVariables() {
     cpuGovernorToSet = "ondemand";
   }
 
-  // 3-WhenChargerSleep
-  string WhenChargerSleepPath =
-      "/data/config/20-sleep_daemon/3-WhenChargerSleep";
-  if (fileExists(WhenChargerSleepPath) == true) {
-    string boolToConvert = readConfigString(WhenChargerSleepPath);
+  // 3 - whenChargerSleep
+  string whenChargerSleepPath = "/data/config/20-sleep_daemon/3-whenChargerSleep";
+  if (fileExists(whenChargerSleepPath) == true) {
+    string boolToConvert = readConfigString(whenChargerSleepPath);
     if (boolToConvert == "true") {
-      WhenChargerSleep = true;
+      whenChargerSleep = true;
     } else {
-      WhenChargerSleep = false;
+      whenChargerSleep = false;
     }
   } else {
-    // those devices have problems when going to sleep with a charger
+    // Those devices have problems when going to sleep with a charger
     if (isDeviceChargerBug() == true) {
-      writeFileString(WhenChargerSleepPath, "false");
-      WhenChargerSleep = false;
+      writeFileString(whenChargerSleepPath, "false");
+      whenChargerSleep = false;
     } else {
-      writeFileString(WhenChargerSleepPath, "true");
-      WhenChargerSleep = true;
+      writeFileString(whenChargerSleepPath, "true");
+      whenChargerSleep = true;
     }
   }
 
-  // 4-ChargerWakeUp
-  string ChargerWakeUpPath = "/data/config/20-sleep_daemon/4-ChargerWakeUp";
-  if (fileExists(ChargerWakeUpPath) == true) {
-    // welp a function for this would be cool
-    string boolToConvert = readConfigString(ChargerWakeUpPath);
+  // 4 - chargerWakeUp
+  string chargerWakeUpPath = "/data/config/20-sleep_daemon/4-chargerWakeUp";
+  if (fileExists(chargerWakeUpPath) == true) {
+    // TODO: Write a function for this
+    string boolToConvert = readConfigString(chargerWakeUpPath);
     if (boolToConvert == "true") {
-      ChargerWakeUp = true;
+      chargerWakeUp = true;
     } else {
-      ChargerWakeUp = false;
+      chargerWakeUp = false;
     }
   } else {
-    writeFileString(ChargerWakeUpPath, "false");
-    ChargerWakeUp = false;
+    writeFileString(chargerWakeUpPath, "false");
+    chargerWakeUp = false;
   }
 
-  // 5-WifiRecconect
-  string recconectWifiPath = "/data/config/20-sleep_daemon/5-WifiRecconect";
-  if (fileExists(recconectWifiPath) == true) {
-    string boolToConvert = readConfigString(recconectWifiPath);
+  // 5 - wifiReconnect
+  string reconnectWifiPath = "/data/config/20-sleep_daemon/5-wifiReconnect";
+  if (fileExists(reconnectWifiPath) == true) {
+    string boolToConvert = readConfigString(reconnectWifiPath);
     if (boolToConvert == "true") {
-      recconectWifi = true;
+      reconnectWifi = true;
     } else {
-      recconectWifi = false;
+      reconnectWifi = false;
     }
   } else {
-    writeFileString(recconectWifiPath, "true");
-    recconectWifi = true;
+    writeFileString(reconnectWifiPath, "true");
+    reconnectWifi = true;
   }
 
-  // 6-LedUsage
-  string LedUsagePath = "/data/config/20-sleep_daemon/6-LedUsage";
-  if (fileExists(LedUsagePath) == true) {
-    string boolToConvert = readConfigString(LedUsagePath);
+  // 6 - ledUsage
+  string ledUsagePath = "/data/config/20-sleep_daemon/6-ledUsage";
+  if (fileExists(ledUsagePath) == true) {
+    string boolToConvert = readConfigString(ledUsagePath);
     if (boolToConvert == "true") {
-      LedUsage = true;
+      ledUsage = true;
     } else {
-      LedUsage = false;
+      ledUsage = false;
     }
   } else {
-    writeFileString(LedUsagePath, "false");
-    recconectWifi = false;
+    writeFileString(ledUsagePath, "false");
+    reconnectWifi = false;
   }
   setLedState(false);
 
-  // 7-IdleSleep
-  string idleSleepTimePath = "/data/config/20-sleep_daemon/7-IdleSleep";
+  // 7 - idleSleep
+  string idleSleepTimePath = "/data/config/20-sleep_daemon/7-idleSleep";
   if (fileExists(idleSleepTimePath) == true) {
     string intToConvert = readConfigString(idleSleepTimePath);
-    intToConvert = normalReplace(intToConvert, "\n", ""); // i like to be sure about some things.
+    intToConvert = normalReplace(intToConvert, "\n", "");
     idleSleepTime = stoi(intToConvert);
   } else {
     writeFileString(idleSleepTimePath, "60");
     idleSleepTime = 60;
   }
 
-  // 8-CustomCase
-  string customCasePath = "/data/config/20-sleep_daemon/8-CustomCase";
+  // 8 - customCase
+  string customCasePath = "/data/config/20-sleep_daemon/8-customCase";
   if (fileExists(customCasePath) == true) {
     string boolToConvert = readConfigString(customCasePath);
     if (boolToConvert == "true") {
@@ -291,10 +246,10 @@ void prepareVariables() {
     customCase = false;
   }
 
-  // 9-DeepSleep
-  string DeepSleepPath = "/data/config/20-sleep_daemon/9-DeepSleep";
-  if (fileExists(DeepSleepPath) == false) {
-    writeFileString(DeepSleepPath, "false");
+  // 9 - deepSleep
+  string deepSleepPath = "/data/config/20-sleep_daemon/9-deepSleep";
+  if (fileExists(deepSleepPath) == false) {
+    writeFileString(deepSleepPath, "false");
   }
 }
 
@@ -303,7 +258,7 @@ string readConfigString(string path) {
   string returnData;
   indata.open(path);
   if (!indata) {
-    log("couldn't read config file: " + path);
+    log("Couldn't read config file: " + path);
     return "none";
   }
   indata >> returnData;
@@ -338,8 +293,7 @@ string readFile(string path) {
     log(message);
     exit(EXIT_FAILURE);
   }
-  return string((std::istreambuf_iterator<char>(input_file)),
-                std::istreambuf_iterator<char>());
+  return string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 }
 
 bool fileExists(string fileName) {
@@ -359,19 +313,19 @@ bool dirExists(string path) {
 }
 
 string executeCommand(string command) {
-  char buffer[128]; // must be enough
+  char buffer[128];
   string result = "";
 
-  // Open pipe to file
+  // Open pipe on file
   FILE *pipe = popen(command.c_str(), "r");
   if (!pipe) {
     return "popen failed!";
   }
 
-  // read till end of process:
+  // Read until end of process:
   while (!feof(pipe)) {
 
-    // use buffer to read and add to result
+    // Use buffer to read and add to result
     if (fgets(buffer, 128, pipe) != NULL)
       result += buffer;
   }
@@ -382,9 +336,7 @@ string executeCommand(string command) {
   return result;
 }
 
-// why this isin't a standard
-string normalReplace(string MainString, string strToLookFor, string replacement)
-{
+string normalReplace(string MainString, string strToLookFor, string replacement) {
   return std::regex_replace(MainString, std::regex(strToLookFor), replacement);
 }
 

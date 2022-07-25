@@ -6,18 +6,12 @@
 
 using namespace std;
 
-vector<string> getBuiltAppsList(string path);
-
+vector<string> getBuiltInAppsList(string path);
 void freezeApps();
-
 string getRunningUserApp();
-
-int getPidByName(string task_name);
-
+int getPidByName(string taskName);
 void unfreezeApps();
-
 void tellAppsToFreeze();
-
 void killProcess(string name);
 
 #endif

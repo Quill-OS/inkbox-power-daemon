@@ -13,11 +13,11 @@
 #include "AppsFreeze.h"
 #include "functions.h"
 
-extern vector<int> AppsPids;
+extern vector<int> appsPids;
 
 // https://ofstack.com/C++/9293/linux-gets-pid-based-on-pid-process-name-and-pid-of-c.html
-// this function could be more efficient by taking a vector as a argument, maybe in the future
-int getPidByName(string task_name) {
+// TODO: Take a vector as argument
+int getPidByName(string taskName) {
   struct dirent *entry = nullptr;
   DIR *dp = nullptr;
 
@@ -28,8 +28,8 @@ int getPidByName(string task_name) {
     string firstLine;
     getline(file, firstLine);
     // https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
-    if (firstLine.find(task_name) != std::string::npos) {
-      log("Found pid of " + task_name + ",its: " + entry->d_name);
+    if (firstLine.find(taskName) != std::string::npos) {
+      log("Found PID of " + taskName + ": " + entry->d_name);
       return stoi(entry->d_name);
     }
   }
@@ -38,13 +38,13 @@ int getPidByName(string task_name) {
 }
 
 // /data/config/20-sleep_daemon/appList.txt
-vector<string> getBuiltAppsList(string path) {
+vector<string> getBuiltInAppsList(string path) {
   vector<string> vectorToReturn;
   vector<string> vectorToParse;
 
-  string configfile = readFile(path);
-  log("appList.txt is: " + configfile);
-  boost::split(vectorToParse, configfile, boost::is_any_of("\n"),
+  string configFile = readFile(path);
+  log("appList.txt is: " + configFile);
+  boost::split(vectorToParse, configFile, boost::is_any_of("\n"),
                boost::token_compress_on);
 
   for (string &app : vectorToParse) {
@@ -61,29 +61,29 @@ string getRunningUserApp() {
 }
 
 void freezeApps() {
-  vector<int> Pidvec;
+  vector<int> pidVector;
 
-  vector<string> BuiltInApps =
-      getBuiltAppsList("/data/config/20-sleep_daemon/appList.txt");
+  vector<string> builtInApps =
+      getBuiltInAppsList("/data/config/20-sleep_daemon/appList.txt");
 
-  for (string &app : BuiltInApps) {
-    Pidvec.push_back(getPidByName(app));
+  for (string &app : builtInApps) {
+    pidVector.push_back(getPidByName(app));
   }
   if (fileExists("/kobo/tmp/currentlyRunningUserApplication") == true) {
-    Pidvec.push_back(stoi(getRunningUserApp()));
+    pidVector.push_back(stoi(getRunningUserApp()));
   }
 
-  AppsPids = Pidvec;
+  appsPids = pidVector;
 
   // SIGCONT - continue
   // SIGSTOP - force freeze
-  for (int &pid : AppsPids) {
+  for (int &pid : appsPids) {
     kill(pid, SIGSTOP);
   }
 }
 
 void unfreezeApps() {
-  for (int &pid : AppsPids) {
+  for (int &pid : appsPids) {
     kill(pid, SIGCONT);
   }
 }

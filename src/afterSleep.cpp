@@ -20,41 +20,33 @@
 #include <thread>
 #include <unistd.h>
 
-// var
-
-extern bool recconectWifi;
-
+// Variables
+extern bool reconnectWifi;
 extern bool deepSleep;
 extern bool deepSleepPermission;
-
 extern string cpuGovernorToSet;
-
-// idle count, to reset it
+// Idle count, to reset it
 extern int countIdle;
-
-//
-
 extern sleepBool sleepJob;
 extern mutex sleep_mtx;
-
+// Screen dump
 extern FBInkDump dump;
+extern bool darkMode;
+extern sleepBool currentActiveThread;
+extern mutex currentActiveThread_mtx;
+extern mutex occupyLed;
 
-extern bool darkmode;
-
-extern sleepBool CurrentActiveThread;
-extern mutex CurrentActiveThread_mtx;
-
-extern mutex OccupyLed;
-
-// there is no way to stop the threat... so i will use this bool
+// There is no way to stop the thread, so use this bool
 bool dieAfter;
 
 // Explanation why this code looks garbage
-// threads in cpp cant be killed from outside, so its needed to check every step
-// for a variable change. -Use another library! no. thats such a simple program
-// that it doesnt need it + other libraries do the same, for example
-// boost::thread does exactly what i have described above, just in the
-// background ~Szybet
+// Threads in C++ can't be killed from the outside, so its needed to check every step
+// for a variable change.
+// "Use another library!" No. thats such a simple program
+// that it doesn't need it + other libraries do the same, for example
+// boost::thread does exactly what I have described above, just in the
+// background
+// ~Szybet
 
 // void checkExitAfter()
 void CEA() {
@@ -73,12 +65,12 @@ void CEA() {
 void afterSleep() {
   log("Launching afterSleep");
   dieAfter = false;
-  waitMutex(&OccupyLed);
+  waitMutex(&occupyLed);
 
-  // Dont put CEA here to avoid locking deepSleepPermission forever
+  // Don't put CEA here to avoid locking deepSleepPermission forever
   returnDeepSleep();
 
-  // very important.
+  // Very important
   int fd = open("/sys/power/state-extended", O_RDWR);
   write(fd, "0", 1);
   close(fd);
@@ -86,18 +78,16 @@ void afterSleep() {
   CEA();
   if (dieAfter == false) {
     writeFileString("/tmp/sleep_mode", "false");
-    // initFbink();
     restoreFbDepth();
   }
 
   CEA();
   if (dieAfter == false) {
     system("/sbin/hwclock --hctosys -u");
-    clearScreen(darkmode);
+    clearScreen(darkMode);
   }
 
-  // how do i manage the lockscreen? the apps are freezen now
-  // Don't
+  // TODO: Handle lockscreen
 
   CEA();
   if (dieAfter == false) {
@@ -108,7 +98,7 @@ void afterSleep() {
 
   CEA();
   if (dieAfter == false) {
-    restoreFbink(darkmode);
+    restoreFbink(darkMode);
   }
 
   CEA();
@@ -117,14 +107,14 @@ void afterSleep() {
     remove("/tmp/savedBrightness");
   }
 
-  if (recconectWifi == true) {
-    log("Recconecting to wifi becouse of 5-WifiRecconect");
+  if (reconnectWifi == true) {
+    log("Reconnecting to wifi because of option '5 - wifiReconnect'");
     CEA();
     if (dieAfter == false) {
       turnOnWifi();
     }
   } else {
-    log("Not Recconecting to wifi becouse of 5-WifiRecconect");
+    log("Not reconnecting to Wi-Fi because of option '5 - wifiReconnect'");
   }
 
   CEA();
@@ -139,10 +129,10 @@ void afterSleep() {
     sleep_mtx.unlock();
   }
 
-  OccupyLed.unlock();
-  waitMutex(&CurrentActiveThread_mtx);
-  CurrentActiveThread = Nothing;
-  CurrentActiveThread_mtx.unlock();
+  occupyLed.unlock();
+  waitMutex(&currentActiveThread_mtx);
+  currentActiveThread = Nothing;
+  currentActiveThread_mtx.unlock();
   countIdle = 0;
   log("Exiting afterSleep");
 }

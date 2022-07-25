@@ -31,8 +31,8 @@ extern mutex newSleepCondition_mtx;
 extern sleepBool sleepJob;
 extern mutex sleep_mtx;
 
-extern sleepBool CurrentActiveThread;
-extern mutex CurrentActiveThread_mtx;
+extern sleepBool currentActiveThread;
+extern mutex currentActiveThread_mtx;
 
 extern sleepBool watchdogNextStep;
 
@@ -65,17 +65,16 @@ void startIdleSleep() {
   do {
     if (idleSleepTime != 0) {
       if (idleSleepTime <= countIdle) {
-        log("Go to sleep becouse of idle time");
+        log("Going to sleep because of idle time");
         waitMutex(&sleep_mtx);
-        // Do absolutely everything to not break things, to not go to idle sleep
-        // when other things are going on
+        // Do absolutely everything to not break things, to not go to idle sleep when other things are going on
         if (sleepJob == Nothing) {
           sleep_mtx.unlock();
           if (watchdogNextStep == Nothing) {
-            waitMutex(&CurrentActiveThread_mtx);
-            if (CurrentActiveThread == Nothing) {
-              log("Going to sleep becouse of idle");
-              CurrentActiveThread_mtx.unlock();
+            waitMutex(&currentActiveThread_mtx);
+            if (currentActiveThread == Nothing) {
+              log("Going to sleep becouse of idle touch screen");
+              currentActiveThread_mtx.unlock();
               countIdle = 0;
               waitMutex(&watchdogStartJob_mtx);
               watchdogStartJob = true;
@@ -83,19 +82,18 @@ void startIdleSleep() {
 
               waitMutex(&newSleepCondition_mtx);
               newSleepCondition =
-                  Idle; // actually this isin't used anywhere, for now
+                  Idle; // TODO: Use this somewhere
               newSleepCondition_mtx.unlock();
             } else {
-              CurrentActiveThread_mtx.unlock();
-              log("Not going to sleep in idleSleep becouse of "
-                  "CurrentActiveThread");
+              currentActiveThread_mtx.unlock();
+              log("idleSleep: Not going to sleep because of currentActiveThread");
             }
           } else {
-            log("Not going to sleep in idleSleep becouse of watchdogNextStep");
+            log("idleSleep: Not going to sleep because of watchdogNextStep");
           }
         } else {
           sleep_mtx.unlock();
-          log("Not going to sleep in idleSleep becouse of sleepJob");
+          log("idleSleep: Not going to sleep because of sleepJob");
         }
       }
     }
@@ -103,7 +101,6 @@ void startIdleSleep() {
     if (libevdev_has_event_pending(dev) == 1) {
       countIdle = 0;
       while (libevdev_has_event_pending(dev) == 1) {
-        // there is no free function?
         rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
       }
       log("Received touchscreen input event");
@@ -111,7 +108,6 @@ void startIdleSleep() {
 
     this_thread::sleep_for(timespan);
     countIdle = countIdle + 1;
-    // log("countIdle = " + to_string(countIdle));
   } while (rc == 1 || rc == 0 || rc == -EAGAIN);
-  log("Monitor events died :(");
+  log("Error: Monitoring events in idle sleep died unexpectedly");
 }

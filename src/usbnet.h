@@ -6,7 +6,6 @@
 using namespace std;
 
 void disableUsbNet();
-
 void startUsbNet();
 
 

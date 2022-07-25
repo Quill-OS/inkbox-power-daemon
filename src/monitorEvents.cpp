@@ -32,9 +32,9 @@ extern bool customCase;
 extern int customCaseCount;
 
 void startMonitoringDev() {
-  log("Starting monitoring events");
+  log("Monitoring events");
 
-  struct libevdev *dev = NULL;
+  struct libevdev * dev = NULL;
 
   int fd = open("/dev/input/event0", O_RDONLY | O_NONBLOCK);
   int rc = libevdev_new_from_fd(fd, &dev);
@@ -62,8 +62,7 @@ void startMonitoringDev() {
           " codename: " + codeName + " value: " + to_string(ev.value));
 
       if (codeName == "KEY_POWER" and ev.value == 1) {
-        log("MonitorEvents: Received power button trigger, Sending message to "
-            "sleep");
+        log("MonitorEvents: Received power button trigger, attempting device suspend");
 
         waitMutex(&watchdogStartJob_mtx);
         watchdogStartJob = true;
@@ -76,17 +75,17 @@ void startMonitoringDev() {
         this_thread::sleep_for(afterEventWait);
       }
 
-      // For hall sensor, kobo nia
+      // For hall sensor (sleepcover)
       if (codeName == "KEY_F1" and ev.value == 1) {
         if (customCase == true) {
-          log("8-CustomCase is true");
+          log("Option '8 - customCase' is true");
           customCaseCount = customCaseCount + 1;
           log("customCaseCount is: " + to_string(customCaseCount));
           if (customCaseCount == 1) {
-            log("Ignoring hall trigger becouse of 8-CustomCase");
+            log("Ignoring hall sensor trigger because of option '8 - customCase'");
           } else if (customCaseCount >= 2) {
             customCaseCount = 0;
-            log("Second hall trigger, going to sleep");
+            log("Second hall sensor trigger, attempting device suspend");
             waitMutex(&watchdogStartJob_mtx);
             watchdogStartJob = true;
             watchdogStartJob_mtx.unlock();
@@ -99,8 +98,8 @@ void startMonitoringDev() {
           }
 
         } else {
-          log("8-CustomCase is false so:");
-          log("MonitorEvents: Received hall trigger, Sending message to sleep");
+          log("Option '8 - customCase' is false:");
+          log("MonitorEvents: Received hall sensor trigger, attempting device suspend");
 
           waitMutex(&watchdogStartJob_mtx);
           watchdogStartJob = true;
@@ -118,5 +117,5 @@ void startMonitoringDev() {
     this_thread::sleep_for(timespan);
 
   } while (rc == 1 || rc == 0 || rc == -EAGAIN);
-  log("Monitor events died :(");
+  log("Error: Monitoring events function died unexpectedly");
 }
