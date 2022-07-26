@@ -43,9 +43,7 @@ vector<string> getBuiltInAppsList(string path) {
   vector<string> vectorToParse;
 
   string configFile = readFile(path);
-  log("appList.txt is: " + configFile);
-  boost::split(vectorToParse, configFile, boost::is_any_of("\n"),
-               boost::token_compress_on);
+  boost::split(vectorToParse, configFile, boost::is_any_of("\n"), boost::token_compress_on);
 
   for (string &app : vectorToParse) {
     if (app.empty() == false) {

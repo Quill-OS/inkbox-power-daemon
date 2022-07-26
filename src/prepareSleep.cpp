@@ -128,7 +128,7 @@ void prepareSleep() {
 }
 
 // Show a splash with the text 'Sleeping', but also allow custom screensavers
-// Writing Sleeping anyway with background
+// Writing 'Sleeping' anyway with background
 // TODO: Don't write 'Sleeping' when custom screensaver is active
 void sleepScreen() {
   string screenSaverPath = "/data/onboard/.screensaver";
@@ -148,6 +148,7 @@ void sleepScreen() {
         if (status < 0) {
           log("Error: Failed to display the screensaver image (is it really a picture?)");
           fbinkWriteCenter("Sleeping", darkMode);
+          fbinkRefreshScreen();
         }
         return;
       }
@@ -155,6 +156,7 @@ void sleepScreen() {
   }
   log("Something went wrong with custom screensaver option, displaying normal message");
   fbinkWriteCenter("Sleeping", darkMode);
+  fbinkRefreshScreen();
 }
 
 void deepSleepGo() {

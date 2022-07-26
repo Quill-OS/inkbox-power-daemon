@@ -65,13 +65,13 @@ void disableUsbNet() {
         log("Can't unload module: configfs");
       }
     }
+    std::remove("/run/openrc/started/usbnet");
   }
 }
 
 void startUsbNet() {
-    if(wasUsbNetOn == true)
-    {
+    if(wasUsbNetOn == true) {
       log("Restoring USB networking");
-      executeCommand("service usbnet restart");
+      executeCommand("service usbnet start");
     }
 }

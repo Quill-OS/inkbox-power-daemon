@@ -24,6 +24,15 @@ void initFbink() {
   log("Loaded FBInk version: " + (string)fbink_version());
 }
 
+int fbinkRefreshScreen() {
+  log("FBInk: Full screen refresh");
+  FBInkConfig fbink_cfg = {0};
+  fbink_cfg.is_flashing = true;
+  int rv = fbink_cls(fbfd, &fbink_cfg, NULL, false);
+  fbink_wait_for_complete(fbfd, LAST_MARKER);
+  return rv;
+}
+
 int fbinkWriteCenter(string stringToWrite, bool darkMode) {
 
   FBInkConfig fbink_cfg = {0};
@@ -103,6 +112,7 @@ void restoreFbink(bool darkMode) {
   }
 
   fbink_restore(fbfd, &fbink_cfg, &dump);
+  fbinkRefreshScreen();
 }
 
 void closeFbink() { fbink_close(fbfd); }

@@ -7,6 +7,7 @@
 using namespace std;
 
 void initFbink();
+int fbinkRefreshScreen();
 int fbinkWriteCenter(string stringToWrite, bool darkMode);
 void clearScreen(bool darkModeSet);
 int printImage(string path);
