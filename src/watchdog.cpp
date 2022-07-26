@@ -59,8 +59,6 @@ void startWatchdog() {
         }
       }
 
-      // Proritise user events over next steps
-
       waitMutex(&sleep_mtx);
 
       if (sleepJob == Nothing) {
@@ -180,7 +178,8 @@ void startWatchdog() {
           sleep_mtx.unlock();
         }
       } else {
-        log("sleepJob is something else", emitter);
+        log("sleepJob is something else ( Propably skip ). Changing it to Nothing", emitter);
+        sleepJob = Nothing;
         sleep_mtx.unlock();
       }
     }
