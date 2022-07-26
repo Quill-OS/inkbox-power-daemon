@@ -66,7 +66,7 @@ mutex currentActiveThread_mtx;
 // To avoid confusion with the LED control (if this is locked, then it other things are done besides charging indicator, like flickering)
 mutex occupyLed;
 
-// Avoid writing to the led if not needed
+// Avoid writing to the LED if not needed
 bool ledState = false;
 // Count for idle
 int countIdle = 0;
@@ -77,7 +77,7 @@ void log(string to_log) {
     std::cout << to_log << std::endl;
 
     // TODO: Improve efficiency (don't close it every time)
-    ofstream logFile("/tmp/PowerDaemonLogs.txt", ios::app);
+    ofstream logFile("/var/log/ipd.log", ios::app);
     logFile << to_log << std::endl;
     logFile.close();
   }

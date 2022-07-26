@@ -31,8 +31,8 @@ int main() {
 
   if (debugEnv != NULL && strcmp(debugEnv, "true") == 0) {
     logEnabled = true;
-    log("Debug mode is activated");
-    log("Saving logs to /tmp/PowerDaemonLogs.txt");
+    log("Debug mode is enabled");
+    log("Saving logs to /var/log/ipd.log");
   }
 
   prepareVariables();
