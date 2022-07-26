@@ -150,16 +150,16 @@ void sleepScreen() {
         int status = printImage(chosenScreensaver);
         if (status < 0) {
           log("Error: Failed to display the screensaver image (is it really a picture?)", emitter);
-          fbinkWriteCenter("Sleeping", darkMode);
           fbinkRefreshScreen();
+          fbinkWriteCenter("Sleeping", darkMode);
         }
         return;
       }
     }
   }
-  log("Something went wrong with custom screensaver option, displaying normal message", emitter);
-  fbinkWriteCenter("Sleeping", darkMode);
+  log("Custom screensaver not found, displaying normal message", emitter);
   fbinkRefreshScreen();
+  fbinkWriteCenter("Sleeping", darkMode);
 }
 
 void deepSleepGo() {
