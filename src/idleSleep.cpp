@@ -75,7 +75,7 @@ void startIdleSleep() {
           if (watchdogNextStep == Nothing) {
             waitMutex(&currentActiveThread_mtx);
             if (currentActiveThread == Nothing) {
-              log("Going to sleep becouse of idle touch screen", emitter);
+              log("Going to sleep because of idle touch screen", emitter);
               currentActiveThread_mtx.unlock();
               countIdle = 0;
               waitMutex(&watchdogStartJob_mtx);

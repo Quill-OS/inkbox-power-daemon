@@ -76,11 +76,12 @@ void log(string toLog, string emitter) {
   if (logEnabled == true) {
     std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
     std::time_t endTime = std::chrono::system_clock::to_time_t(end);
-    std::cout << normalReplace(std::ctime(&endTime), "\n", "\0") << " | " << emitter << ": " << toLog << std::endl;
+    std::string message = normalReplace(std::ctime(&endTime), "\n", "\0") + " | " + emitter + ": " + toLog;
+    std::cout << message << std::endl;
 
     // TODO: Improve efficiency (don't close it every time)
     ofstream logFile("/var/log/ipd.log", ios::app);
-    logFile << toLog << std::endl;
+    logFile << message << std::endl;
     logFile.close();
   }
 }
@@ -272,17 +273,17 @@ string readConfigString(string path) {
 }
 
 void writeFileString(string path, string stringToWrite) {
-  fstream File;
-  File.open(path, ios::out);
-  if (!File) {
+  fstream file;
+  file.open(path, ios::out);
+  if (!file) {
     string message = "File could not be created at path: ";
     message.append(path);
     log(message, emitter);
     exit(EXIT_FAILURE);
   } else {
-    File << stringToWrite;
-    File.close();
-    log("Wrote: \"" + stringToWrite + "\" to: " + path);
+    file << stringToWrite;
+    file.close();
+    log("Wrote: \"" + stringToWrite + "\" to: " + path, emitter);
   }
 }
 
