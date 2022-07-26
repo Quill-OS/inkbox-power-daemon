@@ -75,7 +75,7 @@ void turnOffWifi() {
       log("Can't unload module: " + SDIO_WIFI_PWR_MODULE, emitter);
     }
   } else {
-    log("Is Wi-Fi already off?", emitter);
+    log("Wi-Fi is turned off", emitter);
   }
 }
 
