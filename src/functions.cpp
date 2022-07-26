@@ -107,10 +107,10 @@ void prepareVariables() {
   // dark mode
   string stringRead2 = readConfigString("/opt/config/10-dark_mode/config");
   if (stringRead2 == "true") {
-    log("darkmode is: true");
+    log("darkMode is: true");
     darkMode = true;
   } else {
-    log("darkmode is: false");
+    log("darkMode is: false");
     darkMode = false;
   }
 
@@ -134,7 +134,7 @@ void prepareVariables() {
     // /data/config/20-sleep_daemon/appList.txt
     writeFileString("/data/config/20-sleep_daemon/appList.txt",
                     "inkbox-bin\noobe-inkbox-bin\nlockscreen-bin\ncalculator-"
-                    "bin\nqreversi-bin\n2048-bin\nscribble\nlightmaps\nexec");
+                    "bin\nqreversi-bin\n2048-bin\nscribble\nlightmaps");
     writeFileString("/data/config/20-sleep_daemon/updateConfig", "false");
   }
 
@@ -281,7 +281,7 @@ void writeFileString(string path, string stringToWrite) {
   } else {
     File << stringToWrite;
     File.close();
-    log("Writed: \"" + stringToWrite + "\" to: " + path);
+    log("Wrote: \"" + stringToWrite + "\" to: " + path);
   }
 }
 
@@ -345,7 +345,7 @@ string readConfigStringNoLog(string path) {
   string returnData;
   indata.open(path);
   if (!indata) {
-    log("couldn't read config file: " + path);
+    log("Couldn't read config file: " + path);
     return "none";
   }
   indata >> returnData;

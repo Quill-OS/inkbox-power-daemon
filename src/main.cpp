@@ -25,7 +25,7 @@ int main() {
   static_cast<void>(pthread_create);
   static_cast<void>(pthread_cancel);
 
-  std::cout << "Starting..." << std::endl;
+  std::cout << "InkBox Power Daemon starting ..." << std::endl;
 
   const char * debugEnv = std::getenv("DEBUG");
 

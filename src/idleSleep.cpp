@@ -103,7 +103,6 @@ void startIdleSleep() {
       while (libevdev_has_event_pending(dev) == 1) {
         rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
       }
-      log("Received touchscreen input event");
     }
 
     this_thread::sleep_for(timespan);

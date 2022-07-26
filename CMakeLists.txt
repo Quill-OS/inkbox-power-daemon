@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(inkbox-power-deamon VERSION 0.1.0)
+project(inkbox-power-daemon VERSION 0.1.0)
 
 include(CTest)
 enable_testing()
@@ -22,10 +22,10 @@ file(GLOB fileSrc
 link_directories(${CMAKE_SOURCE_DIR}/lib/libevdev/install/lib/)
 link_directories(${CMAKE_SOURCE_DIR}/lib/FBInk/Release/)
 
-add_executable(inkbox-power-deamon ${fileSrc})
+add_executable(ipd ${fileSrc})
 
 # https://stackoverflow.com/questions/33149878/experimentalfilesystem-linker-error
-target_link_libraries(inkbox-power-deamon libevdev.so libfbink.so stdc++fs)
+target_link_libraries(ipd libevdev.so libfbink.so stdc++fs)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

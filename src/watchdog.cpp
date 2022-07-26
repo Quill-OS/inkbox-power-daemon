@@ -54,7 +54,7 @@ void startWatchdog() {
       // Handling 3 - whenChargerSleep
       if (whenChargerSleep == false) {
         if (getChargerStatus() == true) {
-          log("Skipping watchdog event because of option  '3 - WhenChargerSleep'");
+          log("Skipping watchdog event because of option '3 - whenChargerSleep'");
           sleepJob = Skip;
         }
       }
@@ -90,8 +90,6 @@ void startWatchdog() {
         currentActiveThread_mtx.unlock();
         prepareThread = thread(prepareSleep);
         prepareThread.detach();
-
-        //
       } else if (sleepJob == Prepare) {
         log("Launching 'after' thread because of prepareSleep job");
         waitMutex(&currentActiveThread_mtx);
@@ -119,8 +117,6 @@ void startWatchdog() {
 
         afterThread = thread(afterSleep);
         afterThread.detach();
-
-        //
       } else if (sleepJob == After) {
         log("Launching 'prepare' thread because of afterSleep job");
         waitMutex(&currentActiveThread_mtx);
@@ -148,8 +144,6 @@ void startWatchdog() {
 
         prepareThread = thread(prepareSleep);
         prepareThread.detach();
-
-        //
       } else if (sleepJob == GoingSleep) {
         log("Launching 'after' thread because of goingSleep job");
         // To be sure a new thread isn't launching anyway
@@ -181,8 +175,6 @@ void startWatchdog() {
 
           afterThread = thread(afterSleep);
           afterThread.detach();
-
-          //
         } else {
           log("Event from monitorEvents requested after thread, but watchdogNextStep already wanted it: skipping monitorEvents request");
           sleep_mtx.unlock();

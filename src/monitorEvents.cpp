@@ -52,7 +52,6 @@ void startMonitoringDev() {
   chrono::milliseconds timespan(200);
   chrono::milliseconds afterEventWait(1000);
   do {
-
     struct input_event ev;
     rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
     if (rc == 0) {
@@ -62,7 +61,7 @@ void startMonitoringDev() {
           " codename: " + codeName + " value: " + to_string(ev.value));
 
       if (codeName == "KEY_POWER" and ev.value == 1) {
-        log("MonitorEvents: Received power button trigger, attempting device suspend");
+        log("monitorEvents: Received power button trigger, attempting device suspend");
 
         waitMutex(&watchdogStartJob_mtx);
         watchdogStartJob = true;
@@ -99,7 +98,7 @@ void startMonitoringDev() {
 
         } else {
           log("Option '8 - customCase' is false:");
-          log("MonitorEvents: Received hall sensor trigger, attempting device suspend");
+          log("monitorEvents: Received hall sensor trigger, attempting device suspend");
 
           waitMutex(&watchdogStartJob_mtx);
           watchdogStartJob = true;
