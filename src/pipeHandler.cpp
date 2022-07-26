@@ -8,28 +8,25 @@
 #include <fcntl.h>
 #include <sys/mount.h>
 
+const std::string emitter = "pipeHandler";
+
 void startPipeServer() {
-  log("Starting named pipe server");
+  log("Starting named pipe server", emitter);
 
   if (dirExists("/run/ipd") == false) {
-    log("Creating /run/ipd");
+    log("Creating /run/ipd", emitter);
     experimental::filesystem::create_directory("/run/ipd");
     experimental::filesystem::create_directory("/kobo/run/ipd");
     // Creating the named pipe (First-In-First-Out)
     const char * pipe = "/run/ipd/fifo";
     mkfifo(pipe, 0666);
-  } else if (dirExists("/kobo/run/ipd") == false) {
-    log("Creating /kobo/run/ipd");
-    experimental::filesystem::create_directory("/kobo/run/ipd");
   }
-  // Bind-mounting to GUI rootfs
-  mount("/run/ipd", "/kobo/run/ipd", "tmpfs", MS_BIND, NULL);
 }
 
 void sleepPipeSend() {
-  log("Sending message");
-  const char * myfifo = "/run/ipd/fifo";
-  int fd = open(myfifo, O_RDWR); // O_WRONLY // https://stackoverflow.com/questions/24099693/c-linux-named-pipe-hanging-on-open-with-o-wronly
+  log("Sending message", emitter);
+  const char * pipe = "/run/ipd/fifo";
+  int fd = open(pipe, O_RDWR); // O_WRONLY // https://stackoverflow.com/questions/24099693/c-linux-named-pipe-hanging-on-open-with-o-wronly
 
   string testString = "start";
   write(fd, testString.c_str(), 5);
@@ -37,9 +34,9 @@ void sleepPipeSend() {
 }
 
 void restorePipeSend() {
-  log("Sending message");
-  const char * myfifo = "/run/ipd/fifo";
-  int fd = open(myfifo, O_RDWR); // O_WRONLY // https://stackoverflow.com/questions/24099693/c-linux-named-pipe-hanging-on-open-with-o-wronly
+  log("Sending message", emitter);
+  const char * pipe = "/run/ipd/fifo";
+  int fd = open(pipe, O_RDWR); // O_WRONLY // https://stackoverflow.com/questions/24099693/c-linux-named-pipe-hanging-on-open-with-o-wronly
 
   string testString = "stop0";
   write(fd, testString.c_str(), 5);

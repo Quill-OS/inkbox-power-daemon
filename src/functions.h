@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void log(string message);
+void log(string message, string emitter = "undefined");
 void waitMutex(mutex* exampleMutex);
 void prepareVariables();
 string readConfigString(string path);
@@ -16,7 +16,7 @@ string readFile(string path);
 bool fileExists(string fileName);
 bool dirExists(string path);
 string executeCommand(string command);
-string normalReplace(string MainString, string strToLookFor, string replacement);
+string normalReplace(string mainString, string strToLookFor, string replacement);
 string readConfigStringNoLog(string path);
 
 enum goSleepCondition

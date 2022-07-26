@@ -1,6 +1,6 @@
 #include "prepareSleep.h"
-#include "AppsFreeze.h"
-#include "Wifi.h"
+#include "appsFreeze.h"
+#include "wifi.h"
 #include "cinematicBrightness.h"
 #include "devices.h"
 #include "fbink.h"
@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <string>
 #include <thread>
+
+const std::string emitter = "prepareSleep";
 
 extern sleepBool sleepJob;
 extern mutex sleep_mtx;
@@ -43,7 +45,7 @@ void CEP() {
     waitMutex(&sleep_mtx);
     if (sleepJob != Prepare) {
       sleep_mtx.unlock();
-      log("log: Terminating prepareSleep");
+      log("Terminating prepareSleep", emitter);
       diePrepare = true;
     }
     sleep_mtx.unlock();
@@ -52,7 +54,7 @@ void CEP() {
 
 void prepareSleep() {
   waitMutex(&occupyLed);
-  log("Launching prepareSleep");
+  log("Launching prepareSleep", emitter);
   diePrepare = false;
 
   CEP();
@@ -124,7 +126,7 @@ void prepareSleep() {
   waitMutex(&currentActiveThread_mtx);
   currentActiveThread = Nothing;
   currentActiveThread_mtx.unlock();
-  log("Exiting prepareSleep");
+  log("Exiting prepareSleep", emitter);
 }
 
 // Show a splash with the text 'Sleeping', but also allow custom screensavers
@@ -137,16 +139,16 @@ void sleepScreen() {
     for (const auto &entry : experimental::filesystem::directory_iterator(screenSaverPath)) {
       if (string(entry.path()).find(".png") != std::string::npos) {
         imageList.push_back(string(entry.path()));
-        log("Found screensaver image: " + string(entry.path()));
+        log("Found screensaver image: " + string(entry.path()), emitter);
       }
     }
     if (imageList.empty() == false) {
       string chosenScreensaver = imageList.at(rand() % imageList.size());
       if (fileExists(chosenScreensaver) == true) {
-        log("Writing image to fbink: " + chosenScreensaver);
+        log("Displaying image with FBInk: " + chosenScreensaver, emitter);
         int status = printImage(chosenScreensaver);
         if (status < 0) {
-          log("Error: Failed to display the screensaver image (is it really a picture?)");
+          log("Error: Failed to display the screensaver image (is it really a picture?)", emitter);
           fbinkWriteCenter("Sleeping", darkMode);
           fbinkRefreshScreen();
         }
@@ -154,13 +156,13 @@ void sleepScreen() {
       }
     }
   }
-  log("Something went wrong with custom screensaver option, displaying normal message");
+  log("Something went wrong with custom screensaver option, displaying normal message", emitter);
   fbinkWriteCenter("Sleeping", darkMode);
   fbinkRefreshScreen();
 }
 
 void deepSleepGo() {
-  log("Going to deep sleep");
+  log("Going to deep sleep", emitter);
   setCpuGovernor("powersave");
 
   // TODO

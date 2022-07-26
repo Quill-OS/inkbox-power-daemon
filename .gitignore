@@ -40,3 +40,6 @@ CmakeFIles
 
 # mine
 boost_1_79_0
+
+# Visual Studio Code
+.vscode

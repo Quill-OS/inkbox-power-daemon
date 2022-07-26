@@ -24,7 +24,7 @@
 using namespace std;
 
 // Variables (there is no risk that they will be read at the same time by many threads). Used by: FBInk, internal things
-
+const std::string emitter = "functions";
 bool logEnabled = false;
 string model;
 int fbfd;
@@ -72,13 +72,15 @@ bool ledState = false;
 int countIdle = 0;
 
 // Functions
-void log(string to_log) {
+void log(string toLog, string emitter) {
   if (logEnabled == true) {
-    std::cout << to_log << std::endl;
+    std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+    std::time_t endTime = std::chrono::system_clock::to_time_t(end);
+    std::cout << normalReplace(std::ctime(&endTime), "\n", "\0") << " | " << emitter << ": " << toLog << std::endl;
 
     // TODO: Improve efficiency (don't close it every time)
     ofstream logFile("/var/log/ipd.log", ios::app);
-    logFile << to_log << std::endl;
+    logFile << toLog << std::endl;
     logFile.close();
   }
 }
@@ -88,9 +90,9 @@ void waitMutex(mutex * exampleMutex) {
 }
 
 void prepareVariables() {
-  log("Reading system variables");
+  log("Reading system variables", emitter);
   model = readConfigString("/opt/inkbox_device");
-  log("Running on: " + model);
+  log("Running on: " + model, emitter);
 
   // Lockscreen
   string stringRead1 = readConfigString("/opt/config/12-lockscreen/config");
@@ -99,28 +101,27 @@ void prepareVariables() {
   } else {
     lockscreen = false;
   }
-  log("lockscreen is: " + stringRead1);
+  log("lockscreen is: " + stringRead1, emitter);
 
   // Simply it, for FBInk dump
   dump = {0};
 
-  // dark mode
+  // Dark mode
   string stringRead2 = readConfigString("/opt/config/10-dark_mode/config");
   if (stringRead2 == "true") {
-    log("darkMode is: true");
+    log("darkMode is: true", emitter);
     darkMode = true;
   } else {
-    log("darkMode is: false");
+    log("darkMode is: false", emitter);
     darkMode = false;
   }
 
   // USB networking
-  string commandOutput = executeCommand("service usbnet status");
-  if (commandOutput.find("status: started") != std::string::npos) {
-    log("USB networking system service is started");
+  if (fileExists("/run/openrc/started/usbnet")) {
+    log("USB networking system service is running", emitter);
     wasUsbNetOn = true;
   } else {
-    log("USB networking system service is not running");
+    log("USB networking system service is not running", emitter);
     wasUsbNetOn = false;
   }
 
@@ -129,7 +130,7 @@ void prepareVariables() {
   // /data/config/20-sleep_daemon
   string mainPath = "/data/config/20-sleep_daemon";
   if (dirExists(mainPath) == false) {
-    log("Creating basic config");
+    log("Creating basic config", emitter);
     experimental::filesystem::create_directory(mainPath);
     // /data/config/20-sleep_daemon/appList.txt
     writeFileString("/data/config/20-sleep_daemon/appList.txt",
@@ -258,7 +259,7 @@ string readConfigString(string path) {
   string returnData;
   indata.open(path);
   if (!indata) {
-    log("Couldn't read config file: " + path);
+    log("Couldn't read config file: " + path, emitter);
     return "none";
   }
   indata >> returnData;
@@ -266,7 +267,7 @@ string readConfigString(string path) {
     indata >> returnData;
   }
   indata.close();
-  log(path + " is: " + returnData);
+  log(path + " is: " + returnData, emitter);
   return returnData;
 }
 
@@ -276,7 +277,7 @@ void writeFileString(string path, string stringToWrite) {
   if (!File) {
     string message = "File could not be created at path: ";
     message.append(path);
-    log(message);
+    log(message, emitter);
     exit(EXIT_FAILURE);
   } else {
     File << stringToWrite;
@@ -290,7 +291,7 @@ string readFile(string path) {
   if (!input_file.is_open()) {
     string message = "Could not open file: ";
     message.append(path);
-    log(message);
+    log(message, emitter);
     exit(EXIT_FAILURE);
   }
   return string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
@@ -332,12 +333,12 @@ string executeCommand(string command) {
 
   pclose(pipe);
 
-  log("Output of command: \" " + command + " \"" + "is: \" " + result + " \"");
+  log("Output of command: \" " + command + " \"" + "is: \" " + result + " \"", emitter);
   return result;
 }
 
-string normalReplace(string MainString, string strToLookFor, string replacement) {
-  return std::regex_replace(MainString, std::regex(strToLookFor), replacement);
+string normalReplace(string mainString, string strToLookFor, string replacement) {
+  return std::regex_replace(mainString, std::regex(strToLookFor), replacement);
 }
 
 string readConfigStringNoLog(string path) {
@@ -345,7 +346,7 @@ string readConfigStringNoLog(string path) {
   string returnData;
   indata.open(path);
   if (!indata) {
-    log("Couldn't read config file: " + path);
+    log("Couldn't read config file: " + path, emitter);
     return "none";
   }
   indata >> returnData;

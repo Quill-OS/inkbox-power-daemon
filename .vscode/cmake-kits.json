@@ -1,9 +1,0 @@
-[
-    {
-        "name": "Arm kobo",
-        "compilers": {
-            "C": "/home/build/inkbox/kernel/toolchain/armv7l-linux-musleabihf-cross/bin/armv7l-linux-musleabihf-gcc",
-            "CXX": "/home/build/inkbox/kernel/toolchain/armv7l-linux-musleabihf-cross/bin/armv7l-linux-musleabihf-g++"
-        }
-    }
-]

@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+const std::string emitter = "devices";
 extern string model;
 extern bool ledUsage;
 extern mutex occupyLed;
@@ -115,9 +116,9 @@ bool getAccurateChargerStatus() {
 }
 
 void setCpuGovernor(string cpuGovernor) {
-  log("Setting CPU frequency governor to " + cpuGovernor);
+  log("Setting CPU frequency governor to " + cpuGovernor, emitter);
   int dev = open("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", O_RDWR);
   int writeStatus = write(dev, cpuGovernor.c_str(), cpuGovernor.length());
   close(dev);
-  log("Write status writing to 'scaling_governor' is: " + std::to_string(writeStatus));
+  log("Write status writing to 'scaling_governor' is: " + std::to_string(writeStatus), emitter);
 }

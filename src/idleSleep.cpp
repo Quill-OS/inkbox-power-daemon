@@ -20,6 +20,8 @@
 #include "config.h"
 #include "libevdev/libevdev.h"
 
+const std::string emitter = "idleSleep";
+
 using namespace std;
 
 extern bool watchdogStartJob;
@@ -41,7 +43,7 @@ extern int idleSleepTime;
 extern int countIdle;
 
 void startIdleSleep() {
-  log("Starting idle sleep");
+  log("Starting idleSleep", emitter);
 
   struct libevdev *dev = NULL;
 
@@ -49,14 +51,14 @@ void startIdleSleep() {
   int rc = libevdev_new_from_fd(fd, &dev);
 
   if (rc < 0) {
-    log("Failed to init libevdev: " + (string)strerror(-rc));
+    log("Failed to init libevdev: " + (string)strerror(-rc), emitter);
     exit(1);
   }
 
-  log("Input device name: " + (string)libevdev_get_name(dev));
-  log("Input device bus " + to_string(libevdev_get_id_bustype(dev)) +
+  log("Input device name: " + (string)libevdev_get_name(dev), emitter);
+  log("Input device bus: " + to_string(libevdev_get_id_bustype(dev)) +
       " vendor: " + to_string(libevdev_get_id_vendor(dev)) +
-      " product: " + to_string(libevdev_get_id_product(dev)));
+      " product: " + to_string(libevdev_get_id_product(dev)), emitter);
 
   chrono::milliseconds timespan(1000);
   // Add to it every second, and make operations based on this timing
@@ -65,7 +67,7 @@ void startIdleSleep() {
   do {
     if (idleSleepTime != 0) {
       if (idleSleepTime <= countIdle) {
-        log("Going to sleep because of idle time");
+        log("Going to sleep because of idle time", emitter);
         waitMutex(&sleep_mtx);
         // Do absolutely everything to not break things, to not go to idle sleep when other things are going on
         if (sleepJob == Nothing) {
@@ -73,7 +75,7 @@ void startIdleSleep() {
           if (watchdogNextStep == Nothing) {
             waitMutex(&currentActiveThread_mtx);
             if (currentActiveThread == Nothing) {
-              log("Going to sleep becouse of idle touch screen");
+              log("Going to sleep becouse of idle touch screen", emitter);
               currentActiveThread_mtx.unlock();
               countIdle = 0;
               waitMutex(&watchdogStartJob_mtx);
@@ -81,19 +83,18 @@ void startIdleSleep() {
               watchdogStartJob_mtx.unlock();
 
               waitMutex(&newSleepCondition_mtx);
-              newSleepCondition =
-                  Idle; // TODO: Use this somewhere
+              newSleepCondition = Idle; // TODO: Use this somewhere
               newSleepCondition_mtx.unlock();
             } else {
               currentActiveThread_mtx.unlock();
-              log("idleSleep: Not going to sleep because of currentActiveThread");
+              log("idleSleep: Not going to sleep because of currentActiveThread", emitter);
             }
           } else {
-            log("idleSleep: Not going to sleep because of watchdogNextStep");
+            log("idleSleep: Not going to sleep because of watchdogNextStep", emitter);
           }
         } else {
           sleep_mtx.unlock();
-          log("idleSleep: Not going to sleep because of sleepJob");
+          log("idleSleep: Not going to sleep because of sleepJob", emitter);
         }
       }
     }
@@ -108,5 +109,5 @@ void startIdleSleep() {
     this_thread::sleep_for(timespan);
     countIdle = countIdle + 1;
   } while (rc == 1 || rc == 0 || rc == -EAGAIN);
-  log("Error: Monitoring events in idle sleep died unexpectedly");
+  log("Error: Monitoring events in idle sleep died unexpectedly", emitter);
 }

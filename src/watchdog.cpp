@@ -9,13 +9,13 @@
 #include "prepareSleep.h"
 #include "devices.h"
 
+const std::string emitter = "watchdog";
+
 using namespace std;
 
-// var
-
+// Variables
 extern bool whenChargerSleep;
 
-//
 extern bool watchdogStartJob;
 extern mutex watchdogStartJob_mtx;
 
@@ -49,12 +49,12 @@ void startWatchdog() {
 
     // This takes signals from monitorEvents and assigns them to actions
     if (saveWatchdogState == true) {
-      log("Watchdog event received");
+      log("Watchdog event received", emitter);
 
       // Handling 3 - whenChargerSleep
       if (whenChargerSleep == false) {
         if (getChargerStatus() == true) {
-          log("Skipping watchdog event because of option '3 - whenChargerSleep'");
+          log("Skipping watchdog event because of option '3 - whenChargerSleep'", emitter);
           sleepJob = Skip;
         }
       }
@@ -64,7 +64,7 @@ void startWatchdog() {
       waitMutex(&sleep_mtx);
 
       if (sleepJob == Nothing) {
-        log("Launching 'prepare' thread because of 'Nothing' sleep job");
+        log("Launching 'prepare' thread because of 'Nothing' sleep job", emitter);
         // This is here to avoid waiting too long afterwards
         waitMutex(&currentActiveThread_mtx);
         sleepJob = Prepare;
@@ -91,7 +91,7 @@ void startWatchdog() {
         prepareThread = thread(prepareSleep);
         prepareThread.detach();
       } else if (sleepJob == Prepare) {
-        log("Launching 'after' thread because of prepareSleep job");
+        log("Launching 'after' thread because of prepareSleep job", emitter);
         waitMutex(&currentActiveThread_mtx);
         sleepJob = After;
         sleep_mtx.unlock();
@@ -118,7 +118,7 @@ void startWatchdog() {
         afterThread = thread(afterSleep);
         afterThread.detach();
       } else if (sleepJob == After) {
-        log("Launching 'prepare' thread because of afterSleep job");
+        log("Launching 'prepare' thread because of afterSleep job", emitter);
         waitMutex(&currentActiveThread_mtx);
         sleepJob = Prepare;
         sleep_mtx.unlock();
@@ -145,7 +145,7 @@ void startWatchdog() {
         prepareThread = thread(prepareSleep);
         prepareThread.detach();
       } else if (sleepJob == GoingSleep) {
-        log("Launching 'after' thread because of goingSleep job");
+        log("Launching 'after' thread because of goingSleep job", emitter);
         // To be sure a new thread isn't launching anyway
         std::this_thread::sleep_for(std::chrono::milliseconds(400));
 
@@ -176,7 +176,7 @@ void startWatchdog() {
           afterThread = thread(afterSleep);
           afterThread.detach();
         } else {
-          log("Event from monitorEvents requested after thread, but watchdogNextStep already wanted it: skipping monitorEvents request");
+          log("Event from monitorEvents requested after thread, but watchdogNextStep already wanted it: skipping monitorEvents request", emitter);
           sleep_mtx.unlock();
         }
       } else {
@@ -184,7 +184,7 @@ void startWatchdog() {
       }
     }
     if (watchdogNextStep != Nothing) {
-      log("Launching watchdogNextStep request");
+      log("Launching watchdogNextStep request", emitter);
       // Make sure all jobs exit. they propably already are, because they called it
       waitMutex(&sleep_mtx);
       sleepJob = Nothing;
@@ -207,7 +207,7 @@ void startWatchdog() {
       }
 
       if (watchdogNextStep == After) {
-        log("Launching after thread becouse of a request of watchdogNextStep");
+        log("Launching afterSleep thread from request by watchdogNextStep", emitter);
         waitMutex(&sleep_mtx);
         sleepJob = After;
         sleep_mtx.unlock();
@@ -219,7 +219,7 @@ void startWatchdog() {
         afterThread = thread(afterSleep);
         afterThread.detach();
       } else if (watchdogNextStep == GoingSleep) {
-        log("Launching goingSleep thread from request by watchdogNextStep");
+        log("Launching goingSleep thread from request by watchdogNextStep", emitter);
         waitMutex(&sleep_mtx);
         sleepJob = GoingSleep;
         sleep_mtx.unlock();

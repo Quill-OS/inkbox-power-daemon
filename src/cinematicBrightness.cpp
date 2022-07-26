@@ -11,6 +11,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+const std::string emitter = "cinematicBrightness";
 extern string model;
 
 extern int cinematicBrightnessDelayMs;
@@ -18,7 +19,7 @@ extern int cinematicBrightnessDelayMs;
 void setBrightnessCin(int levelToSet, int currentLevel) {
   int device;
   if ((device = open("/dev/ntx_io", O_RDWR)) == -1) {
-    log("Error on opening ntx device");
+    log("Error on opening ntx device", emitter);
     exit(EXIT_FAILURE);
   }
   chrono::milliseconds timespan(cinematicBrightnessDelayMs);
@@ -43,7 +44,7 @@ int restoreBrightness() {
   if (fileExists("/tmp/savedBrightness") == true) {
     return stoi(readConfigString("/tmp/savedBrightness"));
   } else {
-    log("'/tmp/savedBrightness' doesn't exist, probably because of massive power button spamming. Returning current brightness");
+    log("'/tmp/savedBrightness' doesn't exist, probably because of massive power button spamming. Returning current brightness", emitter);
     return getBrightness();
   }
 }

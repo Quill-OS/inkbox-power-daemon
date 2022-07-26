@@ -10,9 +10,10 @@
 #include <sys/types.h>
 #include <vector>
 
-#include "AppsFreeze.h"
+#include "appsFreeze.h"
 #include "functions.h"
 
+const std::string emitter = "appsFreeze";
 extern vector<int> appsPids;
 
 // https://ofstack.com/C++/9293/linux-gets-pid-based-on-pid-process-name-and-pid-of-c.html
@@ -29,7 +30,7 @@ int getPidByName(string taskName) {
     getline(file, firstLine);
     // https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
     if (firstLine.find(taskName) != std::string::npos) {
-      log("Found PID of " + taskName + ": " + entry->d_name);
+      log("Found PID of " + taskName + ": " + entry->d_name, emitter);
       return stoi(entry->d_name);
     }
   }
@@ -47,7 +48,7 @@ vector<string> getBuiltInAppsList(string path) {
 
   for (string &app : vectorToParse) {
     if (app.empty() == false) {
-      log("In app vector: " + app);
+      log("In app vector: " + app, emitter);
       vectorToReturn.push_back(app);
     }
   }

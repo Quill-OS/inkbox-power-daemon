@@ -1,6 +1,6 @@
 #include "afterSleep.h"
-#include "AppsFreeze.h"
-#include "Wifi.h"
+#include "appsFreeze.h"
+#include "wifi.h"
 #include "cinematicBrightness.h"
 #include "devices.h"
 #include "fbinkFunctions.h"
@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 // Variables
+const std::string emitter = "afterSleep";
 extern bool reconnectWifi;
 extern bool deepSleep;
 extern bool deepSleepPermission;
@@ -55,7 +56,7 @@ void CEA() {
     waitMutex(&sleep_mtx);
     if (sleepJob != After) {
       sleep_mtx.unlock();
-      log("log: Terminating afterSleep");
+      log("Terminating afterSleep", emitter);
       dieAfter = true;
     }
     sleep_mtx.unlock();
@@ -63,7 +64,7 @@ void CEA() {
 }
 
 void afterSleep() {
-  log("Launching afterSleep");
+  log("Launching afterSleep", emitter);
   dieAfter = false;
   waitMutex(&occupyLed);
 
@@ -108,13 +109,13 @@ void afterSleep() {
   }
 
   if (reconnectWifi == true) {
-    log("Reconnecting to wifi because of option '5 - wifiReconnect'");
+    log("Reconnecting to wifi because of option '5 - wifiReconnect'", emitter);
     CEA();
     if (dieAfter == false) {
       turnOnWifi();
     }
   } else {
-    log("Not reconnecting to Wi-Fi because of option '5 - wifiReconnect'");
+    log("Not reconnecting to Wi-Fi because of option '5 - wifiReconnect'", emitter);
   }
 
   CEA();
@@ -134,13 +135,13 @@ void afterSleep() {
   currentActiveThread = Nothing;
   currentActiveThread_mtx.unlock();
   countIdle = 0;
-  log("Exiting afterSleep");
+  log("Exiting afterSleep", emitter);
 }
 
 void returnDeepSleep() {
-  log("Returning from deep sleep");
+  log("Returning from deep sleep", emitter);
   if (deepSleep == true) {
-    remove("/data/config/20-sleep_daemon/SleepCall");
+    remove("/data/config/20-sleep_daemon/ipd/sleepCall");
     setCpuGovernor(cpuGovernorToSet);
   }
   deepSleep = false;

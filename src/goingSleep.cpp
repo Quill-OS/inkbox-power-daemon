@@ -20,6 +20,8 @@
 #include "goingSleep.h"
 #include "devices.h"
 
+const std::string emitter = "goingSleep";
+
 // Variables
 // 4 - chargerWakeUp
 extern bool chargerWakeUp;
@@ -59,7 +61,7 @@ void CEG() {
     waitMutex(&sleep_mtx);
     if (sleepJob != GoingSleep) {
       sleep_mtx.unlock();
-      log("log: Terminating goSleep");
+      log("Terminating goSleep", emitter);
       dieGoing = true;
     }
     sleep_mtx.unlock();
@@ -67,7 +69,7 @@ void CEG() {
 }
 
 void goSleep() {
-  log("Started goSleep");
+  log("Started goSleep", emitter);
   dieGoing = false;
   waitMutex(&occupyLed);
 
@@ -83,7 +85,7 @@ void goSleep() {
   smartWait(1000);
 
   CEG();
-  log("Going to sleep now!");
+  log("Going to sleep now!", emitter);
   smartWait(1000);
 
   bool continueSleeping = true;
@@ -100,7 +102,7 @@ void goSleep() {
     ledManager();
     waitMutex(&occupyLed);
 
-    log("Trying sleep");
+    log("Trying suspend", emitter);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     int fd2 = open("/sys/power/state", O_RDWR);
     int status = write(fd2, "mem", 3);
@@ -111,7 +113,7 @@ void goSleep() {
     log("Got back from suspend");
 
     // Read kernel ring buffer, and then keep only lines containing <3>
-    char *logs_data;
+    char * logs_data;
     ssize_t len = klogctl(10, NULL, 0);
     logs_data = (char *)malloc(len);
     klogctl(3, logs_data, len);
@@ -128,12 +130,12 @@ void goSleep() {
     }
     dmesgErrorsVec.clear();
     if (status == -1 or dmesgErrors.find("PM: Some devices failed to suspend") != std::string::npos) {
-      log("Failed to suspend, kernel ring buffer errors:\n" + dmesgErrors);
-      log("\nstatus of writing to /sys/power/state: " + to_string(status));
+      log("Failed to suspend, kernel ring buffer errors:\n" + dmesgErrors, emitter);
+      log("\nstatus of writing to /sys/power/state: " + to_string(status), emitter);
       CEG();
       count = count + 1;
       if (count == 5) {
-        log("5 failed attempts at suspending, sleep a little longer ...");
+        log("5 failed attempts at suspending, sleep a little longer ...", emitter);
         smartWait(10000);
       } else if (count == 15) {
         log("15 failed attempts at sleeping ...");
@@ -143,19 +145,18 @@ void goSleep() {
       }
     } else {
       // Exiting this sleeping hell
-      log("FATAL error: stopping suspend attempts after " + to_string(count) +
-          " failed attempts");
+      log("FATAL error: stopping suspend attempts after " + to_string(count) + " failed attempts", emitter);
       continueSleeping = false;
 
       // 4 - chargerWakeUp
       if (savedChargerState != getChargerStatus()) {
         if (chargerWakeUp == true) {
-          log("4 - chargerWakeUp option is enabled, and the charger state is different. Going to sleep one more time");
+          log("4 - chargerWakeUp option is enabled, and the charger state is different. Going to sleep one more time", emitter);
           count = 0;
           continueSleeping = true;
         } else {
           // Because the charger doesn't trigger anything in monitorEvents
-          log("The device woke up becouse of a charger, but option '4 - chargerWakeUp' is disabled, so it will continue to wake up");
+          log("The device woke up becouse of a charger, but option '4 - chargerWakeUp' is disabled, so it will continue to wake up", emitter);
         }
       }
     }
@@ -166,7 +167,7 @@ void goSleep() {
   waitMutex(&currentActiveThread_mtx);
   currentActiveThread = Nothing;
   currentActiveThread_mtx.unlock();
-  log("Exiting goSleep");
+  log("Exiting goSleep", emitter);
 }
 
 // Sometimes I regret using such a simple multi-threading approach, but then I remember that it is safe

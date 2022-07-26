@@ -20,6 +20,8 @@
 #include "config.h"
 #include "libevdev/libevdev.h"
 
+const std::string emitter = "monitorEvents";
+
 using namespace std;
 
 extern bool watchdogStartJob;
@@ -32,7 +34,7 @@ extern bool customCase;
 extern int customCaseCount;
 
 void startMonitoringDev() {
-  log("Monitoring events");
+  log("Monitoring events", emitter);
 
   struct libevdev * dev = NULL;
 
@@ -40,14 +42,14 @@ void startMonitoringDev() {
   int rc = libevdev_new_from_fd(fd, &dev);
 
   if (rc < 0) {
-    log("Failed to init libevdev: " + (string)strerror(-rc));
+    log("Failed to init libevdev: " + (string)strerror(-rc), emitter);
     exit(1);
   }
 
-  log("Input device name: " + (string)libevdev_get_name(dev));
-  log("Input device bus " + to_string(libevdev_get_id_bustype(dev)) +
+  log("Input device name: " + (string)libevdev_get_name(dev), emitter);
+  log("Input device bus: " + to_string(libevdev_get_id_bustype(dev)) +
       " vendor: " + to_string(libevdev_get_id_vendor(dev)) +
-      " product: " + to_string(libevdev_get_id_product(dev)));
+      " product: " + to_string(libevdev_get_id_product(dev)), emitter);
 
   chrono::milliseconds timespan(200);
   chrono::milliseconds afterEventWait(1000);
@@ -58,10 +60,10 @@ void startMonitoringDev() {
       string codeName = (string)libevdev_event_code_get_name(ev.type, ev.code);
       log("Input event received, type: " +
           (string)libevdev_event_type_get_name(ev.type) +
-          " codename: " + codeName + " value: " + to_string(ev.value));
+          " codename: " + codeName + " value: " + to_string(ev.value), emitter);
 
       if (codeName == "KEY_POWER" and ev.value == 1) {
-        log("monitorEvents: Received power button trigger, attempting device suspend");
+        log("monitorEvents: Received power button trigger, attempting device suspend", emitter);
 
         waitMutex(&watchdogStartJob_mtx);
         watchdogStartJob = true;
@@ -77,14 +79,14 @@ void startMonitoringDev() {
       // For hall sensor (sleepcover)
       if (codeName == "KEY_F1" and ev.value == 1) {
         if (customCase == true) {
-          log("Option '8 - customCase' is true");
+          log("Option '8 - customCase' is true", emitter);
           customCaseCount = customCaseCount + 1;
-          log("customCaseCount is: " + to_string(customCaseCount));
+          log("customCaseCount is: " + to_string(customCaseCount), emitter);
           if (customCaseCount == 1) {
-            log("Ignoring hall sensor trigger because of option '8 - customCase'");
+            log("Ignoring hall sensor trigger because of option '8 - customCase'", emitter);
           } else if (customCaseCount >= 2) {
             customCaseCount = 0;
-            log("Second hall sensor trigger, attempting device suspend");
+            log("Second hall sensor trigger, attempting device suspend", emitter);
             waitMutex(&watchdogStartJob_mtx);
             watchdogStartJob = true;
             watchdogStartJob_mtx.unlock();
@@ -97,8 +99,8 @@ void startMonitoringDev() {
           }
 
         } else {
-          log("Option '8 - customCase' is false:");
-          log("monitorEvents: Received hall sensor trigger, attempting device suspend");
+          log("Option '8 - customCase' is false:", emitter);
+          log("monitorEvents: Received hall sensor trigger, attempting device suspend", emitter);
 
           waitMutex(&watchdogStartJob_mtx);
           watchdogStartJob = true;
@@ -116,5 +118,5 @@ void startMonitoringDev() {
     this_thread::sleep_for(timespan);
 
   } while (rc == 1 || rc == 0 || rc == -EAGAIN);
-  log("Error: Monitoring events function died unexpectedly");
+  log("Error: Monitoring events function died unexpectedly", emitter);
 }

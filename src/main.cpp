@@ -4,7 +4,7 @@
 #include <thread>
 #include <string.h>
 
-#include "AppsFreeze.h"
+#include "appsFreeze.h"
 #include "configUpdate.h"
 #include "fbinkFunctions.h"
 #include "functions.h"
@@ -13,6 +13,8 @@
 #include "pipeHandler.h"
 #include "watchdog.h"
 #include "idleSleep.h"
+
+const std::string emitter = "main";
 
 extern bool logEnabled;
 extern int fbfd;
@@ -31,8 +33,8 @@ int main() {
 
   if (debugEnv != NULL && strcmp(debugEnv, "true") == 0) {
     logEnabled = true;
-    log("Debug mode is enabled");
-    log("Saving logs to /var/log/ipd.log");
+    log("Debug mode is enabled", emitter);
+    log("Saving logs to /var/log/ipd.log", emitter);
   }
 
   prepareVariables();
@@ -50,6 +52,6 @@ int main() {
   watchConfig.join();
   idleSleep.join();
   
-  log("How did this end?");
+  log("How did this end?", emitter);
   return -1;
 }

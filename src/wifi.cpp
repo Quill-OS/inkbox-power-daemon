@@ -1,5 +1,5 @@
-#include "Wifi.h"
-#include "AppsFreeze.h"
+#include "wifi.h"
+#include "appsFreeze.h"
 #include "functions.h"
 
 #include <chrono>
@@ -13,6 +13,8 @@
 #include <sys/types.h>
 #include <thread>
 #include <unistd.h>
+
+const std::string emitter = "wifi";
 
 // https://stackoverflow.com/questions/5947286/how-to-load-linux-kernel-modules-from-c-code
 #define deleteModule(name, flags) syscall(__NR_delete_module, name, flags)
@@ -61,17 +63,17 @@ void turnOffWifi() {
         system(turnOffInterface.c_str());
       }
     } else {
-      log("Wi-Fi is already off, but modules are still live");
+      log("Wi-Fi is already off, but modules are still live", emitter);
     }
     if (deleteModule(WIFI_MODULE.c_str(), O_NONBLOCK) != 0) {
-      log("Can't unload module: " + WIFI_MODULE);
+      log("Can't unload module: " + WIFI_MODULE, emitter);
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     if (deleteModule(SDIO_WIFI_PWR_MODULE.c_str(), O_NONBLOCK) != 0) {
-      log("Can't unload module: " + SDIO_WIFI_PWR_MODULE);
+      log("Can't unload module: " + SDIO_WIFI_PWR_MODULE, emitter);
     }
   } else {
-    log("Is Wi-Fi already off?");
+    log("Is Wi-Fi already off?", emitter);
   }
 }
 
@@ -116,9 +118,9 @@ void turnOnWifi() {
             true and
         fileExists("/data/config/17-wifi_connection_information/passphrase") ==
             true) {
-      string ESSID = readConfigString("/data/config/17-wifi_connection_information/essid");
-      string PASSPHRASE = readConfigString("/data/config/17-wifi_connection_information/passphrase");
-      string reconnection = "/usr/local/bin/wifi/connect_to_network.sh " + ESSID + " " + PASSPHRASE + " &";
+      string essid = readConfigString("/data/config/17-wifi_connection_information/essid");
+      string passphrase = readConfigString("/data/config/17-wifi_connection_information/passphrase");
+      string reconnection = "/usr/local/bin/wifi/connect_to_network.sh " + essid + " " + passphrase + " &";
       system(reconnection.c_str());
     }
     remove("/run/was_connected_to_wifi");
@@ -128,8 +130,8 @@ void turnOnWifi() {
 void loadModule(string path) {
   size_t image_size;
   struct stat st;
-  void *image;
-  const char *params = "";
+  void * image;
+  const char * params = "";
   int fd = open(path.c_str(), O_RDONLY);
   puts("init");
   fstat(fd, &st);
@@ -138,7 +140,7 @@ void loadModule(string path) {
   read(fd, image, image_size);
   close(fd);
   if (initModule(image, image_size, params) != 0) {
-    log("Couldn't init module " + path);
+    log("Couldn't init module " + path, emitter);
     exit(EXIT_FAILURE);
   }
   free(image);

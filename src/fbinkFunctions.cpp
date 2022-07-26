@@ -11,6 +11,7 @@
 
 #include "fbink.h"
 
+const std::string emitter = "fbinkFunctions";
 extern int fbfd;
 extern FBInkDump dump;
 extern string model;
@@ -18,14 +19,14 @@ extern string model;
 void initFbink() {
   fbfd = fbink_open();
   if (fbfd == -1) {
-    log("Failed to open the framebuffer");
+    log("Failed to open the framebuffer", emitter);
     exit(EXIT_FAILURE);
   }
-  log("Loaded FBInk version: " + (string)fbink_version());
+  log("Loaded FBInk version: " + (string)fbink_version(), emitter);
 }
 
 int fbinkRefreshScreen() {
-  log("FBInk: Full screen refresh");
+  log("FBInk: Full screen refresh", emitter);
   FBInkConfig fbink_cfg = {0};
   fbink_cfg.is_flashing = true;
   int rv = fbink_cls(fbfd, &fbink_cfg, NULL, false);
@@ -43,7 +44,7 @@ int fbinkWriteCenter(string stringToWrite, bool darkMode) {
   }
 
   if (fbink_init(fbfd, &fbink_cfg) < 0) {
-    log("Failed to initialize FBInk, aborting");
+    log("Failed to initialize FBInk, aborting", emitter);
     return EXIT_FAILURE;
   }
 
@@ -57,7 +58,7 @@ int fbinkWriteCenter(string stringToWrite, bool darkMode) {
   FBInkOTFit ot_fit = {0};
 
   if (fbink_print_ot(fbfd, stringToWrite.c_str(), &fbinkOT_cfg, &fbink_cfg, &ot_fit) < 0) {
-    log("FBInk: Failed to print string");
+    log("FBInk: Failed to print string", emitter);
   }
 
   return EXIT_SUCCESS;
@@ -68,7 +69,7 @@ void clearScreen(bool darkModeSet) {
   fbink_cfg.is_inverted = darkModeSet;
 
   if (fbink_init(fbfd, &fbink_cfg) < 0) {
-    log("Failed to initialize FBInk, aborting");
+    log("Failed to initialize FBInk, aborting", emitter);
     exit(EXIT_FAILURE);
   }
 
@@ -90,15 +91,15 @@ void screenshotFbink() {
   FBInkConfig fbink_cfg = {0};
 
   if (fbink_init(fbfd, &fbink_cfg) < 0) {
-    log("Failed to initialize FBInk in screenshotFbink");
+    log("Failed to initialize FBInk in screenshotFbink", emitter);
   } else {
-    log("FBInk was initialized successfully in screenshotFbink");
+    log("FBInk was initialized successfully in screenshotFbink", emitter);
   }
 
   if (fbink_dump(fbfd, &dump) < 0) {
-    log("FBInk: Something went wrong while trying to dump the screen");
+    log("FBInk: Something went wrong while trying to dump the screen", emitter);
   };
-  log("Screen dump done");
+  log("Screen dump done", emitter);
 }
 
 void restoreFbink(bool darkMode) {
@@ -108,7 +109,7 @@ void restoreFbink(bool darkMode) {
   }
 
   if (fbink_init(fbfd, &fbink_cfg) < 0) {
-    log("Failed to initialize FBInk, aborting");
+    log("Failed to initialize FBInk in restoreFbink, aborting"), emitter;
   }
 
   fbink_restore(fbfd, &fbink_cfg, &dump);
@@ -118,6 +119,7 @@ void restoreFbink(bool darkMode) {
 void closeFbink() { fbink_close(fbfd); }
 
 void restoreFbDepth() {
+  // TODO: Use execve() family instead of system()
   if (model == "n437" or model == "kt") {
     if (fileExists("/kobo/tmp/inkbox_running") == true) {
       system("/opt/bin/fbink/fbdepth -d 8");
