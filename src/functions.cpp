@@ -61,7 +61,7 @@ goSleepCondition newSleepCondition = None;
 mutex newSleepCondition_mtx;
 sleepBool sleepJob = Nothing;
 mutex sleep_mtx;
-sleepBool currentActiveThread;
+sleepBool currentActiveThread = Nothing;
 mutex currentActiveThread_mtx;
 // To avoid confusion with the LED control (if this is locked, then it other things are done besides charging indicator, like flickering)
 mutex occupyLed;

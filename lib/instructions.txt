@@ -1,2 +1,5 @@
 download https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz
 and extract it here.
+
+To pull the submodules:
+git submodule update --init --recursive

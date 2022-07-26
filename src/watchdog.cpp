@@ -180,6 +180,7 @@ void startWatchdog() {
           sleep_mtx.unlock();
         }
       } else {
+        log("sleepJob is something else", emitter);
         sleep_mtx.unlock();
       }
     }

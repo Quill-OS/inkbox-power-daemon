@@ -77,6 +77,7 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     clearScreen(darkMode);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
     sleepScreen();
   }
 

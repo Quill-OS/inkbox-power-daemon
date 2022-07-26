@@ -16,8 +16,8 @@ servername="root@10.42.0.28"
 passwd="root"
 
 sshpass -p $passwd ssh $servername "bash -c \"ifsctl mnt rootfs rw\""
-sshpass -p $passwd ssh $servername "bash -c \"rm /inkbox-power-deamon\""
-sshpass -p $passwd ssh $servername "bash -c \"killall -9 inkbox-power-deamon\""
+sshpass -p $passwd ssh $servername "bash -c \"rm /ipd\""
+sshpass -p $passwd ssh $servername "bash -c \"killall -9 ipd\""
 
 sshpass -p $passwd ssh $servername "bash -c \"service sleep_standby stop\""
 sshpass -p $passwd ssh $servername "bash -c \"killall -9 sleep_standby.sh\""
@@ -25,7 +25,7 @@ sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
 sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
 sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
 
-sshpass -p $passwd scp build/inkbox-power-deamon $servername:/
+sshpass -p $passwd scp build/ipd $servername:/
 
 sshpass -p $passwd ssh $servername "bash -c \"sync\""
 

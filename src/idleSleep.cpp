@@ -66,8 +66,9 @@ void startIdleSleep() {
   struct input_event ev;
   do {
     if (idleSleepTime != 0) {
-      if (idleSleepTime <= countIdle) {
+      if (idleSleepTime == countIdle) {
         log("Going to sleep because of idle time", emitter);
+        countIdle = 0;
         waitMutex(&sleep_mtx);
         // Do absolutely everything to not break things, to not go to idle sleep when other things are going on
         if (sleepJob == Nothing) {
@@ -77,7 +78,7 @@ void startIdleSleep() {
             if (currentActiveThread == Nothing) {
               log("Going to sleep because of idle touch screen", emitter);
               currentActiveThread_mtx.unlock();
-              countIdle = 0;
+              
               waitMutex(&watchdogStartJob_mtx);
               watchdogStartJob = true;
               watchdogStartJob_mtx.unlock();
