@@ -57,8 +57,11 @@ sleepBool watchdogNextStep = Nothing;
 // Mutex variables
 bool watchdogStartJob = false;
 mutex watchdogStartJob_mtx;
+
+// Use this before watchdogStartJob
 goSleepCondition newSleepCondition = None;
 mutex newSleepCondition_mtx;
+
 sleepBool sleepJob = Nothing;
 mutex sleep_mtx;
 sleepBool currentActiveThread = Nothing;
