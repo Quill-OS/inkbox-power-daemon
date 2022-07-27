@@ -133,8 +133,8 @@ void prepareVariables() {
   if (dirExists(mainPath) == false) {
     log("Creating basic config", emitter);
     experimental::filesystem::create_directory(mainPath);
-    // /data/config/20-sleep_daemon/appList.txt
-    writeFileString("/data/config/20-sleep_daemon/appList.txt",
+    // /data/config/20-sleep_daemon/appsList
+    writeFileString("/data/config/20-sleep_daemon/appsList",
                     "inkbox-bin\noobe-inkbox-bin\nlockscreen-bin\ncalculator-"
                     "bin\nqreversi-bin\n2048-bin\nscribble\nlightmaps");
     writeFileString("/data/config/20-sleep_daemon/updateConfig", "false");
