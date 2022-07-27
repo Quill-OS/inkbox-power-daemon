@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string>
 #include <thread>
+#include <ctime> // For rand bug
 
 const std::string emitter = "prepareSleep";
 
@@ -77,7 +78,7 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     clearScreen(darkMode);
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
     sleepScreen();
   }
 
@@ -101,7 +102,10 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     writeFileString("/kobo/inkbox/remount", "false");
-    system("/sbin/hwclock --systohc -u");
+    string hwclockPath = "/sbin/hwclock";
+    const char *args[] = {hwclockPath.c_str(), "--systohc", "-u", nullptr};
+    int fakePid = 0;
+    posixSpawnWrapper(hwclockPath.c_str(), args, true, &fakePid);
   }
 
   CEP();
@@ -144,20 +148,25 @@ void sleepScreen() {
       }
     }
     if (imageList.empty() == false) {
-      string chosenScreensaver = imageList.at(rand() % imageList.size());
+      int vectorSize = imageList.size();
+      log("screensaver count is " + to_string(vectorSize));
+      srand(time(0));
+      int randomInt = rand() % vectorSize;
+      log("Choosing screensaver at: " + to_string(randomInt));
+      string chosenScreensaver = imageList.at(randomInt);
       if (fileExists(chosenScreensaver) == true) {
         log("Displaying image with FBInk: " + chosenScreensaver, emitter);
         int status = printImage(chosenScreensaver);
         if (status < 0) {
           log("Error: Failed to display the screensaver image (is it really a picture?)", emitter);
-          fbinkRefreshScreen();
-          fbinkWriteCenter("Sleeping", darkMode);
+        } 
+        else {
+          return;
         }
-        return;
       }
     }
   }
-  log("Custom screensaver not found, displaying normal message", emitter);
+  log("Custom screensaver not found or errored, displaying normal message", emitter);
   fbinkRefreshScreen();
   fbinkWriteCenter("Sleeping", darkMode);
 }

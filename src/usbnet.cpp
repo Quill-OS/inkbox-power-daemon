@@ -71,7 +71,7 @@ void disableUsbNet() {
 
 void startUsbNet() {
     if(wasUsbNetOn == true) {
-      log("Restoring USB networking");
+      log("Restoring USB networking", emitter);
       executeCommand("service usbnet start");
     }
 }

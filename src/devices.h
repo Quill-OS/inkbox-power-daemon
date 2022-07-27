@@ -12,5 +12,6 @@ bool getChargerStatus();
 bool isDeviceChargerBug();
 bool getAccurateChargerStatus();
 void setCpuGovernor(string cpuGovernor);
+void getLedPath();
 
 #endif

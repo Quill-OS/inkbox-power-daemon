@@ -60,7 +60,8 @@ int fbinkWriteCenter(string stringToWrite, bool darkMode) {
   if (fbink_print_ot(fbfd, stringToWrite.c_str(), &fbinkOT_cfg, &fbink_cfg, &ot_fit) < 0) {
     log("FBInk: Failed to print string", emitter);
   }
-
+  fbink_wait_for_complete(fbfd, LAST_MARKER);
+  
   return EXIT_SUCCESS;
 }
 
@@ -79,12 +80,14 @@ void clearScreen(bool darkModeSet) {
   cls_rect.width = (unsigned short int)0;
   cls_rect.height = (unsigned short int)0;
   fbink_cls(fbfd, &fbink_cfg, &cls_rect, false);
+  fbink_wait_for_complete(fbfd, LAST_MARKER);
 }
 
 int printImage(string path) {
   FBInkConfig fbink_cfg = {0};
 
   return fbink_print_image(fbfd, path.c_str(), 0, 0, &fbink_cfg);
+  fbink_wait_for_complete(fbfd, LAST_MARKER);
 }
 
 void screenshotFbink() {
@@ -109,11 +112,13 @@ void restoreFbink(bool darkMode) {
   }
 
   if (fbink_init(fbfd, &fbink_cfg) < 0) {
-    log("Failed to initialize FBInk in restoreFbink, aborting"), emitter;
+    log("Failed to initialize FBInk in restoreFbink, aborting", emitter);
   }
 
   fbinkRefreshScreen();
+  fbink_wait_for_complete(fbfd, LAST_MARKER);
   fbink_restore(fbfd, &fbink_cfg, &dump);
+  fbink_wait_for_complete(fbfd, LAST_MARKER);
 }
 
 void closeFbink() { fbink_close(fbfd); }

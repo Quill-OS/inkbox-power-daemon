@@ -16,6 +16,9 @@
 #include <unistd.h>
 #include <vector>
 #include <regex>
+#include <signal.h>
+#include <sys/wait.h>
+#include <spawn.h>
 
 #include "devices.h"
 #include "fbink.h"
@@ -73,6 +76,10 @@ mutex occupyLed;
 bool ledState = false;
 // Count for idle
 int countIdle = 0;
+// To avoid checking this every led change
+string ledPath = "none";
+// To collect zombie later
+pid_t connectToWifiPid = 0;
 
 // Functions
 void log(string toLog, string emitter) {
@@ -264,6 +271,8 @@ void prepareVariables() {
   if (fileExists(deepSleepPath) == false) {
     writeFileString(deepSleepPath, "false");
   }
+
+  getLedPath();
 }
 
 string readConfigString(string path) {
@@ -403,3 +412,23 @@ bool readConfigBool(string path) {
     return false;
   }
 }
+
+void posixSpawnWrapper(string path, const char *args[], bool wait, pid_t* pid) {
+  log("Posix spawning " + path, emitter);
+  int status = -1;
+
+  status = posix_spawn(pid, path.c_str(), nullptr, nullptr, const_cast<char **>(args), environ);
+  if(status == 0)
+  {
+    log("Spawning without errors", emitter);
+  }
+  else {
+    log("Error spawning", emitter);
+  }
+  log("Spawned with PID: " + to_string(*pid), emitter);
+  if(wait == true)
+  {
+    waitpid(*pid, 0, 0);
+  }
+}
+

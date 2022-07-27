@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <thread>
 #include <unistd.h>
 
@@ -18,9 +19,11 @@ const std::string emitter = "wifi";
 
 // https://stackoverflow.com/questions/5947286/how-to-load-linux-kernel-modules-from-c-code
 #define deleteModule(name, flags) syscall(__NR_delete_module, name, flags)
-#define initModule(module_image, len, param_values) syscall(__NR_init_module, module_image, len, param_values)
+#define initModule(module_image, len, param_values)                            \
+  syscall(__NR_init_module, module_image, len, param_values)
 
 extern string model;
+extern pid_t connectToWifiPid;
 
 void turnOffWifi() {
   string WIFI_MODULE;
@@ -45,14 +48,28 @@ void turnOffWifi() {
     WIFI_DEV = "eth0";
   }
 
+  // Managing zombies is a bit... problematic
+  log("connectToWifiPid is " + to_string(connectToWifiPid), emitter);
+  if(connectToWifiPid != 0)
+  {
+    killProcess("connect_to_network.sh");
+    log("Collecting zombie connect_to_network.sh", emitter);
+    waitpid(connectToWifiPid, 0, 0);
+    log("Collected zombie connect_to_network.sh", emitter);
+  }
+  else {
+    log("No need to collect zombie process", emitter);
+  }
+
   string wifiDevPath = "/sys/class/net/" + WIFI_DEV + "/operstate";
   if (fileExists(wifiDevPath) == true) {
-    if (readConfigString("/sys/class/net/" + WIFI_DEV + "/operstate") == "up") {
-      if(readConfigString("/data/config/20-sleep_daemon/5-wifiReconnect") == "true") {
+    string wifiState = readConfigString("/sys/class/net/" + WIFI_DEV + "/operstate");
+    // Dormant is when its disconnected from a network, but still on
+    if (wifiState == "up" or wifiState == "dormant") {
+      if (readConfigString("/data/config/20-sleep_daemon/5-wifiReconnect") == "true") {
         writeFileString("/run/was_connected_to_wifi", "true");
       }
 
-      system("killall -9 connect_to_network.sh");
       killProcess("connect_to_network.sh");
       killProcess("dhcpcd");
       killProcess("wpa_supplicant");
@@ -60,11 +77,13 @@ void turnOffWifi() {
 
       if (model == "n705" or model == "n905b" or model == "n905c" or model == "n613" or model == "n437") {
         system("/bin/wlarm_le down");
-      } else {
+      } 
+      else {
         string turnOffInterface = "/sbin/ifconfig " + WIFI_DEV + " down";
         system(turnOffInterface.c_str());
       }
-    } else {
+    } 
+    else {
       log("Wi-Fi is already off, but modules are still live", emitter);
     }
     if (deleteModule(WIFI_MODULE.c_str(), O_NONBLOCK) != 0) {
@@ -74,7 +93,8 @@ void turnOffWifi() {
     if (deleteModule(SDIO_WIFI_PWR_MODULE.c_str(), O_NONBLOCK) != 0) {
       log("Can't unload module: " + SDIO_WIFI_PWR_MODULE, emitter);
     }
-  } else {
+  } 
+  else {
     log("Wi-Fi is turned off", emitter);
   }
 }
@@ -122,8 +142,12 @@ void turnOnWifi() {
             true) {
       string essid = readConfigString("/data/config/17-wifi_connection_information/essid");
       string passphrase = readConfigString("/data/config/17-wifi_connection_information/passphrase");
-      string reconnection = "/usr/local/bin/wifi/connect_to_network.sh " + essid + " " + passphrase + " &";
-      system(reconnection.c_str());
+
+      // if this is needed anywhere else, a function is needed to be created
+      string recconectionScriptPath = "/usr/local/bin/wifi/connect_to_network.sh";
+      const char *args[] = {recconectionScriptPath.c_str(), essid.c_str(), passphrase.c_str(), nullptr};
+
+      posixSpawnWrapper(recconectionScriptPath.c_str(), args, false, &connectToWifiPid);
     }
     remove("/run/was_connected_to_wifi");
   }
@@ -132,8 +156,8 @@ void turnOnWifi() {
 void loadModule(string path) {
   size_t image_size;
   struct stat st;
-  void * image;
-  const char * params = "";
+  void *image;
+  const char *params = "";
   int fd = open(path.c_str(), O_RDONLY);
   puts("init");
   fstat(fd, &st);

@@ -8,6 +8,7 @@ extern string model;
 extern bool ledUsage;
 extern mutex occupyLed;
 extern bool ledState;
+extern string ledPath;
 
 void manageChangeLedState() {
   if (ledUsage == true) {
@@ -16,11 +17,14 @@ void manageChangeLedState() {
 }
 
 void changeLedState() {
-  if (model == "n306") {
-    // Here, it's checking the real one; if some other app wants to control the LED, fine
-    string path = "/sys/devices/platform/leds/leds/GLED/brightness";
-    string state = readConfigStringNoLog(path);
-    int dev = open(path.c_str(), O_RDWR);
+  if(ledPath != "none") {
+    if(ledPath == "ntx")
+    {
+      // Not implemented yet
+    } 
+    else {
+    string state = readConfigStringNoLog(ledPath);
+    int dev = open(ledPath.c_str(), O_RDWR);
     if (state == "1") {
       write(dev, "0", 1);
       ledState = 0;
@@ -29,13 +33,18 @@ void changeLedState() {
       ledState = 1;
     }
     close(dev);
+    }
   }
 }
 
 void setLedState(bool on) {
-  if (model == "n306") {
-    string path = "/sys/devices/platform/leds/leds/GLED/brightness";
-    int dev = open(path.c_str(), O_RDWR);
+  if(ledPath != "none") {
+    if(ledPath == "ntx")
+    {
+      // Not implemented yet
+    } 
+    else {
+    int dev = open(ledPath.c_str(), O_RDWR);
     if (on == true) {
       write(dev, "1", 1);
       ledState = 1;
@@ -44,6 +53,7 @@ void setLedState(bool on) {
       ledState = 0;
     }
     close(dev);
+    }
   }
 }
 
@@ -121,4 +131,36 @@ void setCpuGovernor(string cpuGovernor) {
   int writeStatus = write(dev, cpuGovernor.c_str(), cpuGovernor.length());
   close(dev);
   log("Write status writing to 'scaling_governor' is: " + std::to_string(writeStatus), emitter);
+}
+
+void getLedPath()
+{
+  if(model == "n705" or model == "n905b" or model == "n905c" or model == "n613")
+  {
+    ledPath =  "/sys/class/leds/pmic_ledsb/brightness";
+  }
+  else if(model == "n306") {
+    ledPath = "/sys/class/leds/GLED/brightness";
+  }
+  else if(model == "bpi") {
+    ledPath = "/sys/devices/platform/leds/leds/bpi:red:pwr/brightness";
+  }
+  else if(model == "kt") {
+    ledPath = "/sys/class/leds/pmic_ledsb/brightness";
+  }
+  else if(model == "n236" or model == "n437") {
+    /*
+    // ntx things
+    int light;
+        if((light = open("/dev/ntx_io", O_RDWR)) == -1) {
+          fprintf(stderr, "Error opening ntx_io device\n");
+        }
+        ioctl(light, 127, 0);
+    }
+    */
+    ledPath = "ntx";
+  } 
+  else {
+    ledPath = "/sys/class/leds/pmic_ledsb/brightness";
+  }
 }

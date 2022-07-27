@@ -84,7 +84,10 @@ void afterSleep() {
 
   CEA();
   if (dieAfter == false) {
-    system("/sbin/hwclock --hctosys -u");
+    string hwclockPath = "/sbin/hwclock";
+    const char *args[] = {hwclockPath.c_str(), "--hctosys", "-u", nullptr};
+    int fakePid = 0;
+    posixSpawnWrapper(hwclockPath.c_str(), args, true, &fakePid);
     clearScreen(darkMode);
   }
 

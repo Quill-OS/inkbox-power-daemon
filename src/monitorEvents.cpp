@@ -45,7 +45,7 @@ void startMonitoringDev() {
     log("Grabbed /dev/input/event0", emitter);
   }
   else {
-    log("Failed to grab /dev/input/event0", emitter);
+    log("ERROR: Failed to grab /dev/input/event0", emitter);
   }
 
   if (rc < 0) {

@@ -25,15 +25,20 @@ int getPidByName(string taskName) {
   string proc = "/proc/";
   dp = opendir(proc.c_str());
   while ((entry = readdir(dp))) {
-    ifstream file(proc + entry->d_name + "/status");
+    // cmdline is more accurate, status sometimes is buggy?
+    ifstream file(proc + entry->d_name + "/cmdline");
     string firstLine;
     getline(file, firstLine);
     // https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
-    if (firstLine.find(taskName) != std::string::npos) {
+    if(normalContains(firstLine, taskName) == true) {
       log("Found PID of " + taskName + ": " + entry->d_name, emitter);
-      return stoi(entry->d_name);
+      // after closing dir its impossible to call entry->d_name
+      int intToReturn = stoi(entry->d_name);
+      closedir(dp);
+      return intToReturn;
     }
   }
+  log("Couldn't find PID of " + taskName, emitter);
   closedir(dp);
   return EXIT_FAILURE;
 }
@@ -86,6 +91,10 @@ void unfreezeApps() {
   }
 }
 
-void tellAppsToFreeze() {}
-
-void killProcess(string name) { kill(getPidByName(name), 9); }
+void killProcess(string name) {
+  int pid = getPidByName(name);
+  if(pid != -1)
+  {
+    kill(pid, 9);
+  }
+}

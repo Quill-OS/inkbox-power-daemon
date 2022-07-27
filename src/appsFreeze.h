@@ -11,7 +11,6 @@ void freezeApps();
 string getRunningUserApp();
 int getPidByName(string taskName);
 void unfreezeApps();
-void tellAppsToFreeze();
 void killProcess(string name);
 
 #endif
