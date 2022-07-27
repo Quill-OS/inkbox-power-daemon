@@ -112,8 +112,8 @@ void restoreFbink(bool darkMode) {
     log("Failed to initialize FBInk in restoreFbink, aborting"), emitter;
   }
 
-  fbink_restore(fbfd, &fbink_cfg, &dump);
   fbinkRefreshScreen();
+  fbink_restore(fbfd, &fbink_cfg, &dump);
 }
 
 void closeFbink() { fbink_close(fbfd); }

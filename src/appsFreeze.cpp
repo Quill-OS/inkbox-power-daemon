@@ -38,7 +38,7 @@ int getPidByName(string taskName) {
   return EXIT_FAILURE;
 }
 
-// /data/config/20-sleep_daemon/appList.txt
+// /data/config/20-sleep_daemon/appsList
 vector<string> getBuiltInAppsList(string path) {
   vector<string> vectorToReturn;
   vector<string> vectorToParse;
@@ -62,8 +62,7 @@ string getRunningUserApp() {
 void freezeApps() {
   vector<int> pidVector;
 
-  vector<string> builtInApps =
-      getBuiltInAppsList("/data/config/20-sleep_daemon/appList.txt");
+  vector<string> builtInApps = getBuiltInAppsList("/data/config/20-sleep_daemon/appsList");
 
   for (string &app : builtInApps) {
     pidVector.push_back(getPidByName(app));

@@ -156,7 +156,7 @@ void goSleep() {
           continueSleeping = true;
         } else {
           // Because the charger doesn't trigger anything in monitorEvents
-          log("The device woke up becouse of a charger, but option '4 - chargerWakeUp' is disabled, so it will continue to wake up", emitter);
+          log("The device woke up because of a charger, but option '4 - chargerWakeUp' is disabled, so it will continue to wake up", emitter);
         }
       }
     }

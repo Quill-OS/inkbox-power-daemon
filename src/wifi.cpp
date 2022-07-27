@@ -48,7 +48,9 @@ void turnOffWifi() {
   string wifiDevPath = "/sys/class/net/" + WIFI_DEV + "/operstate";
   if (fileExists(wifiDevPath) == true) {
     if (readConfigString("/sys/class/net/" + WIFI_DEV + "/operstate") == "up") {
-      writeFileString("/run/was_connected_to_wifi", "true");
+      if(readConfigString("/data/config/20-sleep_daemon/5-wifiReconnect") == "true") {
+        writeFileString("/run/was_connected_to_wifi", "true");
+      }
 
       system("killall -9 connect_to_network.sh");
       killProcess("connect_to_network.sh");
@@ -73,7 +75,7 @@ void turnOffWifi() {
       log("Can't unload module: " + SDIO_WIFI_PWR_MODULE, emitter);
     }
   } else {
-    log("Is Wi-Fi already off?", emitter);
+    log("Wi-Fi is turned off", emitter);
   }
 }
 

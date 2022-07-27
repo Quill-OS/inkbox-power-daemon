@@ -178,7 +178,7 @@ void startWatchdog() {
           sleep_mtx.unlock();
         }
       } else {
-        log("sleepJob is something else ( Propably skip ). Changing it to Nothing", emitter);
+        log("sleepJob is something else (propably 'Skip'). Changing it to 'Nothing'", emitter);
         sleepJob = Nothing;
         sleep_mtx.unlock();
       }
