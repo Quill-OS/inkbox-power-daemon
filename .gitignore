@@ -38,7 +38,7 @@ CmakeFIles
 # clangd
 .cache
 
-# mine
+# Project specific
 boost_1_79_0
 lib/*
 

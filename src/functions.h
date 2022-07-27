@@ -18,6 +18,8 @@ bool dirExists(string path);
 string executeCommand(string command);
 string normalReplace(string mainString, string strToLookFor, string replacement);
 string readConfigStringNoLog(string path);
+bool normalContains(string stringToCheck, string stringToLookFor);
+bool readConfigBool(string path);
 
 enum goSleepCondition
 {

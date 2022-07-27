@@ -40,6 +40,13 @@ void startMonitoringDev() {
 
   int fd = open("/dev/input/event0", O_RDONLY | O_NONBLOCK);
   int rc = libevdev_new_from_fd(fd, &dev);
+  // becouse user apps and xorg apps grabs the device for some reason:
+  if(libevdev_grab(dev, LIBEVDEV_GRAB) == 0) {
+    log("Grabbed /dev/input/event0", emitter);
+  }
+  else {
+    log("Failed to grab /dev/input/event0", emitter);
+  }
 
   if (rc < 0) {
     log("Failed to init libevdev: " + (string)strerror(-rc), emitter);

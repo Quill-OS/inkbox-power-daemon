@@ -88,19 +88,20 @@ void startIdleSleep() {
               newSleepCondition_mtx.unlock();
             } else {
               currentActiveThread_mtx.unlock();
-              log("idleSleep: Not going to sleep because of currentActiveThread", emitter);
+              log("Not going to sleep because of currentActiveThread", emitter);
             }
           } else {
-            log("idleSleep: Not going to sleep because of watchdogNextStep", emitter);
+            log("Not going to sleep because of watchdogNextStep", emitter);
           }
         } else {
           sleep_mtx.unlock();
-          log("idleSleep: Not going to sleep because of sleepJob", emitter);
+          log("Not going to sleep because of sleepJob", emitter);
         }
       }
     }
 
     if (libevdev_has_event_pending(dev) == 1) {
+      log("Received touch input, resetting timer", emitter);
       countIdle = 0;
       while (libevdev_has_event_pending(dev) == 1) {
         rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);

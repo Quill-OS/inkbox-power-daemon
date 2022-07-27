@@ -146,8 +146,9 @@ void prepareVariables() {
   // 1 - cinematicBrightnessDelayMs
   string cinematicPath = "/data/config/20-sleep_daemon/1-cinematicBrightnessDelayMs";
   if (fileExists(cinematicPath) == true) {
-    cinematicBrightnessDelayMs = stoi(readConfigString(cinematicPath));
-  } else {
+    cinematicBrightnessDelayMs = stoi(normalReplace(readConfigString(cinematicPath), "\n", ""));
+  } 
+  else {
     writeFileString(cinematicPath, "50");
     cinematicBrightnessDelayMs = 50;
   }
@@ -157,7 +158,8 @@ void prepareVariables() {
   if (fileExists(cpuGovernorPath) == true) {
     cpuGovernorToSet = readConfigString(cpuGovernorPath);
     setCpuGovernor(cpuGovernorToSet);
-  } else {
+  } 
+  else {
     writeFileString(cpuGovernorPath, "ondemand");
     cpuGovernorToSet = "ondemand";
   }
@@ -165,13 +167,14 @@ void prepareVariables() {
   // 3 - whenChargerSleep
   string whenChargerSleepPath = "/data/config/20-sleep_daemon/3-whenChargerSleep";
   if (fileExists(whenChargerSleepPath) == true) {
-    string boolToConvert = readConfigString(whenChargerSleepPath);
-    if (boolToConvert == "true") {
+    if(readConfigBool(whenChargerSleepPath) == true)
+    {
       whenChargerSleep = true;
     } else {
       whenChargerSleep = false;
     }
-  } else {
+  } 
+  else {
     // Those devices have problems when going to sleep with a charger
     if (isDeviceChargerBug() == true) {
       writeFileString(whenChargerSleepPath, "false");
@@ -185,14 +188,15 @@ void prepareVariables() {
   // 4 - chargerWakeUp
   string chargerWakeUpPath = "/data/config/20-sleep_daemon/4-chargerWakeUp";
   if (fileExists(chargerWakeUpPath) == true) {
-    // TODO: Write a function for this
-    string boolToConvert = readConfigString(chargerWakeUpPath);
-    if (boolToConvert == "true") {
+    if(readConfigBool(chargerWakeUpPath) == true)
+    {
       chargerWakeUp = true;
-    } else {
+    } 
+    else {
       chargerWakeUp = false;
     }
-  } else {
+  } 
+  else {
     writeFileString(chargerWakeUpPath, "false");
     chargerWakeUp = false;
   }
@@ -200,13 +204,14 @@ void prepareVariables() {
   // 5 - wifiReconnect
   string reconnectWifiPath = "/data/config/20-sleep_daemon/5-wifiReconnect";
   if (fileExists(reconnectWifiPath) == true) {
-    string boolToConvert = readConfigString(reconnectWifiPath);
-    if (boolToConvert == "true") {
+    if(readConfigBool(reconnectWifiPath) == true) {
       reconnectWifi = true;
-    } else {
+    } 
+    else {
       reconnectWifi = false;
     }
-  } else {
+  } 
+  else {
     writeFileString(reconnectWifiPath, "true");
     reconnectWifi = true;
   }
@@ -214,13 +219,14 @@ void prepareVariables() {
   // 6 - ledUsage
   string ledUsagePath = "/data/config/20-sleep_daemon/6-ledUsage";
   if (fileExists(ledUsagePath) == true) {
-    string boolToConvert = readConfigString(ledUsagePath);
-    if (boolToConvert == "true") {
+    if(readConfigBool(ledUsagePath) == true) {
       ledUsage = true;
-    } else {
+    } 
+    else {
       ledUsage = false;
     }
-  } else {
+  }
+  else {
     writeFileString(ledUsagePath, "false");
     reconnectWifi = false;
   }
@@ -229,10 +235,10 @@ void prepareVariables() {
   // 7 - idleSleep
   string idleSleepTimePath = "/data/config/20-sleep_daemon/7-idleSleep";
   if (fileExists(idleSleepTimePath) == true) {
-    string intToConvert = readConfigString(idleSleepTimePath);
-    intToConvert = normalReplace(intToConvert, "\n", "");
+    string intToConvert = normalReplace(readConfigString(idleSleepTimePath), "\n", "");
     idleSleepTime = stoi(intToConvert);
-  } else {
+  }
+  else {
     writeFileString(idleSleepTimePath, "60");
     idleSleepTime = 60;
   }
@@ -240,18 +246,20 @@ void prepareVariables() {
   // 8 - customCase
   string customCasePath = "/data/config/20-sleep_daemon/8-customCase";
   if (fileExists(customCasePath) == true) {
-    string boolToConvert = readConfigString(customCasePath);
-    if (boolToConvert == "true") {
+    if(readConfigBool(customCasePath) == true) {
       customCase = true;
-    } else {
+    } 
+    else {
       customCase = false;
     }
-  } else {
+  } 
+  else {
     writeFileString(customCasePath, "false");
     customCase = false;
   }
 
   // 9 - deepSleep
+  // TODO: this will be remade later
   string deepSleepPath = "/data/config/20-sleep_daemon/9-deepSleep";
   if (fileExists(deepSleepPath) == false) {
     writeFileString(deepSleepPath, "false");
@@ -359,4 +367,39 @@ string readConfigStringNoLog(string path) {
   }
   indata.close();
   return returnData;
+}
+
+bool normalContains(string stringToCheck, string stringToLookFor)
+{
+  if(stringToCheck.find(stringToLookFor) != std::string::npos)
+  {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool readConfigBool(string path) {
+  ifstream indata;
+  string stringData;
+  indata.open(path);
+  if (!indata) {
+    log("Couldn't read config file: " + path, emitter);
+    return "none";
+  }
+  indata >> stringData;
+  while (!indata.eof()) {
+    indata >> stringData;
+  }
+  indata.close();
+
+  // this approach doesn't care about special characters ('\n')
+  if(normalContains(stringData, "true") == true)
+  {
+    log("Path: " + path + " contains a true bool", emitter);\
+    return true;
+  } else {
+    log("Path: " + path + " contains a false bool", emitter);
+    return false;
+  }
 }

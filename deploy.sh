@@ -8,7 +8,8 @@ export PATH=$PATH:/home/build/inkbox/kernel/toolchain/armv7l-linux-musleabihf-cr
 rm -rf build
 mkdir build
 cd build
-cmake ../ -DCMAKE_TOOLCHAIN_FILE=../kobo.cmake
+# https://clangd.llvm.org/installation.html#project-setup
+cmake ../ -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_TOOLCHAIN_FILE=../kobo.cmake
 cmake --build .
 cd ..
 
