@@ -51,7 +51,7 @@ void startMonitoringDev() {
 
   if (rc < 0) {
     log("Failed to init libevdev: " + (string)strerror(-rc), emitter);
-    // Without it
+    // Fatal error
     exit(EXIT_FAILURE);
   }
 

@@ -129,18 +129,16 @@ void restoreFbDepth() {
   const FBInkConfig fbink_cfg = {0};
   if (model == "n437" or model == "kt") {
     if (fileExists("/kobo/tmp/inkbox_running") == true) {
-      // GRAYSCALE_8BIT = 1?
-      // In Bits? so as normal?...
+      // Set bitdepth to 8 BPP
       fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 8, 1, &fbink_cfg);
-      //system("/opt/bin/fbink/fbdepth -d 8");
     } else {
       // X11 is running, elsewise there is something wrong ...
       if (model == "kt") {
+        // Set bitdepth to 32 BPP
         fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 32, 1, &fbink_cfg);
-        //system("/opt/bin/fbink/fbdepth -d 32");
       } else {
+        // Set bitdepth to 16 BPP
         fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 16, 1, &fbink_cfg);
-        //system("/opt/bin/fbink/fbdepth -d 16");
       }
     }
   }

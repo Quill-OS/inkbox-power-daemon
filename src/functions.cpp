@@ -296,7 +296,6 @@ void writeFileString(string path, string stringToWrite) {
   file.open(path, ios::out);
   if (!file) {
     log("File could not be created at path: " + path, emitter);
-    //exit(EXIT_FAILURE);
   } 
   else {
     file << stringToWrite;
@@ -309,7 +308,6 @@ string readFile(string path) {
   ifstream input_file(path);
   if (!input_file.is_open()) {
     log("Could not open file: " + path, emitter);
-    //exit(EXIT_FAILURE);
     return "";
   }
   return string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
