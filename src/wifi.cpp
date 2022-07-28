@@ -19,7 +19,8 @@ const std::string emitter = "wifi";
 
 // https://stackoverflow.com/questions/5947286/how-to-load-linux-kernel-modules-from-c-code
 #define deleteModule(name, flags) syscall(__NR_delete_module, name, flags)
-#define initModule(module_image, len, param_values) syscall(__NR_init_module, module_image, len, param_values)
+#define initModule(module_image, len, param_values)                            \
+  syscall(__NR_init_module, module_image, len, param_values)
 
 extern string model;
 extern pid_t connectToWifiPid;
@@ -33,7 +34,8 @@ void turnOffWifi() {
     WIFI_MODULE = "8189fs";
     SDIO_WIFI_PWR_MODULE = "sdio_wifi_pwr";
     WIFI_DEV = "eth0";
-  } else if (model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
+  } else if (model == "n705" or model == "n905b" or model == "n905c" or
+             model == "n613") {
     WIFI_MODULE = "dhd";
     SDIO_WIFI_PWR_MODULE = "sdio_wifi_pwr";
     WIFI_DEV = "eth0";
@@ -49,22 +51,24 @@ void turnOffWifi() {
 
   // Managing zombies is a bit... problematic
   log("connectToWifiPid is " + to_string(connectToWifiPid), emitter);
-  if(connectToWifiPid != 0) {
+  if (connectToWifiPid != 0) {
     killProcess("connect_to_network.sh");
     log("Collecting connect_to_network.sh zombie", emitter);
     waitpid(connectToWifiPid, 0, 0);
     log("Collected connect_to_network.sh zombie", emitter);
-  }
-  else {
+  } else {
     log("No need to collect zombie process", emitter);
   }
 
   string wifiDevPath = "/sys/class/net/" + WIFI_DEV + "/operstate";
   if (fileExists(wifiDevPath) == true) {
-    string wifiState = readConfigString("/sys/class/net/" + WIFI_DEV + "/operstate");
-    // 'dormant' is when the Wi-Fi interface is disconnected from a network, but is still on
+    string wifiState =
+        readConfigString("/sys/class/net/" + WIFI_DEV + "/operstate");
+    // 'dormant' is when the Wi-Fi interface is disconnected from a network, but
+    // is still on
     if (wifiState == "up" or wifiState == "dormant") {
-      if (readConfigString("/data/config/20-sleep_daemon/5-wifiReconnect") == "true") {
+      if (readConfigString("/data/config/20-sleep_daemon/5-wifiReconnect") ==
+          "true") {
         writeFileString("/run/was_connected_to_wifi", "true");
       }
 
@@ -74,11 +78,16 @@ void turnOffWifi() {
       killProcess("udhcpc");
 
       if (model == "n705" or model == "n905b" or model == "n905c" or model == "n613" or model == "n437") {
-        system("/bin/wlarm_le down");
+        string wlarm_lePath = "/bin/wlarm_le";
+        const char *args[] = {wlarm_lePath.c_str(), "down", nullptr};
+        int fakePid = 0;
+        posixSpawnWrapper(wlarm_lePath.c_str(), args, true, &fakePid);
       } 
       else {
-        string turnOffInterface = "/sbin/ifconfig " + WIFI_DEV + " down";
-        system(turnOffInterface.c_str());
+        string ifconfigPath = "/sbin/ifconfig";
+        const char *args[] = {ifconfigPath.c_str(), WIFI_DEV.c_str(), "down", nullptr};
+        int fakePid = 0;
+        posixSpawnWrapper(ifconfigPath.c_str(), args, true, &fakePid);
       }
     } 
     else {
@@ -106,7 +115,8 @@ void turnOnWifi() {
     WIFI_MODULE = "/modules/wifi/8189fs.ko";
     SDIO_WIFI_PWR_MODULE = "/modules/drivers/mmc/card/sdio_wifi_pwr.ko";
     WIFI_DEV = "eth0";
-  } else if (model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
+  } else if (model == "n705" or model == "n905b" or model == "n905c" or
+             model == "n613") {
     WIFI_MODULE = "/modules/dhd.ko";
     SDIO_WIFI_PWR_MODULE = "/modules/sdio_wifi_pwr.ko";
     WIFI_DEV = "eth0";
@@ -126,11 +136,18 @@ void turnOnWifi() {
       loadModule(SDIO_WIFI_PWR_MODULE);
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-      string wifiInterfaceUp = "/sbin/ifconfig " + WIFI_DEV + " up";
-      system(wifiInterfaceUp.c_str());
-
+      
       if (model == "n705" or model == "n905b" or model == "n905c" or model == "n613" or model == "n437") {
-        system("/bin/wlarm_le up");
+        string wlarm_lePath = "/bin/wlarm_le";
+        const char *args[] = {wlarm_lePath.c_str(), "up", nullptr};
+        int fakePid = 0;
+        posixSpawnWrapper(wlarm_lePath.c_str(), args, true, &fakePid);
+      }
+      else {
+        string ifconfigPath = "/sbin/ifconfig";
+        const char *args[] = {ifconfigPath.c_str(), WIFI_DEV.c_str(), "up", nullptr};
+        int fakePid = 0;
+        posixSpawnWrapper(ifconfigPath.c_str(), args, true, &fakePid);
       }
     }
 
@@ -138,14 +155,19 @@ void turnOnWifi() {
             true and
         fileExists("/data/config/17-wifi_connection_information/passphrase") ==
             true) {
-      string essid = readConfigString("/data/config/17-wifi_connection_information/essid");
-      string passphrase = readConfigString("/data/config/17-wifi_connection_information/passphrase");
+      string essid =
+          readConfigString("/data/config/17-wifi_connection_information/essid");
+      string passphrase = readConfigString(
+          "/data/config/17-wifi_connection_information/passphrase");
 
       // If this is needed anywhere else, a function needs to be created
-      string reconnectionScriptPath = "/usr/local/bin/wifi/connect_to_network.sh";
-      const char *args[] = {reconnectionScriptPath.c_str(), essid.c_str(), passphrase.c_str(), nullptr};
+      string reconnectionScriptPath =
+          "/usr/local/bin/wifi/connect_to_network.sh";
+      const char *args[] = {reconnectionScriptPath.c_str(), essid.c_str(),
+                            passphrase.c_str(), nullptr};
 
-      posixSpawnWrapper(reconnectionScriptPath.c_str(), args, false, &connectToWifiPid);
+      posixSpawnWrapper(reconnectionScriptPath.c_str(), args, false,
+                        &connectToWifiPid);
     }
     remove("/run/was_connected_to_wifi");
   }
@@ -164,7 +186,7 @@ void loadModule(string path) {
   close(fd);
   if (initModule(image, image_size, params) != 0) {
     log("Couldn't init module " + path, emitter);
-    exit(EXIT_FAILURE);
+    // exit(EXIT_FAILURE);
   }
   free(image);
 }

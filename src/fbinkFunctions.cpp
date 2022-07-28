@@ -20,7 +20,7 @@ void initFbink() {
   fbfd = fbink_open();
   if (fbfd == -1) {
     log("Failed to open the framebuffer", emitter);
-    exit(EXIT_FAILURE);
+    //exit(EXIT_FAILURE);
   }
   log("Loaded FBInk version: " + (string)fbink_version(), emitter);
 }
@@ -71,7 +71,7 @@ void clearScreen(bool darkModeSet) {
 
   if (fbink_init(fbfd, &fbink_cfg) < 0) {
     log("Failed to initialize FBInk, aborting", emitter);
-    exit(EXIT_FAILURE);
+    //exit(EXIT_FAILURE);
   }
 
   FBInkRect cls_rect = {0};

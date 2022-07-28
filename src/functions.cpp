@@ -295,11 +295,10 @@ void writeFileString(string path, string stringToWrite) {
   fstream file;
   file.open(path, ios::out);
   if (!file) {
-    string message = "File could not be created at path: ";
-    message.append(path);
-    log(message, emitter);
-    exit(EXIT_FAILURE);
-  } else {
+    log("File could not be created at path: " + path, emitter);
+    //exit(EXIT_FAILURE);
+  } 
+  else {
     file << stringToWrite;
     file.close();
     log("Wrote: \"" + stringToWrite + "\" to: " + path, emitter);
@@ -309,10 +308,9 @@ void writeFileString(string path, string stringToWrite) {
 string readFile(string path) {
   ifstream input_file(path);
   if (!input_file.is_open()) {
-    string message = "Could not open file: ";
-    message.append(path);
-    log(message, emitter);
-    exit(EXIT_FAILURE);
+    log("Could not open file: " + path, emitter);
+    //exit(EXIT_FAILURE);
+    return "";
   }
   return string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 }

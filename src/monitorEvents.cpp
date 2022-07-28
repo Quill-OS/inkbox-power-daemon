@@ -1,4 +1,5 @@
 #include <chrono>
+#include <cstdlib>
 #include <iostream>
 #include <mutex>
 #include <string>
@@ -50,7 +51,8 @@ void startMonitoringDev() {
 
   if (rc < 0) {
     log("Failed to init libevdev: " + (string)strerror(-rc), emitter);
-    exit(1);
+    // Without it
+    exit(EXIT_FAILURE);
   }
 
   log("Input device name: " + (string)libevdev_get_name(dev), emitter);
