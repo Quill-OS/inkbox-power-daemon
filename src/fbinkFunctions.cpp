@@ -124,16 +124,23 @@ void restoreFbink(bool darkMode) {
 void closeFbink() { fbink_close(fbfd); }
 
 void restoreFbDepth() {
-  // TODO: Use execve() family instead of system()
+  // Not tested
+  // https://github.com/NiLuJe/FBInk/blob/9c1be635137ee5d8db9f8d5516aad1c818abc31d/fbink.h#L1287
+  const FBInkConfig fbink_cfg = {0};
   if (model == "n437" or model == "kt") {
     if (fileExists("/kobo/tmp/inkbox_running") == true) {
-      system("/opt/bin/fbink/fbdepth -d 8");
+      // GRAYSCALE_8BIT = 1?
+      // In Bits? so as normal?...
+      fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 8, 1, &fbink_cfg);
+      //system("/opt/bin/fbink/fbdepth -d 8");
     } else {
       // X11 is running, elsewise there is something wrong ...
       if (model == "kt") {
-        system("/opt/bin/fbink/fbdepth -d 32");
+        fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 32, 1, &fbink_cfg);
+        //system("/opt/bin/fbink/fbdepth -d 32");
       } else {
-        system("/opt/bin/fbink/fbdepth -d 16");
+        fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 16, 1, &fbink_cfg);
+        //system("/opt/bin/fbink/fbdepth -d 16");
       }
     }
   }
