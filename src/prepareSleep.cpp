@@ -149,7 +149,7 @@ void sleepScreen() {
     }
     if (imageList.empty() == false) {
       int vectorSize = imageList.size();
-      log("screensaver count is " + to_string(vectorSize));
+      log("Screensaver count is " + to_string(vectorSize));
       srand(time(0));
       int randomInt = rand() % vectorSize;
       log("Choosing screensaver at: " + to_string(randomInt));

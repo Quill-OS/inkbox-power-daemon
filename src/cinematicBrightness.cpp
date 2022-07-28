@@ -17,23 +17,25 @@ extern string model;
 extern int cinematicBrightnessDelayMs;
 
 void setBrightnessCin(int levelToSet, int currentLevel) {
-  int device;
-  if ((device = open("/dev/ntx_io", O_RDWR)) == -1) {
-    log("Error on opening ntx device", emitter);
-    exit(EXIT_FAILURE);
-  }
-  chrono::milliseconds timespan(cinematicBrightnessDelayMs);
-  while (currentLevel != levelToSet) {
-    if (currentLevel < levelToSet) {
-      currentLevel = currentLevel + 1;
-    } else {
-      currentLevel = currentLevel - 1;
+  if(model != "n705" && model != "n905b" && model != "n905c" && model != "kt") {
+    int device;
+    if ((device = open("/dev/ntx_io", O_RDWR)) == -1) {
+      log("Error on opening ntx device", emitter);
+      exit(EXIT_FAILURE);
     }
+    chrono::milliseconds timespan(cinematicBrightnessDelayMs);
+    while (currentLevel != levelToSet) {
+      if (currentLevel < levelToSet) {
+        currentLevel = currentLevel + 1;
+      } else {
+        currentLevel = currentLevel - 1;
+      }
 
-    setBrightness(device, currentLevel);
-    this_thread::sleep_for(timespan);
+      setBrightness(device, currentLevel);
+      this_thread::sleep_for(timespan);
+    }
+    close(device);
   }
-  close(device);
 }
 
 void saveBrightness(int level) {
@@ -58,6 +60,11 @@ int getBrightness() {
   } else if (model == "n236" or model == "n437") {
     return stoi(readConfigString("/sys/class/backlight/mxc_msp430_fl.0/brightness"));
   } else {
-    return stoi(readConfigString("/sys/class/backlight/mxc_msp430.0/actual_brightness"));
+    if(model != "n705" && model != "n905b" && model != "n905c" && model != "kt") {
+      return stoi(readConfigString("/sys/class/backlight/mxc_msp430.0/actual_brightness"));
+    }
+    else {
+      return 0;
+    }
   }
 }
