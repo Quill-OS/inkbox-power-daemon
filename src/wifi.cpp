@@ -19,8 +19,7 @@ const std::string emitter = "wifi";
 
 // https://stackoverflow.com/questions/5947286/how-to-load-linux-kernel-modules-from-c-code
 #define deleteModule(name, flags) syscall(__NR_delete_module, name, flags)
-#define initModule(module_image, len, param_values)                            \
-  syscall(__NR_init_module, module_image, len, param_values)
+#define initModule(module_image, len, param_values) syscall(__NR_init_module, module_image, len, param_values)
 
 extern string model;
 extern pid_t connectToWifiPid;
@@ -34,16 +33,19 @@ void turnOffWifi() {
     WIFI_MODULE = "8189fs";
     SDIO_WIFI_PWR_MODULE = "sdio_wifi_pwr";
     WIFI_DEV = "eth0";
-  } else if (model == "n705" or model == "n905b" or model == "n905c" or
+  } 
+  else if (model == "n705" or model == "n905b" or model == "n905c" or
              model == "n613") {
     WIFI_MODULE = "dhd";
     SDIO_WIFI_PWR_MODULE = "sdio_wifi_pwr";
     WIFI_DEV = "eth0";
-  } else if (model == "n437") {
+  } 
+  else if (model == "n437") {
     WIFI_MODULE = "bcmdhd";
     SDIO_WIFI_PWR_MODULE = "sdio_wifi_pwr";
     WIFI_DEV = "wlan0";
-  } else {
+  } 
+  else {
     WIFI_MODULE = "dhd";
     SDIO_WIFI_PWR_MODULE = "sdio_wifi_pwr";
     WIFI_DEV = "eth0";
@@ -56,19 +58,17 @@ void turnOffWifi() {
     log("Collecting connect_to_network.sh zombie", emitter);
     waitpid(connectToWifiPid, 0, 0);
     log("Collected connect_to_network.sh zombie", emitter);
-  } else {
+  } 
+  else {
     log("No need to collect zombie process", emitter);
   }
 
   string wifiDevPath = "/sys/class/net/" + WIFI_DEV + "/operstate";
   if (fileExists(wifiDevPath) == true) {
-    string wifiState =
-        readConfigString("/sys/class/net/" + WIFI_DEV + "/operstate");
-    // 'dormant' is when the Wi-Fi interface is disconnected from a network, but
-    // is still on
+    string wifiState = readConfigString("/sys/class/net/" + WIFI_DEV + "/operstate");
+    // 'dormant' is when the Wi-Fi interface is disconnected from a network, but is still on
     if (wifiState == "up" or wifiState == "dormant") {
-      if (readConfigString("/data/config/20-sleep_daemon/5-wifiReconnect") ==
-          "true") {
+      if (readConfigString("/data/config/20-sleep_daemon/5-wifiReconnect") == "true") {
         writeFileString("/run/was_connected_to_wifi", "true");
       }
 
@@ -115,16 +115,18 @@ void turnOnWifi() {
     WIFI_MODULE = "/modules/wifi/8189fs.ko";
     SDIO_WIFI_PWR_MODULE = "/modules/drivers/mmc/card/sdio_wifi_pwr.ko";
     WIFI_DEV = "eth0";
-  } else if (model == "n705" or model == "n905b" or model == "n905c" or
-             model == "n613") {
+  } 
+  else if (model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
     WIFI_MODULE = "/modules/dhd.ko";
     SDIO_WIFI_PWR_MODULE = "/modules/sdio_wifi_pwr.ko";
     WIFI_DEV = "eth0";
-  } else if (model == "n437") {
+  } 
+  else if (model == "n437") {
     WIFI_MODULE = "/modules/wifi/bcmdhd.ko";
     SDIO_WIFI_PWR_MODULE = "/modules/drivers/mmc/card/sdio_wifi_pwr.ko";
     WIFI_DEV = "wlan0";
-  } else {
+  } 
+  else {
     WIFI_MODULE = "/modules/dhd.ko";
     SDIO_WIFI_PWR_MODULE = "/modules/sdio_wifi_pwr.ko";
     WIFI_DEV = "eth0";
@@ -151,23 +153,16 @@ void turnOnWifi() {
       }
     }
 
-    if (fileExists("/data/config/17-wifi_connection_information/essid") ==
-            true and
-        fileExists("/data/config/17-wifi_connection_information/passphrase") ==
-            true) {
-      string essid =
-          readConfigString("/data/config/17-wifi_connection_information/essid");
-      string passphrase = readConfigString(
-          "/data/config/17-wifi_connection_information/passphrase");
+    if (fileExists("/data/config/17-wifi_connection_information/essid") == true and
+        fileExists("/data/config/17-wifi_connection_information/passphrase") == true) {
+
+      string essid = readConfigString("/data/config/17-wifi_connection_information/essid");
+      string passphrase = readConfigString("/data/config/17-wifi_connection_information/passphrase");
 
       // If this is needed anywhere else, a function needs to be created
-      string reconnectionScriptPath =
-          "/usr/local/bin/wifi/connect_to_network.sh";
-      const char *args[] = {reconnectionScriptPath.c_str(), essid.c_str(),
-                            passphrase.c_str(), nullptr};
-
-      posixSpawnWrapper(reconnectionScriptPath.c_str(), args, false,
-                        &connectToWifiPid);
+      string reconnectionScriptPath = "/usr/local/bin/wifi/connect_to_network.sh";
+      const char *args[] = {reconnectionScriptPath.c_str(), essid.c_str(), passphrase.c_str(), nullptr};
+      posixSpawnWrapper(reconnectionScriptPath.c_str(), args, false, &connectToWifiPid);
     }
     remove("/run/was_connected_to_wifi");
   }
