@@ -18,41 +18,39 @@ void manageChangeLedState() {
 
 void changeLedState() {
   if(ledPath != "none") {
-    if(ledPath == "ntx")
-    {
+    if(ledPath == "ntx") {
       // Not implemented yet
     } 
     else {
-    string state = readConfigStringNoLog(ledPath);
-    int dev = open(ledPath.c_str(), O_RDWR);
-    if (state == "1") {
-      write(dev, "0", 1);
-      ledState = 0;
-    } else {
-      write(dev, "1", 1);
-      ledState = 1;
-    }
-    close(dev);
+      string state = readConfigStringNoLog(ledPath);
+      int dev = open(ledPath.c_str(), O_RDWR);
+      if (state == "1") {
+        write(dev, "0", 1);
+        ledState = 0;
+      } else {
+        write(dev, "1", 1);
+        ledState = 1;
+      }
+      close(dev);
     }
   }
 }
 
 void setLedState(bool on) {
   if(ledPath != "none") {
-    if(ledPath == "ntx")
-    {
+    if(ledPath == "ntx") {
       // Not implemented yet
     } 
     else {
-    int dev = open(ledPath.c_str(), O_RDWR);
-    if (on == true) {
-      write(dev, "1", 1);
-      ledState = 1;
-    } else {
-      write(dev, "0", 1);
-      ledState = 0;
-    }
-    close(dev);
+      int dev = open(ledPath.c_str(), O_RDWR);
+      if (on == true) {
+        write(dev, "1", 1);
+        ledState = 1;
+      } else {
+        write(dev, "0", 1);
+        ledState = 0;
+      }
+      close(dev);
     }
   }
 }
@@ -135,8 +133,7 @@ void setCpuGovernor(string cpuGovernor) {
 
 void getLedPath()
 {
-  if(model == "n705" or model == "n905b" or model == "n905c" or model == "n613")
-  {
+  if(model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
     ledPath =  "/sys/class/leds/pmic_ledsb/brightness";
   }
   else if(model == "n306") {
@@ -150,7 +147,7 @@ void getLedPath()
   }
   else if(model == "n236" or model == "n437") {
     /*
-    // ntx things
+    // Netronix things
     int light;
         if((light = open("/dev/ntx_io", O_RDWR)) == -1) {
           fprintf(stderr, "Error opening ntx_io device\n");

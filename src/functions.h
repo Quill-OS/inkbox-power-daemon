@@ -20,9 +20,9 @@ string normalReplace(string mainString, string strToLookFor, string replacement)
 string readConfigStringNoLog(string path);
 bool normalContains(string stringToCheck, string stringToLookFor);
 bool readConfigBool(string path);
-// Create args like this:
+// Create arguments like this:
 // const char *args[] = {execPath.c_str(), firstArgument.c_str(), secondArgument.c_str(), nullptr};
-// Use real variables for pid to avoid changing an argument, not sure how cpp handles this
+// Use real variables for pid to avoid changing an argument, not sure how C++ handles this
 void posixSpawnWrapper(string path, const char *args[], bool wait, pid_t* pid);
 
 enum goSleepCondition

@@ -32,7 +32,7 @@ int getPidByName(string taskName) {
     // https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
     if(normalContains(firstLine, taskName) == true) {
       log("Found PID of " + taskName + ": " + entry->d_name, emitter);
-      // after closing dir its impossible to call entry->d_name
+      // After closing directory, it's impossible to call entry->d_name
       int intToReturn = stoi(entry->d_name);
       closedir(dp);
       return intToReturn;
@@ -93,8 +93,7 @@ void unfreezeApps() {
 
 void killProcess(string name) {
   int pid = getPidByName(name);
-  if(pid != -1)
-  {
+  if(pid != -1) {
     kill(pid, 9);
   }
 }

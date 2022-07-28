@@ -19,8 +19,7 @@ const std::string emitter = "wifi";
 
 // https://stackoverflow.com/questions/5947286/how-to-load-linux-kernel-modules-from-c-code
 #define deleteModule(name, flags) syscall(__NR_delete_module, name, flags)
-#define initModule(module_image, len, param_values)                            \
-  syscall(__NR_init_module, module_image, len, param_values)
+#define initModule(module_image, len, param_values) syscall(__NR_init_module, module_image, len, param_values)
 
 extern string model;
 extern pid_t connectToWifiPid;
@@ -50,12 +49,11 @@ void turnOffWifi() {
 
   // Managing zombies is a bit... problematic
   log("connectToWifiPid is " + to_string(connectToWifiPid), emitter);
-  if(connectToWifiPid != 0)
-  {
+  if(connectToWifiPid != 0) {
     killProcess("connect_to_network.sh");
-    log("Collecting zombie connect_to_network.sh", emitter);
+    log("Collecting connect_to_network.sh zombie", emitter);
     waitpid(connectToWifiPid, 0, 0);
-    log("Collected zombie connect_to_network.sh", emitter);
+    log("Collected connect_to_network.sh zombie", emitter);
   }
   else {
     log("No need to collect zombie process", emitter);
@@ -64,7 +62,7 @@ void turnOffWifi() {
   string wifiDevPath = "/sys/class/net/" + WIFI_DEV + "/operstate";
   if (fileExists(wifiDevPath) == true) {
     string wifiState = readConfigString("/sys/class/net/" + WIFI_DEV + "/operstate");
-    // Dormant is when its disconnected from a network, but still on
+    // 'dormant' is when the Wi-Fi interface is disconnected from a network, but is still on
     if (wifiState == "up" or wifiState == "dormant") {
       if (readConfigString("/data/config/20-sleep_daemon/5-wifiReconnect") == "true") {
         writeFileString("/run/was_connected_to_wifi", "true");
@@ -143,11 +141,11 @@ void turnOnWifi() {
       string essid = readConfigString("/data/config/17-wifi_connection_information/essid");
       string passphrase = readConfigString("/data/config/17-wifi_connection_information/passphrase");
 
-      // if this is needed anywhere else, a function is needed to be created
-      string recconectionScriptPath = "/usr/local/bin/wifi/connect_to_network.sh";
-      const char *args[] = {recconectionScriptPath.c_str(), essid.c_str(), passphrase.c_str(), nullptr};
+      // If this is needed anywhere else, a function needs to be created
+      string reconnectionScriptPath = "/usr/local/bin/wifi/connect_to_network.sh";
+      const char *args[] = {reconnectionScriptPath.c_str(), essid.c_str(), passphrase.c_str(), nullptr};
 
-      posixSpawnWrapper(recconectionScriptPath.c_str(), args, false, &connectToWifiPid);
+      posixSpawnWrapper(reconnectionScriptPath.c_str(), args, false, &connectToWifiPid);
     }
     remove("/run/was_connected_to_wifi");
   }

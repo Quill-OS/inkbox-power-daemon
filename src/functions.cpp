@@ -76,7 +76,7 @@ mutex occupyLed;
 bool ledState = false;
 // Count for idle
 int countIdle = 0;
-// To avoid checking this every led change
+// To avoid checking this every LED change
 string ledPath = "none";
 // To collect zombie later
 pid_t connectToWifiPid = 0;
@@ -418,16 +418,14 @@ void posixSpawnWrapper(string path, const char *args[], bool wait, pid_t* pid) {
   int status = -1;
 
   status = posix_spawn(pid, path.c_str(), nullptr, nullptr, const_cast<char **>(args), environ);
-  if(status == 0)
-  {
+  if(status == 0) {
     log("Spawning without errors", emitter);
   }
   else {
     log("Error spawning", emitter);
   }
   log("Spawned with PID: " + to_string(*pid), emitter);
-  if(wait == true)
-  {
+  if(wait == true) {
     waitpid(*pid, 0, 0);
   }
 }

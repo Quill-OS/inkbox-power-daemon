@@ -166,7 +166,7 @@ void sleepScreen() {
       }
     }
   }
-  log("Custom screensaver not found or errored, displaying normal message", emitter);
+  log("Custom screensaver not found or an error occured; displaying normal message", emitter);
   fbinkRefreshScreen();
   fbinkWriteCenter("Sleeping", darkMode);
 }
