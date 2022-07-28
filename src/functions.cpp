@@ -195,8 +195,7 @@ void prepareVariables() {
   // 4 - chargerWakeUp
   string chargerWakeUpPath = "/data/config/20-sleep_daemon/4-chargerWakeUp";
   if (fileExists(chargerWakeUpPath) == true) {
-    if(readConfigBool(chargerWakeUpPath) == true)
-    {
+    if(readConfigBool(chargerWakeUpPath) == true) {
       chargerWakeUp = true;
     } 
     else {
@@ -266,7 +265,7 @@ void prepareVariables() {
   }
 
   // 9 - deepSleep
-  // TODO: this will be remade later
+  // TODO: rewrite this
   string deepSleepPath = "/data/config/20-sleep_daemon/9-deepSleep";
   if (fileExists(deepSleepPath) == false) {
     writeFileString(deepSleepPath, "false");
@@ -380,8 +379,7 @@ string readConfigStringNoLog(string path) {
 
 bool normalContains(string stringToCheck, string stringToLookFor)
 {
-  if(stringToCheck.find(stringToLookFor) != std::string::npos)
-  {
+  if(stringToCheck.find(stringToLookFor) != std::string::npos) {
     return true;
   } else {
     return false;
@@ -402,13 +400,12 @@ bool readConfigBool(string path) {
   }
   indata.close();
 
-  // this approach doesn't care about special characters ('\n')
-  if(normalContains(stringData, "true") == true)
-  {
-    log("Path: " + path + " contains a true bool", emitter);\
+  // This approach doesn't care about special characters ('\n')
+  if(normalContains(stringData, "true") == true) {
+    log("Path: " + path + " contains a true boolean", emitter);\
     return true;
   } else {
-    log("Path: " + path + " contains a false bool", emitter);
+    log("Path: " + path + " contains a false boolean", emitter);
     return false;
   }
 }
