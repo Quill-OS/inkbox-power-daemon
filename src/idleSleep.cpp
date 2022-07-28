@@ -101,7 +101,7 @@ void startIdleSleep() {
     }
 
     if (libevdev_has_event_pending(dev) == 1) {
-      log("Received touch input, resetting timer", emitter);
+      // log("Received touch input, resetting timer", emitter);
       countIdle = 0;
       while (libevdev_has_event_pending(dev) == 1) {
         rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);

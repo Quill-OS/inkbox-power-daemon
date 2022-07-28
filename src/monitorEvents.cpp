@@ -38,7 +38,7 @@ void startMonitoringDev() {
 
   struct libevdev * dev = NULL;
 
-  int fd = open("/dev/input/event0", O_RDONLY | O_NONBLOCK);
+  int fd = open("/dev/input/event0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
   int rc = libevdev_new_from_fd(fd, &dev);
   // Because user apps and X11 apps grab the device for some reason
   if(libevdev_grab(dev, LIBEVDEV_GRAB) == 0) {
@@ -68,7 +68,6 @@ void startMonitoringDev() {
       log("Input event received, type: " +
           (string)libevdev_event_type_get_name(ev.type) +
           " codename: " + codeName + " value: " + to_string(ev.value), emitter);
-
       if (codeName == "KEY_POWER" and ev.value == 1) {
         log("monitorEvents: Received power button trigger, attempting device suspend", emitter);
 

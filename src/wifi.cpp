@@ -157,7 +157,6 @@ void loadModule(string path) {
   void *image;
   const char *params = "";
   int fd = open(path.c_str(), O_RDONLY);
-  puts("init");
   fstat(fd, &st);
   image_size = st.st_size;
   image = malloc(image_size);

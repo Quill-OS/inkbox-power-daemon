@@ -345,7 +345,6 @@ string executeCommand(string command) {
 
   // Read until end of process:
   while (!feof(pipe)) {
-
     // Use buffer to read and add to result
     if (fgets(buffer, 128, pipe) != NULL)
       result += buffer;
@@ -353,7 +352,7 @@ string executeCommand(string command) {
 
   pclose(pipe);
 
-  log("Output of command: \" " + command + " \"" + "is: \" " + result + " \"", emitter);
+  log("Output of command: \"" + command + "\"" + " is: \" " + result + " \"", emitter);
   return result;
 }
 
