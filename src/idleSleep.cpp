@@ -49,7 +49,7 @@ void startIdleSleep() {
   log("Waiting for inkbox-bin to start", emitter);
   bool waitForInkbox = true;
   while(waitForInkbox == true) {
-    if(getPidByName("inkbox-bin") != 0) {
+    if(getPidByName("inkbox-bin") != -1) {
       waitForInkbox = false;
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
