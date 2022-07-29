@@ -6,6 +6,7 @@
 
 #include "functions.h"
 #include "idleSleep.h"
+#include "appsFreeze.h"
 
 // libevdev
 #include <assert.h>
@@ -44,6 +45,17 @@ extern int countIdle;
 
 void startIdleSleep() {
   log("Starting idleSleep", emitter);
+
+  log("Waiting for inkbox-bin to start", emitter);
+  bool waitForInkbox = true;
+  while(waitForInkbox == true) {
+    if(getPidByName("inkbox-bin") != 0) {
+      waitForInkbox = false;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  }
+  log("inkbox-bin started. Waiting additionall 30 seconds", emitter);
+  std::this_thread::sleep_for(std::chrono::milliseconds(30000));
 
   struct libevdev *dev = NULL;
 

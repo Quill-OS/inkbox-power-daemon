@@ -144,7 +144,7 @@ void afterSleep() {
 void returnDeepSleep() {
   log("Returning from deep sleep", emitter);
   if (deepSleep == true) {
-    remove("/data/config/20-sleep_daemon/ipd/sleepCall");
+    remove("/run/ipd/sleepCall");
     setCpuGovernor(cpuGovernorToSet);
   }
   deepSleep = false;

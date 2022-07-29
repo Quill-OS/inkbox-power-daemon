@@ -49,6 +49,8 @@ void startMonitoringConfig() {
 
   wd = inotify_add_watch(fd, "/data/config/20-sleep_daemon", IN_MODIFY | IN_CREATE | IN_DELETE);
 
+  wd = inotify_add_watch(fd, "/run/ipd", IN_MODIFY | IN_CREATE | IN_DELETE);
+
   while (true) {
     int length, i = 0;
     length = read(fd, buffer, BUF_LEN);
@@ -110,12 +112,12 @@ void checkUpdateFile() {
 }
 
 void sleepInotifyCall() {
-  log("sleepInotifyCall() called, going to sleep (probably)", emitter);
+  log("sleepInotifyCall called, going to sleep (probably)", emitter);
   if (deepSleepPermission == true) {
     string deepSleepFile =
-        readConfigString("/data/config/20-sleep_daemon/sleepCall");
+        readConfigString("/run/ipd/sleepCall");
     bool go = false;
-    if (deepSleepFile == "deepSleep") {
+    if (deepSleepFile == "deepsleep") {
       deepSleep = true;
       go = true;
     } else if (deepSleepFile == "sleep") {

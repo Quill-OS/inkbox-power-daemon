@@ -40,7 +40,7 @@ int getPidByName(string taskName) {
   }
   log("Couldn't find PID of " + taskName, emitter);
   closedir(dp);
-  return EXIT_FAILURE;
+  return 0;
 }
 
 // /data/config/20-sleep_daemon/appsList
