@@ -26,7 +26,7 @@ void startPipeServer() {
   string options = "size=8K,uid=0,gid=0,mode=744";
 
   // Creating tmpfs
-  // Note: Creating this tmpfs will kill the bind mount to /kobo/dev/ipd. the bind mount needs to be done after it
+  // Note: Creating this tmpfs will kill the bind mount to /kobo/dev/ipd. The bind mount needs to be done after it
   int rc = 0;
   rc = mount("tmpfs", pipeDirectoryPath.c_str(), "tmpfs", 0, options.c_str());
   if (rc != 0) {

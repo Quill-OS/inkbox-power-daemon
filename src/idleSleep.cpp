@@ -54,7 +54,7 @@ void startIdleSleep() {
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
-  log("inkbox-bin started. Waiting additionall 30 seconds", emitter);
+  log("inkbox-bin started. Waiting additional 30 seconds", emitter);
   std::this_thread::sleep_for(std::chrono::milliseconds(30000));
 
   struct libevdev *dev = NULL;

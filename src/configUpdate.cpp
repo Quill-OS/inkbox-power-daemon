@@ -114,10 +114,9 @@ void checkUpdateFile() {
 void sleepInotifyCall() {
   log("sleepInotifyCall called, going to sleep (probably)", emitter);
   if (deepSleepPermission == true) {
-    string deepSleepFile =
-        readConfigString("/run/ipd/sleepCall");
+    string deepSleepFile = readConfigString("/run/ipd/sleepCall");
     bool go = false;
-    if (deepSleepFile == "deepsleep") {
+    if (deepSleepFile == "deepSleep") {
       deepSleep = true;
       go = true;
     } else if (deepSleepFile == "sleep") {
