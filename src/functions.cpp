@@ -148,10 +148,6 @@ void prepareVariables() {
                     "inkbox-bin\noobe-inkbox-bin\nlockscreen-bin\ncalculator-"
                     "bin\nqreversi-bin\n2048-bin\nscribble\nlightmaps");
     writeFileString("/data/config/20-sleep_daemon/updateConfig", "false");
-
-    // comBind
-    log("Creating comBind", emitter);
-    experimental::filesystem::create_directory(mainPath + "/comBind");
   }
 
   // 1 - cinematicBrightnessDelayMs
@@ -269,7 +265,6 @@ void prepareVariables() {
   }
 
   // 9 - deepSleep
-  // TODO: rewrite this
   string deepSleepPath = "/data/config/20-sleep_daemon/9-deepSleep";
   if (fileExists(deepSleepPath) == false) {
     writeFileString(deepSleepPath, "false");
