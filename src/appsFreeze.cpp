@@ -70,10 +70,16 @@ void freezeApps() {
   vector<string> builtInApps = getBuiltInAppsList("/data/config/20-sleep_daemon/appsList");
 
   for (string &app : builtInApps) {
-    pidVector.push_back(getPidByName(app));
+    int appPid = getPidByName(app);
+    if(appPid != -1) {
+      pidVector.push_back(appPid);
+    }
   }
   if (fileExists("/kobo/tmp/currentlyRunningUserApplication") == true) {
-    pidVector.push_back(stoi(getRunningUserApp()));
+    int userApp = stoi(getRunningUserApp());
+    if(userApp != -1) {
+      pidVector.push_back(userApp);
+    }
   }
 
   appsPids = pidVector;
@@ -81,12 +87,20 @@ void freezeApps() {
   // SIGCONT - continue
   // SIGSTOP - force freeze
   for (int &pid : appsPids) {
-    kill(pid, SIGSTOP);
+    log("Freezing process of number: " + to_string(pid), emitter);
+    killLogger(pid, SIGSTOP);
   }
+}
+
+void killLogger(int pid, int sig)
+{
+  log("Killing process of pid " + to_string(pid) + " with signal " + to_string(sig), emitter);
+  kill(pid, sig);
 }
 
 void unfreezeApps() {
   for (int &pid : appsPids) {
+    log("Unfreezing process of pid " + to_string(pid), emitter);
     kill(pid, SIGCONT);
   }
 }
@@ -94,6 +108,7 @@ void unfreezeApps() {
 void killProcess(string name) {
   int pid = getPidByName(name);
   if(pid != -1) {
+    log("Killing pid of number: " + to_string(pid), emitter);
     kill(pid, 9);
   }
 }

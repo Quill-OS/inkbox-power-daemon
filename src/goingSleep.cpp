@@ -145,7 +145,7 @@ void goSleep() {
       }
     } else {
       // Exiting this sleeping hell
-      log("FATAL error: stopping suspend attempts after " + to_string(count) + " failed attempts", emitter);
+      log("Stopping suspend attempts after " + to_string(count) + " failed attempts", emitter);
       continueSleeping = false;
 
       // 4 - chargerWakeUp

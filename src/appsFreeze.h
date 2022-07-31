@@ -12,5 +12,6 @@ string getRunningUserApp();
 int getPidByName(string taskName);
 void unfreezeApps();
 void killProcess(string name);
+void killLogger(int pid, int sig);
 
 #endif
