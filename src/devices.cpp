@@ -2,6 +2,10 @@
 #include "functions.h"
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
+
+#define CM_nLED 101
+#define CM_USB_Plug_IN 108
 
 const std::string emitter = "devices";
 extern string model;
@@ -19,7 +23,21 @@ void manageChangeLedState() {
 void changeLedState() {
   if(ledPath != "none") {
     if(ledPath == "ntx") {
-      // Not implemented yet
+      int light;
+      if((light = open("/dev/ntx_io", O_RDWR)) == -1) {
+        fprintf(stderr, "Error opening ntx_io device\n");
+      }
+      else {
+        if(ledState == 1) {
+          ioctl(light, CM_nLED, 0);
+          ledState = 0;
+        }
+        else {
+          ioctl(light, CM_nLED, 1);
+          ledState = 1;
+        }
+        close(light);
+      }
     } 
     else {
       string state = readConfigStringNoLog(ledPath);
@@ -39,8 +57,22 @@ void changeLedState() {
 void setLedState(bool on) {
   if(ledPath != "none") {
     if(ledPath == "ntx") {
-      // Not implemented yet
-    } 
+      int light;
+      if((light = open("/dev/ntx_io", O_RDWR)) == -1) {
+        fprintf(stderr, "Error opening ntx_io device\n");
+      }
+      else {
+        if(on == true) {
+          ioctl(light, CM_nLED, 1);
+          ledState = 1;
+        }
+        else {
+          ioctl(light, CM_nLED, 0);
+          ledState = 0;
+        }
+      }
+      close(light);
+    }
     else {
       int dev = open(ledPath.c_str(), O_RDWR);
       if (on == true) {
@@ -76,14 +108,20 @@ bool getChargerStatus() {
   string chargerStatus;
   if (model == "kt") {
     chargerStatus = readFile("/sys/devices/system/yoshi_battery/yoshi_battery0/battery_status");
+    return stoi(chargerStatus);
   } else {
-    chargerStatus = readFile("/sys/devices/platform/pmic_battery.1/power_supply/mc13892_bat/status");
-  }
-  chargerStatus = normalReplace(chargerStatus, "\n", "");
-  if (chargerStatus == "Discharging") {
-    return false;
-  } else {
-    return true;
+    // Thanks to https://github.com/koreader/KoboUSBMS/blob/2efdf9d920c68752b2933f21c664dc1afb28fc2e/usbms.c#L148-L158
+    int ntxfd;
+    if((ntxfd = open("/dev/ntx_io", O_RDWR)) == -1) {
+      fprintf(stderr, "Error opening ntx_io device\n");
+      return false;
+    }
+    else {
+      unsigned long ptr = 0U;
+      ioctl(ntxfd, CM_USB_Plug_IN, &ptr);
+      close(ntxfd);
+      return !!ptr;
+    }
   }
 }
 
@@ -112,14 +150,16 @@ bool getAccurateChargerStatus() {
   string chargerStatus;
   if (model == "kt") {
     chargerStatus = readFile("/sys/devices/system/yoshi_battery/yoshi_battery0/battery_status");
+    return stoi(chargerStatus);
   } else {
     chargerStatus = readFile("/sys/devices/platform/pmic_battery.1/power_supply/mc13892_bat/status");
-  }
-  chargerStatus = normalReplace(chargerStatus, "\n", "");
-  if (chargerStatus == "Discharging" or chargerStatus == "Not charging") {
-    return false;
-  } else {
-    return true;
+    chargerStatus = normalReplace(chargerStatus, "\n", "");
+    if (chargerStatus == "Discharging" or chargerStatus == "Not charging") {
+      return false;
+    }
+    else {
+      return true;
+    }
   }
 }
 
@@ -131,8 +171,7 @@ void setCpuGovernor(string cpuGovernor) {
   log("Write status writing to 'scaling_governor' is: " + std::to_string(writeStatus), emitter);
 }
 
-void getLedPath()
-{
+void getLedPath() {
   if(model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
     ledPath =  "/sys/class/leds/pmic_ledsb/brightness";
   }
@@ -146,15 +185,6 @@ void getLedPath()
     ledPath = "/sys/class/leds/pmic_ledsb/brightness";
   }
   else if(model == "n236" or model == "n437") {
-    /*
-    // Netronix things
-    int light;
-        if((light = open("/dev/ntx_io", O_RDWR)) == -1) {
-          fprintf(stderr, "Error opening ntx_io device\n");
-        }
-        ioctl(light, 127, 0);
-    }
-    */
     ledPath = "ntx";
   } 
   else {
