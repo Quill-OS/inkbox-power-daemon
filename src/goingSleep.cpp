@@ -110,7 +110,7 @@ void goSleep() {
 
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // 500
 
-    log("Got back from suspend");
+    log("Got back from suspend", emitter);
 
     // Read kernel ring buffer, and then keep only lines containing <3>
     char * logs_data;
