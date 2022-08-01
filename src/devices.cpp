@@ -175,7 +175,7 @@ void getLedPath() {
   if(model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
     ledPath =  "/sys/class/leds/pmic_ledsb/brightness";
   }
-  else if(model == "n306") {
+  else if(model == "n306" or model == "n873") {
     ledPath = "/sys/class/leds/GLED/brightness";
   }
   else if(model == "bpi") {
