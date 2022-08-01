@@ -25,12 +25,16 @@ void disableUsbNet() {
     if (model == "kt") {
       executeCommand("modprobe -r g_ether");
     } else {
-      //
+      // i.MX 507/508 : Arc USBOTG Device Controller Driver
+      if(deleteModule(string("arcotg_udc").c_str(), O_NONBLOCK) != 0) {
+        log("Can't unload module: arcotg_udc", emitter);
+      }
+      // USB Ethernet gadget
       if (deleteModule(string("g_ether").c_str(), O_NONBLOCK) != 0) {
         log("Can't unload module: g_ether", emitter);
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(timestamp));
-      //
+      // Helpers for the above module
       if (deleteModule(string("usb_f_rndis").c_str(), O_NONBLOCK) != 0) {
         log("Can't unload module: usb_f_rndis", emitter);
       }
