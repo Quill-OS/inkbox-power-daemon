@@ -168,8 +168,6 @@ void turnOnWifi() {
       const char *args[] = {reconnectionScriptPath.c_str(), essid.c_str(), passphrase.c_str(), nullptr};
       posixSpawnWrapper(reconnectionScriptPath.c_str(), args, false, &connectToWifiPid);
     }
-    // This file in the newest version is removed by connect_to_network.sh
-    remove("/run/was_connected_to_wifi");
   }
 }
 

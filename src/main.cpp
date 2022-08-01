@@ -13,6 +13,7 @@
 #include "pipeHandler.h"
 #include "watchdog.h"
 #include "idleSleep.h"
+#include "devices.h"
 
 const std::string emitter = "main";
 extern std::string model;
@@ -52,6 +53,11 @@ int main() {
   thread watchdogThread(startWatchdog);
   thread watchConfig(startMonitoringConfig);
   thread idleSleep(startIdleSleep);
+
+
+  // Something is turning the led at starting all services ( inkbox.sh? ). This is fine until we want a charger indicator
+  std::this_thread::sleep_for(std::chrono::milliseconds(30000));
+  ledManagerAccurate();
 
   // https://stackoverflow.com/questions/7381757/c-terminate-called-without-an-active-exception
   monitorDev.join();

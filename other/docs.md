@@ -47,7 +47,12 @@ If this file's content is `true`, Wi-Fi will be reconnected on wake-up.
 By default, this option is set to `true`.
 
 ### `6-ledUsage`
-If this file's content is `true`, the following will happen: the power LED will light up for indicating that the device going to sleep in said case (every step in the suspend process changes the led state!). It will also turn it on when the device is charging. Currently, only the Kobo Nia is supported.
+If this file's content is `true`, the following will happen: the power LED will light up for indicating that the device going to sleep. The blinking goes as follows:
+- first, slow led blinking indicates invidual steps in preparing to sleep (turn off wifi, show screensaver etc)
+- fast blinking indicates write to state-extended, so all devices components are preparing to sleep
+- slow blinking ( but faster than step 1 ) indicates that the device is trying to sleep, but a device component ( touchscreen propably ) refused too. thats normal behavior so don't worry
+
+It will also turn it on when the device is charging and will be turned off when the device finishes charging.
 
 ### `7-idleSleep`
 This file contains an integer that determines, in seconds, when to go to sleep when no touch input is received from the screen. `0` means 'Never', minimum is `15` seconds.

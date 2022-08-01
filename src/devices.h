@@ -8,6 +8,7 @@ void manageChangeLedState();
 void changeLedState();
 void setLedState(bool on);
 void ledManager();
+void ledManagerAccurate();
 bool getChargerStatus();
 bool isDeviceChargerBug();
 bool getAccurateChargerStatus();

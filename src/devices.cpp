@@ -104,6 +104,21 @@ void ledManager() {
   }
 }
 
+// At boot, do not depend on ledState
+void ledManagerAccurate() {
+  if (ledUsage == true) {
+    occupyLed.lock();
+    // To be sure ledState is true
+    setLedState(false);
+    if (getAccurateChargerStatus() == true) {
+      setLedState(true);
+    } else {
+      setLedState(false);
+    }
+    occupyLed.unlock();
+  }
+}
+
 bool getChargerStatus() {
   string chargerStatus;
   if (model == "kt") {
