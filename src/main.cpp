@@ -54,8 +54,7 @@ int main() {
   thread watchConfig(startMonitoringConfig);
   thread idleSleep(startIdleSleep);
 
-
-  // Something is turning the led at starting all services ( inkbox.sh? ). This is fine until we want a charger indicator
+  // Something is turning off the LED when starting all the GUI (inkbox.sh). This is fine until we want a charger indicator
   std::this_thread::sleep_for(std::chrono::milliseconds(30000));
   ledManagerAccurate();
 

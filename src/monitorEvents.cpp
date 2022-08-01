@@ -22,7 +22,7 @@
 #include <linux/netlink.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#define MAX_PAYLOAD 1024  /* maximum payload size*/
+#define MAX_PAYLOAD 1024  /* Maximum payload size */
 
 #include "config.h"
 #include "libevdev/libevdev.h"

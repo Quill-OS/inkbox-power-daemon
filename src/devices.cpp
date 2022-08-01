@@ -112,7 +112,8 @@ void ledManagerAccurate() {
     setLedState(false);
     if (getAccurateChargerStatus() == true) {
       setLedState(true);
-    } else {
+    }
+    else {
       setLedState(false);
     }
     occupyLed.unlock();
