@@ -87,20 +87,20 @@ void freezeApps() {
   // SIGCONT - continue
   // SIGSTOP - force freeze
   for (int &pid : appsPids) {
-    log("Freezing process of number: " + to_string(pid), emitter);
+    log("Freezing process with PID " + to_string(pid), emitter);
     killLogger(pid, SIGSTOP);
   }
 }
 
 void killLogger(int pid, int sig)
 {
-  log("Killing process of pid " + to_string(pid) + " with signal " + to_string(sig), emitter);
+  log("Killing process with PID " + to_string(pid) + " with signal " + to_string(sig), emitter);
   kill(pid, sig);
 }
 
 void unfreezeApps() {
   for (int &pid : appsPids) {
-    log("Unfreezing process of pid " + to_string(pid), emitter);
+    log("Unfreezing process with PID " + to_string(pid), emitter);
     kill(pid, SIGCONT);
   }
 }
@@ -108,7 +108,7 @@ void unfreezeApps() {
 void killProcess(string name) {
   int pid = getPidByName(name);
   if(pid != -1) {
-    log("Killing pid of number: " + to_string(pid), emitter);
+    log("Killing process with PID " + to_string(pid), emitter);
     kill(pid, 9);
   }
 }
