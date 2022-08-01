@@ -15,6 +15,7 @@
 #include "idleSleep.h"
 
 const std::string emitter = "main";
+extern std::string model;
 
 extern bool logEnabled;
 extern int fbfd;
@@ -41,7 +42,13 @@ int main() {
   initFbink();
   startPipeServer();
 
-  thread monitorDev(startMonitoringDev);
+  thread monitorDev;
+  if(model != "kt") {
+    monitorDev = thread(startMonitoringDev);
+  }
+  else {
+    monitorDev = thread(startMonitoringDevKT);
+  }
   thread watchdogThread(startWatchdog);
   thread watchConfig(startMonitoringConfig);
   thread idleSleep(startIdleSleep);

@@ -2,5 +2,6 @@
 #define MONITOREVENTS_H
 
 void startMonitoringDev();
+void startMonitoringDevKT();
 
 #endif

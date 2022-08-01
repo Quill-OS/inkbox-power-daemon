@@ -40,8 +40,9 @@ extern mutex currentActiveThread_mtx;
 extern sleepBool watchdogNextStep;
 
 extern int idleSleepTime;
-
 extern int countIdle;
+
+extern string model;
 
 void startIdleSleep() {
   log("Starting idleSleep", emitter);
@@ -59,7 +60,13 @@ void startIdleSleep() {
 
   struct libevdev *dev = NULL;
 
-  int fd = open("/dev/input/event1", O_RDONLY | O_NONBLOCK);
+  int fd;
+  if(model != "kt") {
+    fd = open("/dev/input/event1", O_RDONLY | O_NONBLOCK);
+  }
+  else {
+    fd = open("/dev/input/event2", O_RDONLY | O_NONBLOCK);
+  }
   int rc = libevdev_new_from_fd(fd, &dev);
 
   if (rc < 0) {

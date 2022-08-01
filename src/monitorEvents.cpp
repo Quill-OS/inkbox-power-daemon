@@ -18,6 +18,12 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+// Kindle Touch (KT)
+#include <linux/netlink.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#define MAX_PAYLOAD 1024  /* maximum payload size*/
+
 #include "config.h"
 #include "libevdev/libevdev.h"
 
@@ -33,6 +39,9 @@ extern mutex newSleepCondition_mtx;
 
 extern bool customCase;
 extern int customCaseCount;
+
+chrono::milliseconds timespan(200);
+chrono::milliseconds afterEventWait(1000);
 
 void startMonitoringDev() {
   log("Monitoring events", emitter);
@@ -60,8 +69,6 @@ void startMonitoringDev() {
       " vendor: " + to_string(libevdev_get_id_vendor(dev)) +
       " product: " + to_string(libevdev_get_id_product(dev)), emitter);
 
-  chrono::milliseconds timespan(200);
-  chrono::milliseconds afterEventWait(1000);
   do {
     struct input_event ev;
     rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
@@ -127,4 +134,56 @@ void startMonitoringDev() {
 
   } while (rc == 1 || rc == 0 || rc == -EAGAIN);
   log("Error: Monitoring events function died unexpectedly", emitter);
+}
+
+void startMonitoringDevKT() {
+    /* Modified Linux Journal article example to use NETLINK_KOBJECT_UEVENT */
+
+    log("Starting monitoring power button input events", emitter);
+
+    struct sockaddr_nl srcAddr, destAddr;
+    struct nlmsghdr * nlh = NULL;
+    struct msghdr msg;
+    struct iovec iov;
+    int sockFd;
+
+    sockFd = socket(PF_NETLINK, SOCK_RAW, NETLINK_KOBJECT_UEVENT);
+    memset(&srcAddr, 0, sizeof(srcAddr));
+
+    srcAddr.nl_family = AF_NETLINK;
+    srcAddr.nl_pid = getpid(); // Self PID
+    srcAddr.nl_groups = 1;     // Interested in group 1<<0
+
+    bind(sockFd, (struct sockaddr*)&srcAddr, sizeof(srcAddr));
+    memset(&destAddr, 0, sizeof(destAddr));
+    nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(MAX_PAYLOAD));
+    memset(nlh, 0, NLMSG_SPACE(MAX_PAYLOAD));
+
+    iov.iov_base = (void *)nlh;
+    iov.iov_len = NLMSG_SPACE(MAX_PAYLOAD);
+
+    msg.msg_name = (void *)&destAddr;
+    msg.msg_namelen = sizeof(destAddr);
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+
+    while(true) {
+        /* Read message from kernel */
+        recvmsg(sockFd, &msg, 0);
+        char * message = (char*)NLMSG_DATA(nlh);
+        if(strcmp(message, "virtual/misc/yoshibutton") == 0) {
+          log("monitorEvents: Received power button trigger, attempting device suspend", emitter);
+
+          waitMutex(&watchdogStartJob_mtx);
+          watchdogStartJob = true;
+          watchdogStartJob_mtx.unlock();
+
+          waitMutex(&newSleepCondition_mtx);
+          newSleepCondition = powerButton;
+          newSleepCondition_mtx.unlock();
+
+          this_thread::sleep_for(afterEventWait);
+        }
+    }
+    close(sockFd);
 }
