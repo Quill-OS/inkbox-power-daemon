@@ -23,6 +23,7 @@ const std::string emitter = "wifi";
 
 extern string model;
 extern pid_t connectToWifiPid;
+extern bool reconnectWifi;
 
 void turnOffWifi() {
   string WIFI_MODULE;
@@ -69,7 +70,9 @@ void turnOffWifi() {
     string wifiState = readConfigString("/sys/class/net/" + WIFI_DEV + "/operstate");
     // 'dormant' is when the Wi-Fi interface is disconnected from a network, but is still on
     if (wifiState == "up" or wifiState == "dormant") {
-      if (readConfigString("/data/config/20-sleep_daemon/5-wifiReconnect") == "true") {
+      if (reconnectWifi == true) {
+        // To be 100% sure
+        remove("/run/was_connected_to_wifi");
         writeFileString("/run/was_connected_to_wifi", "true");
       }
 
@@ -165,6 +168,7 @@ void turnOnWifi() {
       const char *args[] = {reconnectionScriptPath.c_str(), essid.c_str(), passphrase.c_str(), nullptr};
       posixSpawnWrapper(reconnectionScriptPath.c_str(), args, false, &connectToWifiPid);
     }
+    // This file in the newest version is removed by connect_to_network.sh
     remove("/run/was_connected_to_wifi");
   }
 }

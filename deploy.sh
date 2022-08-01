@@ -18,10 +18,13 @@ passwd="root"
 
 sshpass -p $passwd ssh $servername "bash -c \"ifsctl mnt rootfs rw\""
 sshpass -p $passwd ssh $servername "bash -c \"rm /ipd\""
+
+sshpass -p $passwd ssh $servername "bash -c \"killall -9 ipd\""
+sshpass -p $passwd ssh $servername "bash -c \"service ipd stop\""
 sshpass -p $passwd ssh $servername "bash -c \"killall -9 ipd\""
 
-sshpass -p $passwd ssh $servername "bash -c \"service sleep_standby stop\""
-sshpass -p $passwd ssh $servername "bash -c \"killall -9 sleep_standby.sh\""
+#sshpass -p $passwd ssh $servername "bash -c \"service sleep_standby stop\""
+#sshpass -p $passwd ssh $servername "bash -c \"killall -9 sleep_standby.sh\""
 sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
 sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
 sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
