@@ -425,5 +425,5 @@ void notifySend(string message) {
   // Displays a notification on the device's screen via FBInk
   const char *args[] = {"/usr/local/bin/notify-send", message.c_str(), nullptr};
   int fakePid = 0;
-  posixSpawnWrapper("/usr/local/bin/notify-send", args, false, &fakePid);
+  posixSpawnWrapper("/usr/local/bin/notify-send", args, true, &fakePid);
 }
