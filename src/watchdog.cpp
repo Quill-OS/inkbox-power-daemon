@@ -55,6 +55,9 @@ void startWatchdog() {
       if (whenChargerSleep == false) {
         if (getChargerStatus() == true) {
           log("Skipping watchdog event because of option '3 - whenChargerSleep'", emitter);
+          if(newSleepCondition != Idle) {
+            notifySend("Can't suspend while charging");
+          }
           sleepJob = Skip;
         }
       }

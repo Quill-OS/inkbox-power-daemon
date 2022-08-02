@@ -86,7 +86,6 @@ void startIdleSleep() {
   do {
     if (idleSleepTime != 0) {
       if (idleSleepTime == countIdle) {
-        log("Going to sleep because of idle time", emitter);
         countIdle = 0;
         waitMutex(&sleep_mtx);
         // Do absolutely everything to not break things, to not go to idle sleep when other things are going on
@@ -103,7 +102,7 @@ void startIdleSleep() {
               watchdogStartJob_mtx.unlock();
 
               waitMutex(&newSleepCondition_mtx);
-              newSleepCondition = Idle; // TODO: Use this somewhere
+              newSleepCondition = Idle;
               newSleepCondition_mtx.unlock();
             } else {
               currentActiveThread_mtx.unlock();

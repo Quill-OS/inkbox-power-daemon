@@ -24,6 +24,7 @@ bool readConfigBool(string path);
 // const char *args[] = {execPath.c_str(), firstArgument.c_str(), secondArgument.c_str(), nullptr};
 // Use real variables for pid to avoid changing an argument, not sure how C++ handles this
 void posixSpawnWrapper(string path, const char *args[], bool wait, pid_t* pid);
+void notifySend(string message);
 
 enum goSleepCondition
 {
