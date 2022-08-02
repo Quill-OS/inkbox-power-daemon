@@ -35,8 +35,7 @@ void turnOffWifi() {
     SDIO_WIFI_PWR_MODULE = "sdio_wifi_pwr";
     WIFI_DEV = "eth0";
   } 
-  else if (model == "n705" or model == "n905b" or model == "n905c" or
-             model == "n613") {
+  else if (model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
     WIFI_MODULE = "dhd";
     SDIO_WIFI_PWR_MODULE = "sdio_wifi_pwr";
     WIFI_DEV = "eth0";

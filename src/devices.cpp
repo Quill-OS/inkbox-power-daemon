@@ -46,7 +46,12 @@ void changeLedState() {
         write(dev, "0", 1);
         ledState = 0;
       } else {
-        write(dev, "1", 1);
+        if(model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
+          write(dev, "100", 3);
+        }
+        else {
+          write(dev, "1", 1);
+        }
         ledState = 1;
       }
       close(dev);
@@ -76,7 +81,12 @@ void setLedState(bool on) {
     else {
       int dev = open(ledPath.c_str(), O_RDWR);
       if (on == true) {
-        write(dev, "1", 1);
+        if(model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
+          write(dev, "100", 3);
+        }
+        else {
+          write(dev, "1", 1);
+        }
         ledState = 1;
       } else {
         write(dev, "0", 1);
@@ -189,7 +199,7 @@ void setCpuGovernor(string cpuGovernor) {
 
 void getLedPath() {
   if(model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
-    ledPath =  "/sys/class/leds/pmic_ledsb/brightness";
+    ledPath = "/sys/class/leds/pmic_ledsg/brightness";
   }
   else if(model == "n306" or model == "n873") {
     ledPath = "/sys/class/leds/GLED/brightness";
@@ -198,12 +208,13 @@ void getLedPath() {
     ledPath = "/sys/devices/platform/leds/leds/bpi:red:pwr/brightness";
   }
   else if(model == "kt") {
+    // TODO
     ledPath = "/sys/class/leds/pmic_ledsb/brightness";
   }
   else if(model == "n236" or model == "n437") {
     ledPath = "ntx";
   } 
   else {
-    ledPath = "/sys/class/leds/pmic_ledsb/brightness";
+    ledPath = "/sys/class/leds/pmic_ledsg/brightness";
   }
 }
