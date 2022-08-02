@@ -208,8 +208,7 @@ void getLedPath() {
     ledPath = "/sys/devices/platform/leds/leds/bpi:red:pwr/brightness";
   }
   else if(model == "kt") {
-    // TODO
-    ledPath = "/sys/class/leds/pmic_ledsb/brightness";
+    ledPath = "none";
   }
   else if(model == "n236" or model == "n437") {
     ledPath = "ntx";
