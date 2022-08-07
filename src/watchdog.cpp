@@ -51,18 +51,20 @@ void startWatchdog() {
     if (saveWatchdogState == true) {
       log("Watchdog event received", emitter);
 
+      waitMutex(&sleep_mtx);
+
       // Handling 3 - whenChargerSleep
       if (whenChargerSleep == false) {
         if (getChargerStatus() == true) {
           log("Skipping watchdog event because of option '3 - whenChargerSleep'", emitter);
+          waitMutex(&newSleepCondition_mtx);
           if(newSleepCondition != Idle) {
             notifySend("Can't suspend while charging");
           }
+          newSleepCondition_mtx.unlock();
           sleepJob = Skip;
         }
       }
-
-      waitMutex(&sleep_mtx);
 
       if (sleepJob == Nothing) {
         log("Launching 'prepare' thread because of 'Nothing' sleep job", emitter);

@@ -127,6 +127,9 @@ void ledManagerAccurate() {
       setLedState(false);
     }
     occupyLed.unlock();
+  } else {
+    // If the user switches off usage of the LED, this will be executed in prepareVariables;
+    setLedState(false);
   }
 }
 

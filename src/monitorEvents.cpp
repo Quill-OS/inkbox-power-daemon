@@ -99,9 +99,11 @@ void startMonitoringDev() {
           log("customCaseCount is: " + to_string(customCaseCount), emitter);
           if (customCaseCount == 1) {
             log("Ignoring hall sensor trigger because of option '8 - customCase'", emitter);
+            notifySend("Case on back detected");
           } else if (customCaseCount >= 2) {
             customCaseCount = 0;
             log("Second hall sensor trigger, attempting device suspend", emitter);
+            notifySend("Case on front detected");
             waitMutex(&watchdogStartJob_mtx);
             watchdogStartJob = true;
             watchdogStartJob_mtx.unlock();
@@ -126,6 +128,15 @@ void startMonitoringDev() {
           newSleepCondition_mtx.unlock();
 
           this_thread::sleep_for(afterEventWait);
+        }
+      }
+      if (codeName == "KEY_F1" and ev.value == 0) {
+        if (customCase == true) {
+          // Don't show this message when going back from sleep
+          if(customCaseCount != 0) {
+            log("Hall sensor trigger", emitter);
+            notifySend("Case disconnected");
+          }
         }
       }
     }

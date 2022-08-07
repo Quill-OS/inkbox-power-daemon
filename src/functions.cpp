@@ -53,6 +53,8 @@ int customCaseCount = 0;
 bool deepSleep;
 bool deepSleepPermission = true; // Because inotify is weird, if false it will ignore the call. It's called true in afterSleep
 
+bool deviceRooted = false;
+
 // Internal variables used by watchdog and threads
 // TODO: Find out if this needs a mutex or not
 sleepBool watchdogNextStep = Nothing;
@@ -61,7 +63,7 @@ sleepBool watchdogNextStep = Nothing;
 bool watchdogStartJob = false;
 mutex watchdogStartJob_mtx;
 
-// Use this before watchdogStartJob
+// Use this before watchdogStartJob. Always
 goSleepCondition newSleepCondition = None;
 mutex newSleepCondition_mtx;
 
@@ -104,6 +106,9 @@ void prepareVariables() {
   log("Reading system variables", emitter);
   model = readConfigString("/opt/inkbox_device");
   log("Running on: " + model, emitter);
+
+  // Root
+  deviceRooted = readConfigBool("/opt/root/rooted");
 
   // Lockscreen
   string stringRead1 = readConfigString("/opt/config/12-lockscreen/config");
@@ -271,6 +276,9 @@ void prepareVariables() {
   }
 
   getLedPath();
+
+  // Handle turning off the led usage option
+  ledManagerAccurate();
 }
 
 string readConfigString(string path) {
@@ -423,6 +431,7 @@ void posixSpawnWrapper(string path, const char *args[], bool wait, pid_t* pid) {
 
 void notifySend(string message) {
   // Displays a notification on the device's screen via FBInk
+  log("notifySend message: " + message, emitter);
   const char *args[] = {"/usr/local/bin/notify-send", message.c_str(), nullptr};
   int fakePid = 0;
   posixSpawnWrapper("/usr/local/bin/notify-send", args, true, &fakePid);

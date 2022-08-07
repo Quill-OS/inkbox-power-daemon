@@ -44,6 +44,8 @@ extern int countIdle;
 
 extern string model;
 
+extern bool deviceRooted;
+
 void startIdleSleep() {
   log("Starting idleSleep", emitter);
 
@@ -94,16 +96,26 @@ void startIdleSleep() {
           if (watchdogNextStep == Nothing) {
             waitMutex(&currentActiveThread_mtx);
             if (currentActiveThread == Nothing) {
+              if(deviceRooted == true) {
+                // If the device is rooted, and a ssh connection is on, don't go to sleep and show a message
+                // this will execute only if the device is rooted, so don't worry
+                if(normalContains(executeCommand("ss | grep -o ssh"), "ssh") == true) {
+                  log("Skipping idle sleep call bcouse of an active ssh session", emitter);
+                  notifySend("SSH active: skipping idling");
+                  continue;
+                }
+              }
               log("Going to sleep because of idle touch screen", emitter);
               currentActiveThread_mtx.unlock();
-              
-              waitMutex(&watchdogStartJob_mtx);
-              watchdogStartJob = true;
-              watchdogStartJob_mtx.unlock();
 
               waitMutex(&newSleepCondition_mtx);
               newSleepCondition = Idle;
               newSleepCondition_mtx.unlock();
+              
+              waitMutex(&watchdogStartJob_mtx);
+              watchdogStartJob = true;
+              watchdogStartJob_mtx.unlock();
+              
             } else {
               currentActiveThread_mtx.unlock();
               log("Not going to sleep because of currentActiveThread", emitter);
