@@ -132,6 +132,7 @@ void startMonitoringDev() {
       }
       if (codeName == "KEY_F1" and ev.value == 0) {
         if (customCase == true) {
+          log("customCaseCount is " + to_string(customCaseCount), emitter);
           // Don't show this message when going back from sleep
           if(customCaseCount != 0) {
             log("Hall sensor trigger", emitter);
