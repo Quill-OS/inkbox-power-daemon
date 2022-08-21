@@ -93,6 +93,17 @@ void afterSleep() {
 
   // TODO: Handle lockscreen
 
+  // Moving wifi before apps because the icon will freak out
+  if (reconnectWifi == true) {
+    log("Reconnecting to wifi because of option '5 - wifiReconnect'", emitter);
+    CEA();
+    if (dieAfter == false) {
+      turnOnWifi();
+    }
+  } else {
+    log("Not reconnecting to Wi-Fi because of option '5 - wifiReconnect'", emitter);
+  }
+
   CEA();
   if (dieAfter == false) {
     unfreezeApps();
@@ -111,16 +122,6 @@ void afterSleep() {
     remove("/tmp/savedBrightness");
   }
 
-  if (reconnectWifi == true) {
-    log("Reconnecting to wifi because of option '5 - wifiReconnect'", emitter);
-    CEA();
-    if (dieAfter == false) {
-      turnOnWifi();
-    }
-  } else {
-    log("Not reconnecting to Wi-Fi because of option '5 - wifiReconnect'", emitter);
-  }
-
   CEA();
   if (dieAfter == false) {
     startUsbNet();
@@ -131,6 +132,14 @@ void afterSleep() {
     waitMutex(&sleep_mtx);
     sleepJob = Nothing;
     sleep_mtx.unlock();
+  }
+
+  // Put this here the second time because if someone spams the button, this thread will unfreeze it but prepareSleep will freeze them and then go to sleep
+  CEA();
+  if (dieAfter == false) {
+    unfreezeApps();
+    std::this_thread::sleep_for(std::chrono::milliseconds(650));
+    restorePipeSend();
   }
 
   occupyLed.unlock();
