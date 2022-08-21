@@ -277,7 +277,7 @@ void prepareVariables() {
 
   getLedPath();
 
-  // Handle turning off the led usage option
+  // Handle turning off the LED usage option
   ledManagerAccurate();
 }
 

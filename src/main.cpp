@@ -56,8 +56,8 @@ int main() {
 
   // Something is turning off the LED when starting all the GUI (inkbox.sh). This is fine until we want a charger indicator
   std::this_thread::sleep_for(std::chrono::milliseconds(30000));
-  // If you want to do shut down the led in ipd, do this here:
-  //setLedState(false);
+  // If you want to do shut down the LED from IPD, do this here:
+  // setLedState(false);
   ledManagerAccurate();
 
   // https://stackoverflow.com/questions/7381757/c-terminate-called-without-an-active-exception
