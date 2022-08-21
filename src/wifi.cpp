@@ -75,7 +75,15 @@ void turnOffWifi() {
         writeFileString("/run/was_connected_to_wifi", "true");
       }
 
+      killProcess("toggle.sh");
+      killProcess("turn_on_with_stats.sh");
+      killProcess("connection_manager.sh");
+      killProcess("get_dhcp.sh");
+      killProcess("prepare_changing_wifi.sh");
+      killProcess("prepare_network.sh");
+      killProcess("wifi_informations.sh");
       killProcess("connect_to_network.sh");
+      
       killProcess("dhcpcd");
       killProcess("wpa_supplicant");
       killProcess("udhcpc");
@@ -135,7 +143,7 @@ void turnOnWifi() {
     WIFI_DEV = "eth0";
   }
   if (fileExists("/run/was_connected_to_wifi") == true) {
-    if (readConfigString("/run/was_connected_to_wifi") == "true") {
+    if (readConfigBool("/run/was_connected_to_wifi") == true) {
       loadModule(WIFI_MODULE);
       std::this_thread::sleep_for(std::chrono::milliseconds(300));
       loadModule(SDIO_WIFI_PWR_MODULE);
