@@ -81,7 +81,7 @@ void turnOffWifi() {
       killProcess("get_dhcp.sh");
       killProcess("prepare_changing_wifi.sh");
       killProcess("prepare_network.sh");
-      killProcess("wifi_informations.sh");
+      killProcess("wifi_information.sh");
       killProcess("connect_to_network.sh");
       
       killProcess("dhcpcd");
