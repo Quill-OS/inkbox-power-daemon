@@ -95,9 +95,9 @@ void afterSleep() {
     }
   }
 
-  // Moving wifi before apps because the icon will freak out
+  // Moving Wi-Fi before apps because the GUI status icon would freak out
   if (reconnectWifi == true) {
-    log("Reconnecting to wifi because of option '5 - wifiReconnect'", emitter);
+    log("Reconnecting to Wi-Fi because of option '5 - wifiReconnect'", emitter);
     CEA();
     if (dieAfter == false) {
       turnOnWifi();
