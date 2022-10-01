@@ -38,6 +38,7 @@ bool wasUsbNetOn;
 // Config var
 int cinematicBrightnessDelayMs;
 bool lockscreen;
+string lockscreenBackgroundMode = "";
 bool darkMode;
 string cpuGovernorToSet;
 bool whenChargerSleep;
@@ -82,6 +83,7 @@ int countIdle = 0;
 string ledPath = "none";
 // To collect zombie later
 pid_t connectToWifiPid = 0;
+pid_t lockscreenPid = 0;
 
 // Functions
 void log(string toLog, string emitter) {
@@ -118,6 +120,9 @@ void prepareVariables() {
     lockscreen = false;
   }
   log("lockscreen is: " + stringRead1, emitter);
+
+  lockscreenBackgroundMode = normalReplace(readFile("/opt/config/12-lockscreen/background"), "\n", "");
+  log("lockscreen background mode is: " + lockscreenBackgroundMode, emitter);
 
   // Simply it, for FBInk dump
   dump = {0};
@@ -435,4 +440,16 @@ void notifySend(string message) {
   const char *args[] = {"/usr/local/bin/notify-send", message.c_str(), nullptr};
   int fakePid = 0;
   posixSpawnWrapper("/usr/local/bin/notify-send", args, true, &fakePid);
+}
+
+/*
+// In /usr/local/bin/launch_lockscreen.sh:
+#!/bin/sh
+chroot /kobo /bin/sh -c "env QT_QPA_PLATFORM=kobo /mnt/onboard/.adds/inkbox/lockscreen; echo exiting; exit 0"
+*/
+
+void launchLockscreen() {
+  log("Launching lockscreen", emitter);
+  const char *args[] = {"/usr/local/bin/launch_lockscreen.sh", nullptr};
+  posixSpawnWrapper("/usr/local/bin/launch_lockscreen.sh", args, false, &lockscreenPid);
 }

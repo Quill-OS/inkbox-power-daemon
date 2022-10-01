@@ -61,7 +61,7 @@ void turnOffWifi() {
     connectToWifiPid = 0;
   } 
   else {
-    log("No need to collect zombie process", emitter);
+    log("No need to collect zombie process: connectToWifi", emitter);
   }
 
   string wifiDevPath = "/sys/class/net/" + WIFI_DEV + "/operstate";

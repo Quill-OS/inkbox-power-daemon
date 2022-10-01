@@ -16,6 +16,7 @@
 #include <mutex>
 #include <stdlib.h>
 #include <string>
+#include <sys/wait.h>
 #include <thread>
 #include <ctime> // For rand bug
 
@@ -29,6 +30,8 @@ extern FBInkDump dump;
 extern sleepBool watchdogNextStep;
 
 extern bool darkMode;
+extern string lockscreenBackgroundMode;
+extern pid_t lockscreenPid;
 
 extern sleepBool currentActiveThread;
 extern mutex currentActiveThread_mtx;
@@ -61,7 +64,29 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     screenshotFbink();
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    if(lockscreenBackgroundMode == "background") {
+      string fbgrabPath = "/usr/bin/fbgrab";
+      const char *args[] = {fbgrabPath.c_str(), "/tmp/lockscreen.png", nullptr};
+      int fakePid = 0;
+      posixSpawnWrapper(fbgrabPath.c_str(), args, true, &fakePid);
+    }
+    else {
+      std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    }
+  }
+
+  // Managing zombies is a bit... problematic
+  // If this needs to be used anywhere else too, make a function out od it
+  log("lockscreenPid is " + to_string(lockscreenPid), emitter);
+  if (lockscreenPid != 0) {
+    killProcess("launch_lockscreen.sh");
+    log("Collecting lockscreen zombie", emitter);
+    waitpid(lockscreenPid, 0, 0);
+    log("Collected lockscreen zombie", emitter);
+    lockscreenPid = 0;
+  } 
+  else {
+    log("No need to collect zombie process", emitter);
   }
 
   CEP();
@@ -72,6 +97,14 @@ void prepareSleep() {
 
   CEP();
   if (diePrepare == false) {
+    // To prevent weird things from happening
+    if(getPidByName("launch_lockscreen.sh") != -1) {
+      killProcess("launch_lockscreen.sh");
+    }
+    if(getPidByName("lockscreen") != -1) {
+      killProcess("lockscreen");
+    }
+
     freezeApps();
   }
 
@@ -161,7 +194,10 @@ void sleepScreen() {
           log("Error: Failed to display the screensaver image (is it really a picture?)", emitter);
         } 
         else {
-          return;
+          if(lockscreenBackgroundMode == "screensaver") {
+            writeFileString("/tmp/screensaver-used.txt", chosenScreensaver);
+          }
+          return void();
         }
       }
     }

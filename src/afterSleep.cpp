@@ -26,6 +26,8 @@ extern bool reconnectWifi;
 extern bool deepSleep;
 extern bool deepSleepPermission;
 extern string cpuGovernorToSet;
+extern bool lockscreen;
+extern string lockscreenBackgroundMode;
 // Idle count, to reset it
 extern int countIdle;
 extern sleepBool sleepJob;
@@ -88,10 +90,10 @@ void afterSleep() {
     const char *args[] = {hwclockPath.c_str(), "--hctosys", "-u", nullptr};
     int fakePid = 0;
     posixSpawnWrapper(hwclockPath.c_str(), args, true, &fakePid);
-    clearScreen(darkMode);
+    if(lockscreen == false and lockscreenBackgroundMode != "screensaver") {
+      clearScreen(darkMode);
+    }
   }
-
-  // TODO: Handle lockscreen
 
   // Moving wifi before apps because the icon will freak out
   if (reconnectWifi == true) {
@@ -106,14 +108,24 @@ void afterSleep() {
 
   CEA();
   if (dieAfter == false) {
-    unfreezeApps();
-    std::this_thread::sleep_for(std::chrono::milliseconds(650));
-    restorePipeSend();
+    if(lockscreen == false) {
+      unfreezeApps();
+      std::this_thread::sleep_for(std::chrono::milliseconds(650));
+      restorePipeSend();
+    }
   }
 
   CEA();
   if (dieAfter == false) {
-    restoreFbink(darkMode);
+    if(lockscreen == false) {
+      restoreFbink(darkMode);
+    }
+  }
+
+  if(lockscreen == true) {
+    if(getPidByName("launch_lockscreen.sh") == -1) {
+      launchLockscreen();
+    }
   }
 
   CEA();
@@ -137,9 +149,26 @@ void afterSleep() {
   // Put this here the second time because if someone spams the button, this thread will unfreeze it but prepareSleep will freeze them and then go to sleep
   CEA();
   if (dieAfter == false) {
-    unfreezeApps();
-    std::this_thread::sleep_for(std::chrono::milliseconds(650));
-    restorePipeSend();
+    if(lockscreen == false) {
+      unfreezeApps();
+      std::this_thread::sleep_for(std::chrono::milliseconds(650));
+      restorePipeSend();
+    }
+  }
+
+  if(lockscreen == true) {
+    while(dieAfter == false and getPidByName("launch_lockscreen.sh") != -1) {
+      CEA();
+      std::this_thread::sleep_for(std::chrono::milliseconds(400));
+      log("Waiting for launch_lockscreen.sh to finish", emitter);
+    }
+    if(getPidByName("launch_lockscreen.sh") == -1) {
+      log("Restoring fbink after lockscreen was launched", emitter);
+      restoreFbink(darkMode);
+    }
+    else {
+      log("ERROR: Not restoring fbink after lockscreen was launched", emitter);
+    }
   }
 
   occupyLed.unlock();
