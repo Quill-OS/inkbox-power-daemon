@@ -122,7 +122,7 @@ void prepareVariables() {
   log("lockscreen is: " + stringRead1, emitter);
 
   lockscreenBackgroundMode = normalReplace(readFile("/opt/config/12-lockscreen/background"), "\n", "");
-  log("lockscreen background mode is: " + lockscreenBackgroundMode, emitter);
+  log("Lockscreen background mode is: " + lockscreenBackgroundMode, emitter);
 
   // Simply it, for FBInk dump
   dump = {0};
@@ -151,12 +151,12 @@ void prepareVariables() {
   // /data/config/20-sleep_daemon
   string mainPath = "/data/config/20-sleep_daemon";
   if (dirExists(mainPath) == false) {
-    log("Creating basic config", emitter);
+    log("Writing default appsList configuration", emitter);
     experimental::filesystem::create_directory(mainPath);
     // /data/config/20-sleep_daemon/appsList
     writeFileString("/data/config/20-sleep_daemon/appsList",
-                    "inkbox-bin\noobe-inkbox-bin\nlockscreen-bin\ncalculator-"
-                    "bin\nqreversi-bin\n2048-bin\nscribble\nlightmaps");
+                    "inkbox-bin\noobe-inkbox-bin\nlockscreen-bin\nqalculate-"
+                    "bin\nqreversi-bin\n2048-bin\nscribble");
     writeFileString("/data/config/20-sleep_daemon/updateConfig", "false");
   }
 

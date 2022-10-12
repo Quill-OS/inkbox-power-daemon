@@ -163,11 +163,11 @@ void afterSleep() {
       log("Waiting for launch_lockscreen.sh to finish", emitter);
     }
     if(getPidByName("launch_lockscreen.sh") == -1) {
-      log("Restoring fbink after lockscreen was launched", emitter);
+      log("Restoring FBInk after lockscreen launch", emitter);
       restoreFbink(darkMode);
     }
     else {
-      log("ERROR: Not restoring fbink after lockscreen was launched", emitter);
+      log("ERROR: Not restoring FBInk after lockscreen launch", emitter);
     }
   }
 

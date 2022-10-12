@@ -9,7 +9,7 @@ This is a list of apps that will be frozen (`SIGSTOP`) by the power daemon by de
 inkbox-bin
 oobe-inkbox-bin
 lockscreen-bin
-calculator-bin
+qalculate-bin
 qreversi-bin
 2048-bin
 scribble
