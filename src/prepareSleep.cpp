@@ -30,6 +30,7 @@ extern FBInkDump dump;
 extern sleepBool watchdogNextStep;
 
 extern bool darkMode;
+extern bool lockscreen;
 extern string lockscreenBackgroundMode;
 extern pid_t lockscreenPid;
 
@@ -64,7 +65,7 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     screenshotFbink();
-    if(lockscreenBackgroundMode == "background") {
+    if(lockscreen == true) {
       string fbgrabPath = "/usr/bin/fbgrab";
       const char *args[] = {fbgrabPath.c_str(), "/tmp/lockscreen.png", nullptr};
       int fakePid = 0;
