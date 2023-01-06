@@ -149,7 +149,8 @@ void startMonitoringDev() {
 }
 
 void startMonitoringDevKT() {
-    /* Modified Linux Journal article example to use NETLINK_KOBJECT_UEVENT */
+    // Partially taken from https://www.mobileread.com/forums/showpost.php?p=2685079&postcount=14
+    // Modified Linux Journal article example to use NETLINK_KOBJECT_UEVENT
 
     log("Starting monitoring power button input events", emitter);
 
