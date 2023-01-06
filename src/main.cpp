@@ -1,5 +1,5 @@
 /*
-    InkBox: Open-source Qt-based eBook reader
+    InkBox Power Daemon (IPD): InkBox OS power management program
     Copyright (C) 2022-2023 Szybet <https://github.com/Szybet> and Nicolas Mailloux <nicolecrivain@gmail.com>
     SPDX-License-Identifier: GPL-3.0-only
 
