@@ -18,7 +18,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "config.h"
 #include "libevdev/libevdev.h"
 
 const std::string emitter = "idleSleep";

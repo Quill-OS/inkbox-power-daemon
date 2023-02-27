@@ -24,7 +24,6 @@
 #include <unistd.h>
 #define MAX_PAYLOAD 1024  /* Maximum payload size */
 
-#include "config.h"
 #include "libevdev/libevdev.h"
 
 const std::string emitter = "monitorEvents";

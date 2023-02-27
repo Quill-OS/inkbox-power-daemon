@@ -51,6 +51,9 @@ bool customCase;
 // When 2 it resets to 0 and triggers the watchdog, so 1 is ignored
 int customCaseCount = 0;
 
+bool chargerControllerEnabled;
+string chargerControllerPath;
+
 bool deepSleep;
 bool deepSleepPermission = true; // Because inotify is weird, if false it will ignore the call. It's called true in afterSleep
 
@@ -278,6 +281,18 @@ void prepareVariables() {
   string deepSleepPath = "/data/config/20-sleep_daemon/9-deepSleep";
   if (fileExists(deepSleepPath) == false) {
     writeFileString(deepSleepPath, "false");
+  }
+
+  // 10 - chargerController
+  string chargerControllerPathConfig = "/data/config/20-sleep_daemon/10-chargerController";
+  if (fileExists(chargerControllerPathConfig) == true) {
+    chargerControllerPath = normalReplace(readConfigString(chargerControllerPathConfig), "\n", "");
+    if (fileExists(chargerControllerPath) == true) {
+      chargerControllerEnabled = true;
+    }
+  }
+  else {
+    chargerControllerEnabled = false;
   }
 
   getLedPath();

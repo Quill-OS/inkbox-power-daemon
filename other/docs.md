@@ -76,6 +76,9 @@ By default, it's set to `false`.
 This file is only read by the GUI. If it's set to `true` (from the GUI power daemon settings) the power menu option of the eReader called 'Suspend' will be replaced by 'Deep sleep'. If this is clicked, `/run/ipd/sleepCall` will be created and `deepSleep` will be written to it instead of `sleep` (as it usually would). In this way inotify will be triggered, and the device will go to sleep, but with extra things, like:
 - `powersave` CPU governor, which will extend the time the device takes to wake-up, but the battery will live longer.
 
+### `10-chargerController`
+If this file exists and contains a valid path, it will be runned every time the charger is runned, and it will wait for that program to stop. Usefull if you are crazy and control your charger current using i2c, or just want to switch usb to host mode. https://github.com/Szybet/Charger-controller
+
 ### `updateConfig`
 If `true` is written to this file, the daemon will update all its variables on-the-fly, then write `false` to this file.
 

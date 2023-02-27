@@ -31,6 +31,10 @@ extern sleepBool watchdogNextStep;
 extern sleepBool currentActiveThread;
 extern mutex currentActiveThread_mtx;
 
+extern bool chargerControllerEnabled;
+extern string chargerControllerPath;
+bool chargerConnected = false; // First boot up the device, then connect the charger, so it will work
+
 // TODO: Implement smarter join function
 
 void startWatchdog() {
@@ -240,7 +244,22 @@ void startWatchdog() {
       }
       watchdogNextStep = Nothing;
     }
+
     ledManager();
+    
+    if(chargerControllerEnabled == true) {
+      bool chargerStatusTmp = getChargerStatus();
+      if(chargerConnected != chargerStatusTmp) {
+        chargerConnected = chargerStatusTmp;
+        if(chargerConnected == true) {
+          log("launching charger controller located at: " + chargerControllerPath, emitter);
+          const char *args[] = {chargerControllerPath.c_str(), nullptr};
+          int fakePid = 0;
+          posixSpawnWrapper(chargerControllerPath, args, true, &fakePid);
+        }
+      }
+    }
+
     std::this_thread::sleep_for(timespan);
   }
 
