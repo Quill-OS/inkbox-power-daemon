@@ -17,8 +17,8 @@ const std::string emitter = "appsFreeze";
 extern vector<int> appsPids;
 
 // https://ofstack.com/C++/9293/linux-gets-pid-based-on-pid-process-name-and-pid-of-c.html
-// TODO: Take a vector as argument
 int getPidByName(string taskName) {
+  log("Looking for process named like " + taskName, emitter);
   struct dirent *entry = nullptr;
   DIR *dp = nullptr;
 
@@ -31,7 +31,7 @@ int getPidByName(string taskName) {
     getline(file, firstLine);
     // https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
     if(normalContains(firstLine, taskName) == true) {
-      log("Found PID of " + taskName + ": " + entry->d_name, emitter);
+      log("Found PID of " + taskName + ": " + entry->d_name + " in line: " + firstLine, emitter);
       // After closing directory, it's impossible to call entry->d_name
       int intToReturn = stoi(entry->d_name);
       closedir(dp);
@@ -41,6 +41,34 @@ int getPidByName(string taskName) {
   log("Couldn't find PID of " + taskName, emitter);
   closedir(dp);
   return -1;
+}
+
+// Can't be used with user apps because it targets everything - unshare etc which crashes it
+// Maybe usefull in the future
+vector<int> getPidsByNameAll(string taskName) {
+  log("Looking for processes named like " + taskName, emitter + ":getPidsByNameAll");
+
+  struct dirent *entry = nullptr;
+  DIR *dp = nullptr;
+
+  string proc = "/proc/";
+  dp = opendir(proc.c_str());
+
+  vector<int> pidsRet;
+  while ((entry = readdir(dp))) {
+    // cmdline is more accurate, status sometimes is buggy?
+    ifstream file(proc + entry->d_name + "/cmdline");
+    string firstLine;
+    getline(file, firstLine);
+    // https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
+    if(normalContains(firstLine, taskName) == true) {
+      log("Found PID of " + taskName + ": " + entry->d_name + " In line: " + firstLine, emitter + ":getPidsByNameAll");
+      int appPid = stoi(entry->d_name);
+      pidsRet.push_back(appPid);
+    }
+  }
+  closedir(dp);
+  return pidsRet;
 }
 
 // /data/config/20-sleep_daemon/appsList
@@ -60,8 +88,16 @@ vector<string> getBuiltInAppsList(string path) {
   return vectorToReturn;
 }
 
-string getRunningUserApp() {
-  return readConfigString("/kobo/tmp/currentlyRunningUserApplication");
+int getRunningUserApp() {
+  string name = readConfigString("/kobo/tmp/currentlyRunningUserApplication");
+
+  // Prioritise .bin files
+  int fileBin = getPidByName(name + ".bin");
+  if(fileBin != -1) {
+    log("Found user app bin file, that's good", emitter);
+    return fileBin;
+  };
+  return getPidByName(name);
 }
 
 void freezeApps() {
@@ -76,13 +112,15 @@ void freezeApps() {
     }
   }
   if (fileExists("/kobo/tmp/currentlyRunningUserApplication") == true) {
-    int userApp = stoi(getRunningUserApp());
-    if(userApp != -1) {
-      pidVector.push_back(userApp);
+    int userAppPid = getRunningUserApp();
+    if(userAppPid != -1) {
+      pidVector.push_back(userAppPid);
     }
   }
 
-  appsPids = pidVector;
+  // Here append because of fast clicking something could get not unfreezed
+  // https://stackoverflow.com/questions/2551775/appending-a-vector-to-a-vector
+  appsPids.insert(appsPids.end(), pidVector.begin(), pidVector.end());
 
   // SIGCONT - continue
   // SIGSTOP - force freeze
@@ -103,6 +141,7 @@ void unfreezeApps() {
     log("Unfreezing process with PID " + to_string(pid), emitter);
     kill(pid, SIGCONT);
   }
+  appsPids.clear();
 }
 
 void killProcess(string name) {

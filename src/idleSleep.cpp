@@ -50,13 +50,19 @@ void startIdleSleep() {
 
   log("Waiting for inkbox-bin to start", emitter);
   bool waitForInkbox = true;
+  int waitCount = 0;
   while(waitForInkbox == true) {
     if(getPidByName("inkbox-bin") != -1) {
       waitForInkbox = false;
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    waitCount = waitCount + 1;
+    if(waitCount > 90) {
+      log("Waited 1,5 minute for inkbox-bin, giving up, going on with idle sleep", emitter);
+      break;
+    }
   }
-  log("inkbox-bin started. Waiting additional 30 seconds", emitter);
+  if (waitForInkbox == false) log("inkbox-bin started. Waiting additional 30 seconds", emitter);
   std::this_thread::sleep_for(std::chrono::milliseconds(30000));
 
   struct libevdev *dev = NULL;

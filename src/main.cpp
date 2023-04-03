@@ -21,11 +21,9 @@
 #include <thread>
 #include <string.h>
 
-#include "appsFreeze.h"
 #include "configUpdate.h"
 #include "fbinkFunctions.h"
 #include "functions.h"
-#include "goingSleep.h"
 #include "monitorEvents.h"
 #include "pipeHandler.h"
 #include "watchdog.h"

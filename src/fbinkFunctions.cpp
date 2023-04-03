@@ -86,8 +86,12 @@ void clearScreen(bool darkModeSet) {
 int printImage(string path) {
   FBInkConfig fbink_cfg = {0};
 
-  return fbink_print_image(fbfd, path.c_str(), 0, 0, &fbink_cfg);
+  // TODO: Rotation management :(
+  int status = fbink_print_image(fbfd, path.c_str(), 0, 0, &fbink_cfg);
   fbink_wait_for_complete(fbfd, LAST_MARKER);
+
+
+  return status;
 }
 
 void screenshotFbink() {

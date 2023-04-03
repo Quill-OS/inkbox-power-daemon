@@ -25,9 +25,9 @@ sshpass -p $passwd ssh $servername "bash -c \"killall -9 ipd\""
 
 # sshpass -p $passwd ssh $servername "bash -c \"service sleep_standby stop\""
 # sshpass -p $passwd ssh $servername "bash -c \"killall -9 sleep_standby.sh\""
-sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
-sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
-sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
+# sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
+# sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
+# sshpass -p $passwd ssh $servername "bash -c \"killall -9 evtest\""
 
 sshpass -p $passwd scp build/ipd $servername:/
 
@@ -42,4 +42,5 @@ sshpass -p $passwd ssh $servername "bash -c \"sync\""
 # shpass -p $passwd ssh $servername "chroot /kobo sh -c \"DEBUG=true /inkbox-power-deamon\""
 
 # Reconnect to wifi
+# /usr/local/bin/wifi/turn_on_with_stats.sh
 # /usr/local/bin/wifi/connect_to_network.sh hotspot 12345678
