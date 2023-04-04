@@ -92,7 +92,7 @@ void goSleep() {
   int count = 0;
   while (continueSleeping == true and dieGoing == false) {
     // 4 - chargerWakeUp. Actually we need this variable anyway to know whether we need to wakeup the device after it or not
-    savedChargerState = getChargerStatus();
+    savedChargerState = getAccurateChargerStatus();
 
     // https://linux.die.net/man/3/klogctl
     klogctl(5, NULL, 0);
@@ -149,7 +149,7 @@ void goSleep() {
       continueSleeping = false;
 
       // 4 - chargerWakeUp
-      if (savedChargerState != getChargerStatus()) {
+      if (savedChargerState != getAccurateChargerStatus()) {
         if (chargerWakeUp == true) {
           log("4 - chargerWakeUp option is enabled, and the charger state is different. Going to sleep one more time", emitter);
           count = 0;

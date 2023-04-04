@@ -20,6 +20,7 @@
 #include <string>
 #include <thread>
 #include <string.h>
+#include <cstdlib> // https://en.cppreference.com/w/cpp/utility/program/getenv
 
 #include "configUpdate.h"
 #include "fbinkFunctions.h"
@@ -61,17 +62,21 @@ using namespace std;
 int main() {
   // Some weird bugs, this is the fix, but I lost the link to the fix
   // TODO: Find link describing fix
-  static_cast<void>(pthread_create);
-  static_cast<void>(pthread_cancel);
+  // static_cast<void>(pthread_create);
+  // static_cast<void>(pthread_cancel);
+  // FIX FOR RANDOM SEGMENTATION FAULTS WHICH IS CAUSING EVEN MORE SEGMENTATION FAULTS OH NOOOOOOOO
 
   std::cout << "InkBox Power Daemon starting ..." << std::endl;
 
   const char * debugEnv = std::getenv("DEBUG");
 
-  if (debugEnv != NULL && strcmp(debugEnv, "true") == 0) {
-    logEnabled = true;
-    log("Debug mode is enabled", emitter);
-    log("Saving logs to /var/log/ipd.log", emitter);
+  // To string to check because of weird segmantation faults i had
+  if (debugEnv != NULL) {
+    if(normalContains(string(debugEnv), "true") == true ) {
+      logEnabled = true;
+      log("Debug mode is enabled", emitter);
+      log("Saving logs to /var/log/ipd.log", emitter);
+    }
   }
 
   prepareVariables();
