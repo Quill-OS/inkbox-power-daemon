@@ -32,24 +32,24 @@
 #include "devices.h"
 
 
-// The whaaat
+// Mystery to solve
 #include "goingSleep.h"
 #include "appsFreeze.h"
-// Without these lines, it does this:
 /*
-kobo:~# strace /sbin/ipd
-execve("/sbin/ipd", ["/sbin/ipd"], 0x7e8d2e30 / 12 vars /) = 0
-set_tls(0x76f4c388)                     = 0
-set_tid_address(0x76f4cf3c)             = 1955
-brk(NULL)                               = 0x55143000
-brk(0x55145000)                         = 0x55145000
-mmap2(0x55143000, 4096, PROT_NONE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x55143000
-mprotect(0x54c5b000, 4096, PROT_READ)   = 0
---- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=NULL} ---
-+++ killed by SIGSEGV +++
-Segmentation fault
+ Without these lines, it does this:
+	kobo:~# strace /sbin/ipd
+	execve("/sbin/ipd", ["/sbin/ipd"], 0x7e8d2e30 / 12 vars /) = 0
+	set_tls(0x76f4c388)                     = 0
+	set_tid_address(0x76f4cf3c)             = 1955
+	brk(NULL)                               = 0x55143000
+	brk(0x55145000)                         = 0x55145000
+	mmap2(0x55143000, 4096, PROT_NONE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x55143000
+	mprotect(0x54c5b000, 4096, PROT_READ)   = 0
+	--- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=NULL} ---
+	+++ killed by SIGSEGV +++
+	Segmentation fault
+ Only after second launch, the first one works
 */
-// Only after second launch, the first one works
 
 const std::string emitter = "main";
 extern std::string model;
@@ -70,7 +70,7 @@ int main() {
 
   const char * debugEnv = std::getenv("DEBUG");
 
-  // To string to check because of weird segmantation faults i had
+  // String to check because of weird segmentation faults I had
   if (debugEnv != NULL) {
     if(normalContains(string(debugEnv), "true") == true ) {
       logEnabled = true;

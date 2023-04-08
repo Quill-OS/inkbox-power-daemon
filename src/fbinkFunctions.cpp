@@ -90,7 +90,6 @@ int printImage(string path) {
   int status = fbink_print_image(fbfd, path.c_str(), 0, 0, &fbink_cfg);
   fbink_wait_for_complete(fbfd, LAST_MARKER);
 
-
   return status;
 }
 

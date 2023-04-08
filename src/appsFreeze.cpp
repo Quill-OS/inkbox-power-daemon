@@ -18,14 +18,14 @@ extern vector<int> appsPids;
 
 // https://ofstack.com/C++/9293/linux-gets-pid-based-on-pid-process-name-and-pid-of-c.html
 int getPidByName(string taskName) {
-  log("Looking for process named like " + taskName, emitter);
+  log("Looking for process matching '" + taskName + "' string", emitter);
   struct dirent *entry = nullptr;
   DIR *dp = nullptr;
 
   string proc = "/proc/";
   dp = opendir(proc.c_str());
   while ((entry = readdir(dp))) {
-    // cmdline is more accurate, status sometimes is buggy?
+    // cmdline is more accurate, status is sometimes buggy
     ifstream file(proc + entry->d_name + "/cmdline");
     string firstLine;
     getline(file, firstLine);
@@ -43,10 +43,10 @@ int getPidByName(string taskName) {
   return -1;
 }
 
-// Can't be used with user apps because it targets everything - unshare etc which crashes it
-// Maybe usefull in the future
+// Can't be used with user applications because it targets everything (unshare et al.) which crashes them
+// May be useful in the future
 vector<int> getPidsByNameAll(string taskName) {
-  log("Looking for processes named like " + taskName, emitter + ":getPidsByNameAll");
+  log("Looking for processes matching '" + taskName + "' string", emitter + ":getPidsByNameAll");
 
   struct dirent *entry = nullptr;
   DIR *dp = nullptr;
@@ -55,8 +55,8 @@ vector<int> getPidsByNameAll(string taskName) {
   dp = opendir(proc.c_str());
 
   vector<int> pidsRet;
-  while ((entry = readdir(dp))) {
-    // cmdline is more accurate, status sometimes is buggy?
+  while((entry = readdir(dp))) {
+    // cmdline is more accurate, status is sometimes buggy
     ifstream file(proc + entry->d_name + "/cmdline");
     string firstLine;
     getline(file, firstLine);
@@ -94,7 +94,7 @@ int getRunningUserApp() {
   // Prioritise .bin files
   int fileBin = getPidByName(name + ".bin");
   if(fileBin != -1) {
-    log("Found user app bin file, that's good", emitter);
+    log("Found user application binary file, that's good", emitter);
     return fileBin;
   };
   return getPidByName(name);

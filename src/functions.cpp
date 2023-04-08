@@ -35,7 +35,7 @@ FBInkDump dump;
 vector<int> appsPids;
 bool wasUsbNetOn;
 
-// Config var
+// Configuration variables
 int cinematicBrightnessDelayMs;
 bool lockscreen;
 string lockscreenBackgroundMode = "";

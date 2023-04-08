@@ -255,7 +255,7 @@ void startWatchdog() {
           currentActiveThread_mtx.lock();
           sleep_mtx.lock();
           if(currentActiveThread == Nothing && watchdogNextStep == Nothing && sleepJob == Nothing ) {
-            log("launching charger controller located at: " + chargerControllerPath, emitter);
+            log("Launching charger controller located at: " + chargerControllerPath, emitter);
             const char *args[] = {chargerControllerPath.c_str(), nullptr};
             int fakePid = 0;
             posixSpawnWrapper(chargerControllerPath, args, true, &fakePid);

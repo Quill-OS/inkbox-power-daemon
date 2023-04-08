@@ -58,7 +58,7 @@ void startIdleSleep() {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     waitCount = waitCount + 1;
     if(waitCount > 90) {
-      log("Waited 1,5 minute for inkbox-bin, giving up, going on with idle sleep", emitter);
+      log("Waited 1.5 minute for inkbox-bin: giving up; starting idle sleep service", emitter);
       break;
     }
   }
