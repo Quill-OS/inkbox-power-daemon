@@ -180,12 +180,17 @@ void startMonitoringDevKT() {
     msg.msg_iovlen = 1;
 
     while(true) {
-        /* Read message from kernel */
-        recvmsg(sockFd, &msg, 0);
-        char * message = (char*)NLMSG_DATA(nlh);
-        if(strcmp(message, "virtual/misc/yoshibutton") == 0) {
+      /* Read message from kernel */
+      recvmsg(sockFd, &msg, 0);
+      char * message = (char*)NLMSG_DATA(nlh);
+      if(strcmp(message, "virtual/misc/yoshibutton") == 0) {
+        // Fix issues caused by `udevadm trigger'
+        if(readFile("/run/power_button_cancel") == "true\n") {
+          log("Ignoring power button input event as it has been disabled by '/run/power_button_cancel'", emitter);
+          remove("/run/power_button_cancel");
+        }
+        else {
           log("monitorEvents: Received power button trigger, attempting device suspend", emitter);
-
           waitMutex(&watchdogStartJob_mtx);
           watchdogStartJob = true;
           watchdogStartJob_mtx.unlock();
@@ -194,8 +199,9 @@ void startMonitoringDevKT() {
           newSleepCondition = powerButton;
           newSleepCondition_mtx.unlock();
 
-          this_thread::sleep_for(afterEventWait);
+	  this_thread::sleep_for(afterEventWait);
         }
+      }
     }
     close(sockFd);
 }
