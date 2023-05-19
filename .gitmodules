@@ -1,6 +1,6 @@
 [submodule "lib/libevdev"]
 	path = lib/libevdev
-	url = git@github.com:freedesktop/libevdev
+	url = https://gitlab.freedesktop.org/libevdev/libevdev
 [submodule "lib/FBInk"]
 	path = lib/FBInk
 	url = git@github.com:NiLuJe/FBInk
