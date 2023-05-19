@@ -133,19 +133,19 @@ void restoreFbDepth() {
   if (model == "n437" or model == "kt") {
     if (fileExists("/kobo/tmp/inkbox_running") == true) {
       // Set bitdepth to 8 BPP
-      if(fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 8, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) != 0) {
+      if(fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 8, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
         log("FBInk: Something went wrong when trying to change screen bitdepth to 8 bpp", emitter);
       }
     } else {
       // X11 is running, elsewise there is something wrong ...
       if (model == "kt") {
         // Set bitdepth to 32 BPP
-        if(fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 32, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) != 0) {
+        if(fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 32, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
           log("FBInk: Something went wrong when trying to change screen bitdepth to 32 bpp", emitter);
 	}
       } else {
         // Set bitdepth to 16 BPP
-        if(fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 16, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) != 0) {
+        if(fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 16, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
           log("FBInk: Something went wrong when trying to change screen bitdepth to 16 bpp", emitter);
         }
       }
