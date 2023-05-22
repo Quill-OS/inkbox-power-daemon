@@ -2,6 +2,11 @@
 #include <string>
 #include <thread>
 
+// blank
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <linux/fb.h>
+
 #include "afterSleep.h"
 #include "functions.h"
 #include "goingSleep.h"
@@ -35,6 +40,9 @@ extern bool chargerControllerEnabled;
 extern string chargerControllerPath;
 bool chargerConnected = false; // First boot up the device, then connect the charger, so it will work
 
+// Xorg blank
+extern bool blankNeeded;
+
 // TODO: Implement smarter join function
 
 void startWatchdog() {
@@ -43,6 +51,13 @@ void startWatchdog() {
   thread prepareThread;
   thread afterThread;
   thread goingThread;
+
+  unsigned long blankArg;
+  int blankFd;
+  if(blankNeeded == true) {
+    blankFd = open("/dev/fb0", O_RDONLY | O_CLOEXEC | O_NONBLOCK);
+    blankArg = VESA_NO_BLANKING;
+  }
 
   while (true) {
     bool saveWatchdogState = false;
@@ -264,6 +279,11 @@ void startWatchdog() {
           sleep_mtx.unlock();
         }
       }
+    }
+
+    // Xorg fix
+    if(blankNeeded == true) {
+      ioctl(blankFd, FBIOBLANK, blankArg);
     }
 
     std::this_thread::sleep_for(timespan);

@@ -88,6 +88,10 @@ string ledPath = "none";
 pid_t connectToWifiPid = 0;
 pid_t lockscreenPid = 0;
 
+// for blank
+bool xorgRunning = false;
+bool blankNeeded = false;
+
 // Functions
 void log(string toLog, string emitter) {
   if (logEnabled == true) {
@@ -295,6 +299,52 @@ void prepareVariables() {
     chargerControllerEnabled = false;
   }
 
+  // X - Xorg checking
+  string xorgFlagPath = "/boot/flags/X11_START";
+  if (fileExists(xorgFlagPath) == true) {
+    if(readConfigBool(xorgFlagPath) == true) {
+      xorgRunning = true;
+    }
+    else {
+      xorgRunning = false;
+    }
+  }
+
+  // Blank checking for xorg
+  if(model == "kt") {
+    blankNeeded = true;
+  }
+  else {
+    if(xorgRunning == true) {
+      string blankFlag = "/boot/flags/X11_START";
+      if(fileExists(blankFlag) == true) {
+        if(readConfigBool(xorgFlagPath) == false) {
+          if (model == "n306" or model == "n873") {
+            blankNeeded = true;
+          }
+          else {
+            blankNeeded = false;
+          }
+        }
+      } 
+      else {
+        if (model == "n306" or model == "n873") {
+          blankNeeded = true;
+        }
+        else {
+          blankNeeded = false;
+        }
+      }
+    }
+    else {
+      blankNeeded = false;
+    }
+  }
+
+  if(blankNeeded == true) {
+    log("Blank will be used", "functions");
+  }
+
   getLedPath();
 
   // Handle turning off the LED usage option
@@ -414,7 +464,7 @@ bool readConfigBool(string path) {
   indata.open(path);
   if (!indata) {
     log("Couldn't read config file: " + path, emitter);
-    return "none";
+    return false;
   }
   indata >> stringData;
   while (!indata.eof()) {
