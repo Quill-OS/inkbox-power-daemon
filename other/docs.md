@@ -56,7 +56,7 @@ It will also turn it on when the device is charging and will be turned off when 
 ### `7-idleSleep`
 This file contains an integer that determines, in seconds, when to go to sleep when no touch input is received from the screen. `0` means 'Never', minimum is `15` seconds.
 <br>
-By default, it's set to `60`.
+By default, it's set to `300`.
 
 ### `8-customCase`
 This option is complicated, I will try my best to explain it.
