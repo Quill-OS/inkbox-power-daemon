@@ -262,7 +262,7 @@ void prepareVariables() {
     idleSleepTime = stoi(intToConvert);
   }
   else {
-    writeFileString(idleSleepTimePath, "60");
+    writeFileString(idleSleepTimePath, "300");
     idleSleepTime = 60;
   }
 
