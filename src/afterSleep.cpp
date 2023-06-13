@@ -123,7 +123,8 @@ void afterSleep() {
   }
 
   if(lockscreen == true) {
-    if(getPidByName("launch_lockscreen.sh") == -1) {
+    // Overall lockscreen - this will catch those 2 scripts and one binary - they should be killed anyway
+    if(getPidByName("lockscreen") == -1) {
       launchLockscreen();
     }
   }

@@ -524,3 +524,19 @@ void launchLockscreen() {
   const char *args[] = {"/usr/local/bin/launch_lockscreen.sh", nullptr};
   posixSpawnWrapper("/usr/local/bin/launch_lockscreen.sh", args, false, &lockscreenPid);
 }
+
+// Not tested on KT, for sure
+bool stringContainsUSBmsModule(string fileContent) {
+  /*
+  Module                  Size  Used by
+  g_mass_storage          4248  0
+  usb_f_mass_storage     38079  2 g_mass_storage
+  libcomposite           44430  2 usb_f_mass_storage,g_mass_storage
+  configfs               23581  3 libcomposite,usb_f_mass_storage
+  */
+  if(normalContains(fileContent, "g_mass_storage") == true || normalContains(fileContent, "usb_f_mass_storage") == true ||normalContains(fileContent, "libcomposite") == true ||
+  normalContains(fileContent, "configfs") == true) {
+    return true;
+  }
+  return false;
+} 

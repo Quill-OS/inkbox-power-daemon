@@ -80,6 +80,9 @@ void prepareSleep() {
   // If this needs to be used anywhere else too, make a function out od it
   log("lockscreenPid is " + to_string(lockscreenPid), emitter);
   if (lockscreenPid != 0) {
+    // Kill children too
+    killProcess("lockscreen-bin");
+    killProcess("lockscreen");
     killProcess("launch_lockscreen.sh");
     log("Collecting lockscreen zombie", emitter);
     waitpid(lockscreenPid, 0, 0);

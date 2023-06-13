@@ -72,8 +72,16 @@ void startWatchdog() {
 
       waitMutex(&sleep_mtx);
 
+      // Check if we are in a USB mass storage session - if yes - ignore everything
+      string modules = readFile("/proc/modules");
+      if(stringContainsUSBmsModule(modules) == true) {
+        log("We are in a USBms session, ignoring all possible sleep calls", emitter);
+        sleepJob = Skip;
+      }
+
       // Handling 3 - whenChargerSleep
-      if (whenChargerSleep == false) {
+      // sleepJob checking because USBms modules
+      if (whenChargerSleep == false && sleepJob != Skip) {
         if (getChargerStatus() == true) {
           log("Skipping watchdog event because of option '3 - whenChargerSleep'", emitter);
           waitMutex(&newSleepCondition_mtx);
@@ -263,13 +271,13 @@ void startWatchdog() {
     ledManager();
     
     if(chargerControllerEnabled == true) {
-      bool chargerStatusTmp = getChargerStatus();
-      if(chargerConnected != chargerStatusTmp) {
-        chargerConnected = chargerStatusTmp;
-        if(chargerConnected == true) {
-          currentActiveThread_mtx.lock();
-          sleep_mtx.lock();
-          if(currentActiveThread == Nothing && watchdogNextStep == Nothing && sleepJob == Nothing ) {
+      if(currentActiveThread == Nothing && watchdogNextStep == Nothing && sleepJob == Nothing) {
+        bool chargerStatusTmp = getChargerStatus();
+        if(chargerConnected != chargerStatusTmp) {
+          chargerConnected = chargerStatusTmp;
+          if(chargerConnected == true) {
+            currentActiveThread_mtx.lock();
+            sleep_mtx.lock();
             log("Launching charger controller located at: " + chargerControllerPath, emitter);
             const char *args[] = {chargerControllerPath.c_str(), nullptr};
             int fakePid = 0;

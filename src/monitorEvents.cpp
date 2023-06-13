@@ -86,12 +86,7 @@ void startMonitoringDev() {
         waitMutex(&newSleepCondition_mtx);
         newSleepCondition = powerButton;
         newSleepCondition_mtx.unlock();
-
-        this_thread::sleep_for(afterEventWait);
-      }
-
-      // For hall sensor (sleepcover)
-      if (codeName == "KEY_F1" and ev.value == 1) {
+      } else if (codeName == "KEY_F1" and ev.value == 1) { // For hall sensor (sleepcover)
         if (customCase == true) {
           log("Option '8 - customCase' is true", emitter);
           customCaseCount = customCaseCount + 1;
@@ -110,10 +105,7 @@ void startMonitoringDev() {
             waitMutex(&newSleepCondition_mtx);
             newSleepCondition = halSensor;
             newSleepCondition_mtx.unlock();
-
-            this_thread::sleep_for(afterEventWait);
           }
-
         } else {
           log("Option '8 - customCase' is false:", emitter);
           log("monitorEvents: Received hall sensor trigger, attempting device suspend", emitter);
@@ -125,8 +117,6 @@ void startMonitoringDev() {
           waitMutex(&newSleepCondition_mtx);
           newSleepCondition = halSensor;
           newSleepCondition_mtx.unlock();
-
-          this_thread::sleep_for(afterEventWait);
         }
       }
       if (codeName == "KEY_F1" and ev.value == 0) {
@@ -140,11 +130,14 @@ void startMonitoringDev() {
         }
       }
     }
-
     this_thread::sleep_for(timespan);
-
-  } while (rc == 1 || rc == 0 || rc == -EAGAIN);
+  }
+  while (rc == 1 || rc == 0 || rc == -EAGAIN);
   log("Error: Monitoring events function died unexpectedly", emitter);
+  close(fd);
+  // Possibly do this for KT too
+  // Possible, experimental fix for sometimes IPD not responding
+  startMonitoringDev();
 }
 
 void startMonitoringDevKT() {
