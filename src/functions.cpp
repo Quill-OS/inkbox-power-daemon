@@ -235,8 +235,14 @@ void prepareVariables() {
     }
   } 
   else {
-    writeFileString(reconnectWifiPath, "true");
-    reconnectWifi = true;
+    if(model == "n905b") {
+      writeFileString(reconnectWifiPath, "false");
+      reconnectWifi = false;
+    }
+    else {
+      writeFileString(reconnectWifiPath, "true");
+      reconnectWifi = true;
+    }
   }
 
   // 6 - ledUsage
