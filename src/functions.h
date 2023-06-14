@@ -26,7 +26,7 @@ bool readConfigBool(string path);
 void posixSpawnWrapper(string path, const char *args[], bool wait, pid_t* pid);
 void notifySend(string message);
 void launchLockscreen();
-bool stringContainsUSBmsModule(string fileContent);
+bool stringContainsUSBMSModule(string fileContent);
 
 enum goSleepCondition
 {
