@@ -142,7 +142,7 @@ void restoreFbDepth() {
         // Set bitdepth to 32 BPP
         if(fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 32, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
           log("FBInk: Something went wrong when trying to change screen bitdepth to 32 bpp", emitter);
-	}
+	      }
       } else {
         // Set bitdepth to 16 BPP
         if(fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 16, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {

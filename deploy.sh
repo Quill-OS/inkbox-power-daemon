@@ -4,6 +4,7 @@
 # source /mnt/HDD/Project/qt-kobo/koxtoolchain/refs/x-compile.sh kobo env
 # /mnt/HDD/Project/qt-kobo/x-tools/arm-kobo-linux-gnueabihf/bin/arm-kobo-linux-gnueabihf-g++ -o ../inkbox-power-deamon main.cpp
 
+# Compile with this script. Do it.
 export PATH=$PATH:/home/build/inkbox/kernel/toolchain/armv7l-linux-musleabihf-cross/bin
 rm -rf build
 mkdir build
