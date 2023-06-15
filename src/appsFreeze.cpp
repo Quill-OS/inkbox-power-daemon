@@ -27,6 +27,10 @@ int getPidByName(string taskName) {
   while ((entry = readdir(dp))) {
     // cmdline is more accurate, status is sometimes buggy
     ifstream file(proc + entry->d_name + "/cmdline");
+    // No need to call fileExists, to avoid creating another ifstream
+    if(file.good() == false) {
+      continue;
+    }
     string firstLine;
     getline(file, firstLine);
     // https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
