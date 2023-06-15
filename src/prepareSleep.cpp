@@ -43,6 +43,9 @@ extern bool deepSleep;
 
 bool diePrepare;
 
+// To show warning
+extern bool xorgAppRunning;
+
 // void checkExitPrepare()
 void CEP() {
   if (diePrepare == false) {
@@ -108,7 +111,6 @@ void prepareSleep() {
     if(getPidByName("lockscreen") != -1) {
       killProcess("lockscreen");
     }
-
     freezeApps();
   }
 
@@ -117,6 +119,16 @@ void prepareSleep() {
     clearScreen(darkMode);
     std::this_thread::sleep_for(std::chrono::milliseconds(150));
     sleepScreen();
+  }
+
+  CEP();
+  if (diePrepare == false) {
+    if(xorgAppRunning == true) {
+      // Xorg is experimental hehe, it's just a warning - I don't trust xorg so leave it
+      // + don't make it more latters - it barely fits on the nia
+      // Maybe doesn't fit on the mini
+      notifySend("Suspending Xorg apps is experimental");
+    }
   }
 
   CEP();

@@ -91,6 +91,7 @@ pid_t lockscreenPid = 0;
 // for blank
 bool xorgRunning = false;
 bool blankNeeded = false;
+bool xorgAppRunning = false;
 
 // Functions
 void log(string toLog, string emitter) {
@@ -437,6 +438,23 @@ string executeCommand(string command) {
 
 string normalReplace(string mainString, string strToLookFor, string replacement) {
   return std::regex_replace(mainString, std::regex(strToLookFor), replacement);
+}
+
+// While reading file, xorg process in proc, do not ask.
+string repairString(string word) {
+    string newWord;
+    for (int i = 0; i < word.length(); i++) {
+        // https://stackoverflow.com/questions/31193454/empty-character-constant-in-c
+        if (word[i] != '\0') {
+          newWord += word[i];
+        }
+    }
+  return newWord;
+}
+
+string removeSpaces(string word) {
+      word.erase(std::remove_if(word.begin(), word.end(), ::isspace), word.end());
+      return word;
 }
 
 string readConfigStringNoLog(string path) {

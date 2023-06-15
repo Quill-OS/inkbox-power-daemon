@@ -27,6 +27,8 @@ void posixSpawnWrapper(string path, const char *args[], bool wait, pid_t* pid);
 void notifySend(string message);
 void launchLockscreen();
 bool stringContainsUSBMSModule(string fileContent);
+string repairString(string word);
+string removeSpaces(string word);
 
 enum goSleepCondition
 {
