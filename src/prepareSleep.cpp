@@ -124,10 +124,8 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     if(xorgAppRunning == true) {
-      // Xorg is experimental hehe, it's just a warning - I don't trust xorg so leave it
-      // + don't make it more latters - it barely fits on the nia
-      // Maybe doesn't fit on the mini
-      notifySend("Suspending Xorg apps is experimental");
+      // Experimental
+      notifySend("KoBox suspend is experimental");
     }
   }
 
