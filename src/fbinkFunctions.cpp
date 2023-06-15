@@ -131,7 +131,7 @@ void restoreFbDepth() {
   // https://github.com/NiLuJe/FBInk/blob/9c1be635137ee5d8db9f8d5516aad1c818abc31d/fbink.h#L1287
   const FBInkConfig fbink_cfg = {0};
   if (model == "n437" or model == "kt") {
-    if (fileExists("/kobo/tmp/inkbox_running") == true) {
+    if (fileExists("/var/run/openrc/started/inkbox_gui") == true) {
       // Set bitdepth to 8 BPP
       if(fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, 8, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
         log("FBInk: Something went wrong when trying to change screen bitdepth to 8 bpp", emitter);
