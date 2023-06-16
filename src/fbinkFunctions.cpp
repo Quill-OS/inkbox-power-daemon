@@ -16,6 +16,10 @@ extern int fbfd;
 extern FBInkDump dump;
 extern string model;
 
+// Because of lockscreen at boot it sometimes isin't taken, so avoid dumping random bytes
+// Default value here is very important
+bool dumpSuccess = false;
+
 void initFbink() {
   fbfd = fbink_open();
   if (fbfd == -1) {
@@ -104,11 +108,19 @@ void screenshotFbink() {
 
   if (fbink_dump(fbfd, &dump) < 0) {
     log("FBInk: Something went wrong while trying to dump the screen", emitter);
-  };
+    dumpSuccess = false;
+  } 
+  else {
+    dumpSuccess = true;
+  }
   log("Screen dump done", emitter);
 }
 
 void restoreFbink(bool darkMode) {
+  if(dumpSuccess == false) {
+    log("Variable dumpSuccess is false, avoid taking dump", emitter);
+    return void();
+  }
   FBInkConfig fbink_cfg = {0};
   if (darkMode == true) {
     fbink_cfg.is_nightmode = true;
@@ -117,11 +129,12 @@ void restoreFbink(bool darkMode) {
   if (fbink_init(fbfd, &fbink_cfg) < 0) {
     log("Failed to initialize FBInk in restoreFbink, aborting", emitter);
   }
-
-  fbinkRefreshScreen();
-  fbink_wait_for_complete(fbfd, LAST_MARKER);
-  fbink_restore(fbfd, &fbink_cfg, &dump);
-  fbink_wait_for_complete(fbfd, LAST_MARKER);
+  else {
+    fbinkRefreshScreen();
+    fbink_wait_for_complete(fbfd, LAST_MARKER);
+    fbink_restore(fbfd, &fbink_cfg, &dump);
+    fbink_wait_for_complete(fbfd, LAST_MARKER);
+  }
 }
 
 void closeFbink() { fbink_close(fbfd); }

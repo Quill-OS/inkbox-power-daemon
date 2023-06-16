@@ -110,7 +110,7 @@ void afterSleep() {
   CEA();
   if (dieAfter == false) {
     if(lockscreen == true) {
-      // Overall lockscreen - this will catch those 2 scripts and one binary - they should be killed anyway
+      // Overall lockscreen - this will catch those 2 scripts and one binary - they should be killed anyway - well not at boot
       if(getPidByName("lockscreen") == -1) {
         launchLockscreen();
       }

@@ -108,10 +108,9 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     // To prevent weird things from happening
-    if(getPidByName("launch_lockscreen.sh") != -1) {
+    // killProcess doesn't need checking, it does it internally.. don't touch my code that much ~Szybet
+    if(getPidByName("inkbox.sh") == -1) {
       killProcess("launch_lockscreen.sh");
-    }
-    if(getPidByName("lockscreen") != -1) {
       killProcess("lockscreen");
     }
     freezeApps();
