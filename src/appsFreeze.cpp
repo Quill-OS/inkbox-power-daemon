@@ -127,26 +127,11 @@ vector<int> getRunningXorgPrograms() {
       programs.insert(programs.end(), programsNoSpace.begin(), programsNoSpace.end());  
       xorgAppRunning = !programs.empty();
 
-      // Also those:
       vector<int> otherXorgPrograms;
-      string i3ProcessName = "i3";
-      otherXorgPrograms.push_back(getPidByName(removeSpaces(i3ProcessName)));
-      otherXorgPrograms.push_back(getPidByName(i3ProcessName));
-
-      string vncProcessName = "x11vnc";
-      otherXorgPrograms.push_back(getPidByName(removeSpaces(vncProcessName)));
-      otherXorgPrograms.push_back(getPidByName(vncProcessName));
 
       string fbinkXdamageProcessName = "fbink_xdamage";
       otherXorgPrograms.push_back(getPidByName(removeSpaces(fbinkXdamageProcessName)));
       otherXorgPrograms.push_back(getPidByName(fbinkXdamageProcessName));
-
-      /*
-      // This was causing write to /power/state to freeze the thread
-      string xProcessName = "X -nocursor";
-      otherXorgPrograms.push_back(getPidByName(removeSpaces(xProcessName)));
-      otherXorgPrograms.push_back(getPidByName(xProcessName));
-      */
 
       string otherVncProcessName = "vnc-nographic";
       otherXorgPrograms.push_back(getPidByName(removeSpaces(otherVncProcessName)));
