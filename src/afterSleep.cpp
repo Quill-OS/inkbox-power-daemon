@@ -96,6 +96,7 @@ void afterSleep() {
   }
 
   // Moving Wi-Fi before apps because the GUI status icon would freak out
+  // This will run in the background - even if lockscreen is launched
   if (reconnectWifi == true) {
     log("Reconnecting to Wi-Fi because of option '5 - wifiReconnect'", emitter);
     CEA();
@@ -108,69 +109,70 @@ void afterSleep() {
 
   CEA();
   if (dieAfter == false) {
-    if(lockscreen == false) {
-      unfreezeApps();
-      std::this_thread::sleep_for(std::chrono::milliseconds(650));
-      restorePipeSend();
+    if(lockscreen == true) {
+      // Overall lockscreen - this will catch those 2 scripts and one binary - they should be killed anyway
+      if(getPidByName("lockscreen") == -1) {
+        launchLockscreen();
+      }
     }
   }
 
   CEA();
   if (dieAfter == false) {
-    if(lockscreen == false) {
-      restoreFbink(darkMode);
+    // Needed by lockscreen but takes time if lockscreen is off
+    if(lockscreen == true) {
+      setBrightnessCin(restoreBrightness(), 0);
+      remove("/tmp/savedBrightness");
     }
   }
 
+  // Here it waits for lockscreen to exit
   if(lockscreen == true) {
-    // Overall lockscreen - this will catch those 2 scripts and one binary - they should be killed anyway
-    if(getPidByName("lockscreen") == -1) {
-      launchLockscreen();
+    while(dieAfter == false and getPidByName("lockscreen") != -1) {
+      CEA();
+      std::this_thread::sleep_for(std::chrono::milliseconds(400));
+      log("Waiting for launch_lockscreen.sh to finish", emitter);
     }
+    log("Exitin waiting for lockscreen", emitter);
   }
 
   CEA();
   if (dieAfter == false) {
-    setBrightnessCin(restoreBrightness(), 0);
-    remove("/tmp/savedBrightness");
+    restoreFbink(darkMode);
+    // It has a delay?
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
   }
 
+  CEA();
+  if (dieAfter == false) {
+    unfreezeApps();
+    std::this_thread::sleep_for(std::chrono::milliseconds(650));
+    restorePipeSend();
+  }
+
+  CEA();
+  if (dieAfter == false) {
+    if(lockscreen == false) {
+      setBrightnessCin(restoreBrightness(), 0);
+      remove("/tmp/savedBrightness");
+    }
+  }
+
+  // After lockscreen for a bit more security
+  // And after everything else for speed
   CEA();
   if (dieAfter == false) {
     startUsbNet();
   }
 
+  // Finish...
   CEA();
   if (dieAfter == false) {
     waitMutex(&sleep_mtx);
     sleepJob = Nothing;
     sleep_mtx.unlock();
   }
-
-  // Put this here the second time because if someone spams the button, this thread will unfreeze it but prepareSleep will freeze them and then go to sleep
-  CEA();
-  if (dieAfter == false) {
-    if(lockscreen == false) {
-      unfreezeApps();
-      std::this_thread::sleep_for(std::chrono::milliseconds(650));
-      restorePipeSend();
-    }
-  }
-
-  if(lockscreen == true) {
-    while(dieAfter == false and getPidByName("launch_lockscreen.sh") != -1) {
-      CEA();
-      std::this_thread::sleep_for(std::chrono::milliseconds(400));
-      log("Waiting for launch_lockscreen.sh to finish", emitter);
-    }
-    if(getPidByName("launch_lockscreen.sh") == -1) {
-      log("Restoring FBInk after lockscreen launch", emitter);
-      restoreFbink(darkMode);
-    }
-    else {
-      log("ERROR: Not restoring FBInk after lockscreen launch", emitter);
-    }
-  }
+  // Everything after this will well, die
 
   occupyLed.unlock();
   waitMutex(&currentActiveThread_mtx);

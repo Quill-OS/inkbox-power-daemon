@@ -67,15 +67,18 @@ void prepareSleep() {
 
   CEP();
   if (diePrepare == false) {
-    screenshotFbink();
-    if(lockscreen == true) {
-      string fbgrabPath = "/usr/bin/fbgrab";
-      const char *args[] = {fbgrabPath.c_str(), "/tmp/lockscreen.png", nullptr};
-      int fakePid = 0;
-      posixSpawnWrapper(fbgrabPath.c_str(), args, true, &fakePid);
-    }
-    else {
-      std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    // To avoid screen shooting the previous lockscreen
+    if(getPidByName("lockscreen") == -1) {
+      screenshotFbink();
+      if(lockscreen == true) {
+        string fbgrabPath = "/usr/bin/fbgrab";
+        const char *args[] = {fbgrabPath.c_str(), "/tmp/lockscreen.png", nullptr};
+        int fakePid = 0;
+        posixSpawnWrapper(fbgrabPath.c_str(), args, true, &fakePid);
+      }
+      else {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      }
     }
   }
 
