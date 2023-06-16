@@ -164,7 +164,7 @@ void prepareVariables() {
     // /data/config/20-sleep_daemon/appsList
     writeFileString("/data/config/20-sleep_daemon/appsList",
                     "inkbox-bin\noobe-inkbox-bin\nlockscreen-bin\nqalculate-"
-                    "bin\nqreversi-bin\n2048-bin\nscribble");
+                    "bin\nqreversi-bin\n2048-bin");
     writeFileString("/data/config/20-sleep_daemon/updateConfig", "false");
   }
 
