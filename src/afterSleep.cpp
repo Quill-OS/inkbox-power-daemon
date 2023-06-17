@@ -111,7 +111,7 @@ void afterSleep() {
   if (dieAfter == false) {
     if(lockscreen == true) {
       // Overall lockscreen - this will catch those 2 scripts and one binary - they should be killed anyway - well not at boot
-      int lockscreenPid = getPidByName("lockscreen");
+      int lockscreenPid = getPidByName("lockscreen-bin");
       if(lockscreenPid == -1) {
         launchLockscreen();
       } else {
@@ -133,7 +133,11 @@ void afterSleep() {
 
   // Here it waits for lockscreen to exit
   if(lockscreen == true) {
-    while(dieAfter == false and getPidByName("lockscreen") != -1) {
+    CEA();
+    if(getPidByName("inkbox-bin") == -1) {
+      restoreFbink(darkMode);
+    }
+    while(dieAfter == false and getPidByName("lockscreen-bin") != -1) {
       CEA();
       std::this_thread::sleep_for(std::chrono::milliseconds(400));
       log("Waiting for launch_lockscreen.sh to finish", emitter);
@@ -143,9 +147,12 @@ void afterSleep() {
 
   CEA();
   if (dieAfter == false) {
-    restoreFbink(darkMode);
-    // It has a delay?
-    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    if(getPidByName("inkbox-bin") != -1) {
+      // THIS DOESN'T WORK // ~tux-linux
+      restoreFbink(darkMode);
+      // It has a delay?
+      std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    }
   }
 
   CEA();

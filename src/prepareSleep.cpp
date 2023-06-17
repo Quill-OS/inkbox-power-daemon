@@ -68,7 +68,7 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     // To avoid screen shooting the previous lockscreen
-    if(getPidByName("lockscreen") == -1 && getPidByName("inkbox.sh") == -1) {
+    if(getPidByName("lockscreen-bin") == -1 && getPidByName("inkbox.sh") == -1) {
       screenshotFbink();
       if(lockscreen == true) {
         string fbgrabPath = "/usr/bin/fbgrab";
@@ -108,9 +108,10 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     // To prevent weird things from happening
-    // killProcess doesn't need checking, it does it internally.. don't touch my code that much ~Szybet
+    // killProcess doesn't need checking, it does it internally
     if(getPidByName("inkbox.sh") == -1) {
       killProcess("launch_lockscreen.sh");
+      killProcess("lockscreen-bin");
       killProcess("lockscreen");
     }
     freezeApps();
