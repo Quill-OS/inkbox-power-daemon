@@ -1,12 +1,12 @@
 #include "afterSleep.h"
 #include "appsFreeze.h"
-#include "wifi.h"
 #include "cinematicBrightness.h"
 #include "devices.h"
 #include "fbinkFunctions.h"
 #include "functions.h"
 #include "pipeHandler.h"
 #include "usbnet.h"
+#include "wifi.h"
 
 #include <chrono>
 #include <exception>
@@ -43,20 +43,19 @@ extern mutex occupyLed;
 bool dieAfter;
 
 // Explanation why this code looks garbage
-// Threads in C++ can't be killed from the outside, so its needed to check every step
-// for a variable change.
-// "Use another library!" No. thats such a simple program
-// that it doesn't need it + other libraries do the same, for example
+// Threads in C++ can't be killed from the outside, so its needed to check every
+// step for a variable change. "Use another library!" No. thats such a simple
+// program that it doesn't need it + other libraries do the same, for example
 // boost::thread does exactly what I have described above, just in the
 // background
 // ~Szybet
 
 // void checkExitAfter()
 void CEA() {
-  if (dieAfter == false) {
+  if(dieAfter == false) {
     manageChangeLedState();
     waitMutex(&sleep_mtx);
-    if (sleepJob != After) {
+    if(sleepJob != After) {
       sleep_mtx.unlock();
       log("Terminating afterSleep", emitter);
       dieAfter = true;
@@ -79,13 +78,13 @@ void afterSleep() {
   close(fd);
 
   CEA();
-  if (dieAfter == false) {
+  if(dieAfter == false) {
     writeFileString("/tmp/sleep_mode", "false");
     restoreFbDepth();
   }
 
   CEA();
-  if (dieAfter == false) {
+  if(dieAfter == false) {
     string hwclockPath = "/sbin/hwclock";
     const char *args[] = {hwclockPath.c_str(), "--hctosys", "-u", nullptr};
     int fakePid = 0;
@@ -97,10 +96,10 @@ void afterSleep() {
 
   // Moving Wi-Fi before apps because the GUI status icon would freak out
   // This will run in the background - even if lockscreen has been launched
-  if (reconnectWifi == true) {
+  if(reconnectWifi == true) {
     log("Reconnecting to Wi-Fi because of option '5 - wifiReconnect'", emitter);
     CEA();
-    if (dieAfter == false) {
+    if(dieAfter == false) {
       turnOnWifi();
     }
   } else {
@@ -108,9 +107,10 @@ void afterSleep() {
   }
 
   CEA();
-  if (dieAfter == false) {
+  if(dieAfter == false) {
     if(lockscreen == true) {
-      // Overall lockscreen - this will catch those 2 scripts and one binary - they should be killed anyway - well not at boot
+      // Lockscreen should have been killed anyway
+      // well not at boot
       int lockscreenPid = getPidByName("lockscreen-bin");
       if(lockscreenPid == -1) {
         launchLockscreen();
@@ -123,7 +123,7 @@ void afterSleep() {
   }
 
   CEA();
-  if (dieAfter == false) {
+  if(dieAfter == false) {
     // Needed by lockscreen but takes time if lockscreen is off
     if(lockscreen == true) {
       setBrightnessCin(restoreBrightness(), 0);
@@ -133,10 +133,6 @@ void afterSleep() {
 
   // Here it waits for lockscreen to exit
   if(lockscreen == true) {
-    CEA();
-    if(getPidByName("inkbox-bin") == -1) {
-      restoreFbink(darkMode);
-    }
     while(dieAfter == false and getPidByName("lockscreen-bin") != -1) {
       CEA();
       std::this_thread::sleep_for(std::chrono::milliseconds(400));
@@ -146,24 +142,21 @@ void afterSleep() {
   }
 
   CEA();
-  if (dieAfter == false) {
-    if(getPidByName("inkbox-bin") != -1) {
-      // THIS DOESN'T WORK // ~tux-linux
-      restoreFbink(darkMode);
-      // It has a delay?
-      std::this_thread::sleep_for(std::chrono::milliseconds(400));
-    }
+  if(dieAfter == false) {
+    restoreFbink(darkMode);
+    // It has a delay?
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
   }
 
   CEA();
-  if (dieAfter == false) {
+  if(dieAfter == false) {
     unfreezeApps();
     std::this_thread::sleep_for(std::chrono::milliseconds(650));
     restorePipeSend();
   }
 
   CEA();
-  if (dieAfter == false) {
+  if(dieAfter == false) {
     if(lockscreen == false) {
       setBrightnessCin(restoreBrightness(), 0);
       remove("/tmp/savedBrightness");
@@ -172,13 +165,13 @@ void afterSleep() {
 
   // After lockscreen for a bit more security, and after everything else for speed
   CEA();
-  if (dieAfter == false) {
+  if(dieAfter == false) {
     startUsbNet();
   }
 
   // Finish...
   CEA();
-  if (dieAfter == false) {
+  if(dieAfter == false) {
     waitMutex(&sleep_mtx);
     sleepJob = Nothing;
     sleep_mtx.unlock();
@@ -195,7 +188,7 @@ void afterSleep() {
 
 void returnDeepSleep() {
   log("Returning from deep sleep", emitter);
-  if (deepSleep == true) {
+  if(deepSleep == true) {
     remove("/run/ipd/sleepCall");
     setCpuGovernor(cpuGovernorToSet);
   }

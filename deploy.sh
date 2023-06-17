@@ -45,4 +45,4 @@ sshpass -p $passwd ssh $servername "bash -c \"sync\""
 
 # Reconnect to wifi
 # /usr/local/bin/wifi/turn_on_with_stats.sh
-# /usr/local/bin/wifi/connect_to_network.sh hotspot 12345678
+# /usr/local/bin/wifi/connect_to_network.sh hotspot 12345678 &

@@ -68,7 +68,9 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     // To avoid screen shooting the previous lockscreen
-    if(getPidByName("lockscreen-bin") == -1 && getPidByName("inkbox.sh") == -1) {
+    // But if the lockscreen is the boot lockscreen, then screen shoot it
+    // In the future if more things call lockscreen, we could use lockscreen pid to check if it's from ipd
+    if(getPidByName("lockscreen-bin") == -1 || getPidByName("inkbox.sh") != -1) {
       screenshotFbink();
       if(lockscreen == true) {
         string fbgrabPath = "/usr/bin/fbgrab";
@@ -77,7 +79,7 @@ void prepareSleep() {
         posixSpawnWrapper(fbgrabPath.c_str(), args, true, &fakePid);
       }
       else {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
       }
     }
   }
