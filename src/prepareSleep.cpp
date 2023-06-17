@@ -68,7 +68,7 @@ void prepareSleep() {
   CEP();
   if (diePrepare == false) {
     // To avoid screen shooting the previous lockscreen
-    if(getPidByName("lockscreen") == -1) {
+    if(getPidByName("lockscreen") == -1 && getPidByName("inkbox.sh") == -1) {
       screenshotFbink();
       if(lockscreen == true) {
         string fbgrabPath = "/usr/bin/fbgrab";

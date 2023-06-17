@@ -11,6 +11,7 @@ void freezeApps();
 int getRunningUserApp();
 int getPidByName(string taskName);
 void unfreezeApps();
+void unfreezeApp(int pid);
 void killProcess(string name);
 void killLogger(int pid, int sig);
 vector<int> getPidsByNameAll(string taskName);

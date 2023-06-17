@@ -111,8 +111,13 @@ void afterSleep() {
   if (dieAfter == false) {
     if(lockscreen == true) {
       // Overall lockscreen - this will catch those 2 scripts and one binary - they should be killed anyway - well not at boot
-      if(getPidByName("lockscreen") == -1) {
+      int lockscreenPid = getPidByName("lockscreen");
+      if(lockscreenPid == -1) {
         launchLockscreen();
+      } else {
+        // Unfreeze it because it's in the list
+        restoreFbink(darkMode);
+        unfreezeApp(lockscreenPid);
       }
     }
   }

@@ -200,6 +200,11 @@ void unfreezeApps() {
   appsPids.clear();
 }
 
+void unfreezeApp(int pid) {
+  log("Unfreezing process with PID " + to_string(pid), emitter);
+  kill(pid, SIGCONT);
+}
+
 void killProcess(string name) {
   int pid = getPidByName(name);
   if(pid != -1) {
