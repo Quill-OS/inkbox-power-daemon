@@ -96,7 +96,7 @@ void afterSleep() {
   }
 
   // Moving Wi-Fi before apps because the GUI status icon would freak out
-  // This will run in the background - even if lockscreen is launched
+  // This will run in the background - even if lockscreen has been launched
   if (reconnectWifi == true) {
     log("Reconnecting to Wi-Fi because of option '5 - wifiReconnect'", emitter);
     CEA();
@@ -138,7 +138,7 @@ void afterSleep() {
       std::this_thread::sleep_for(std::chrono::milliseconds(400));
       log("Waiting for launch_lockscreen.sh to finish", emitter);
     }
-    log("Exitin waiting for lockscreen", emitter);
+    log("Exiting; waiting for lockscreen", emitter);
   }
 
   CEA();
@@ -163,8 +163,7 @@ void afterSleep() {
     }
   }
 
-  // After lockscreen for a bit more security
-  // And after everything else for speed
+  // After lockscreen for a bit more security, and after everything else for speed
   CEA();
   if (dieAfter == false) {
     startUsbNet();
@@ -177,7 +176,7 @@ void afterSleep() {
     sleepJob = Nothing;
     sleep_mtx.unlock();
   }
-  // Everything after this will well, die
+  // Everything after this will, well, die
 
   occupyLed.unlock();
   waitMutex(&currentActiveThread_mtx);
