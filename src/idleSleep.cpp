@@ -145,12 +145,10 @@ void startIdleSleep() {
     this_thread::sleep_for(timespan);
     countIdle = countIdle + 1;
 
-    string modules = readFile("/proc/modules");
-    if(stringContainsUSBMSModule(modules) == true) {
-      log("USB mass storage session is active. Delaying idle sleep for additionall 5 minutes");
-      countIdle = -60; // to be sure
-      // To avoid reads in that time
-      this_thread::sleep_for(chrono::milliseconds(1000 * 60 * 5));
+    while(fileExists("/kobo/tmp/in_usbms")) {
+      log("USB mass storage session is active. Delaying idle sleep for additional 5 minutes");
+      countIdle = -300; // to be sure
+      this_thread::sleep_for(timespan);
     }
 
   } while (rc == 1 || rc == 0 || rc == -EAGAIN);

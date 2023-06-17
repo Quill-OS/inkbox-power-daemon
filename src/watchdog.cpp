@@ -73,15 +73,14 @@ void startWatchdog() {
       waitMutex(&sleep_mtx);
 
       // Check if we are in a USB mass storage session; if yes, ignore everything
-      string modules = readFile("/proc/modules");
-      if(stringContainsUSBMSModule(modules) == true) {
+      if(sleepJob != Skip && fileExists("/kobo/tmp/in_usbms") == true) {
         log("We are in an USBMS session, ignoring all possible sleep calls", emitter);
         sleepJob = Skip;
       }
 
       // Handling 3 - whenChargerSleep
       // sleepJob checking because of USBMS modules
-      if (whenChargerSleep == false && sleepJob != Skip) {
+      if (sleepJob != Skip && whenChargerSleep == false) {
         if (getChargerStatus() == true) {
           log("Skipping watchdog event because of option '3 - whenChargerSleep'", emitter);
           waitMutex(&newSleepCondition_mtx);
