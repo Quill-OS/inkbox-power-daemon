@@ -323,28 +323,13 @@ void prepareVariables() {
   }
   else {
     if(xorgRunning == true) {
-      string blankFlag = "/boot/flags/X11_START";
-      if(fileExists(blankFlag) == true) {
-        if(readConfigBool(xorgFlagPath) == false) {
-          if (model == "n306" or model == "n873") {
-            blankNeeded = true;
-          }
-          else {
-            blankNeeded = false;
-          }
-        }
-      } 
-      else {
-        if (model == "n306" or model == "n873") {
-          blankNeeded = true;
-        }
-        else {
-          blankNeeded = false;
-        }
+      if (model == "n306" or model == "n873") {
+        blankNeeded = true;
       }
-    }
-    else {
-      blankNeeded = false;
+      else {
+        string blankFlag = "/boot/flags/EINK_BLANK";
+        blankNeeded = readConfigBool(blankFlag);
+      }
     }
   }
 

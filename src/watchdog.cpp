@@ -54,6 +54,7 @@ void startWatchdog() {
 
   unsigned long blankArg;
   int blankFd;
+  std::uint8_t blankCounter = 5; 
   if(blankNeeded == true) {
     blankFd = open("/dev/fb0", O_RDONLY | O_CLOEXEC | O_NONBLOCK);
     blankArg = VESA_NO_BLANKING;
@@ -290,7 +291,14 @@ void startWatchdog() {
 
     // Xorg fix
     if(blankNeeded == true) {
-      ioctl(blankFd, FBIOBLANK, blankArg);
+      if(blankCounter > 10) {
+        ioctl(blankFd, FBIOBLANK, blankArg);
+        log("Using blank", emitter);
+        blankCounter = 0;
+      }
+      else {
+        blankCounter = blankCounter + 1;
+      }
     }
 
     std::this_thread::sleep_for(timespan);
