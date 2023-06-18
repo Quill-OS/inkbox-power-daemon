@@ -114,6 +114,9 @@ void afterSleep() {
       int lockscreenPid = getPidByName("lockscreen-bin");
       if(lockscreenPid == -1) {
         launchLockscreen();
+        while(getPidByName("lockscreen-bin") == -1) {
+          std::this_thread::sleep_for(std::chrono::milliseconds(400));
+        }
       } else {
         // Unfreeze it because it's in the list
         restoreFbink(darkMode);
