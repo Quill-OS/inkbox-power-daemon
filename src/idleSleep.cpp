@@ -146,7 +146,7 @@ void startIdleSleep() {
     countIdle = countIdle + 1;
 
     while(fileExists("/kobo/tmp/in_usbms")) {
-      log("USB mass storage session is active. Delaying idle sleep for additional 5 minutes");
+      log("USB mass storage session is active. Delaying idle sleep for additional 5 minutes", emitter);
       countIdle = -300; // to be sure
       this_thread::sleep_for(timespan);
     }
