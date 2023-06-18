@@ -309,7 +309,7 @@ void startWatchdog() {
     if(blankNeeded == true) {
       if(blankCounter > 10) {
         ioctl(blankFd, FBIOBLANK, blankArg);
-        log("Using blank", emitter);
+        // log("Using blank", emitter);
         blankCounter = 0;
       }
       else {
