@@ -96,7 +96,9 @@ void startWatchdog() {
       if (sleepJob == Nothing) {
         log("Launching 'prepare' thread because of 'Nothing' sleep job", emitter);
         // This is here to avoid waiting too long afterwards
+        log("Waiting for currentActiveThread_mtx in beginning of prepare launching process", emitter);
         waitMutex(&currentActiveThread_mtx);
+        log("Waiting finished", emitter);
         sleepJob = Prepare;
         sleep_mtx.unlock();
 
@@ -104,6 +106,8 @@ void startWatchdog() {
           bool check = false;
           currentActiveThread_mtx.unlock();
           while (check == false) {
+            // Possible problem
+            log("Waiting for currentActiveThread to became nothing", emitter);
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
             waitMutex(&currentActiveThread_mtx);
             if (currentActiveThread == Nothing) {
@@ -115,9 +119,13 @@ void startWatchdog() {
           currentActiveThread_mtx.unlock();
         }
 
+        log("Waiting for currentActiveThread_mtx in the middle of prepare launching process", emitter);
         waitMutex(&currentActiveThread_mtx);
+        log("Waiting finished", emitter);
         currentActiveThread = Prepare;
         currentActiveThread_mtx.unlock();
+
+        log("Launching thread: Prepare", emitter);
         prepareThread = thread(prepareSleep);
         prepareThread.detach();
       } else if (sleepJob == Prepare) {
@@ -130,6 +138,7 @@ void startWatchdog() {
           bool check = false;
           currentActiveThread_mtx.unlock();
           while (check == false) {
+            log("Waiting for currentActiveThread to became nothing", emitter);
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
             waitMutex(&currentActiveThread_mtx);
             if (currentActiveThread == Nothing) {
@@ -145,6 +154,7 @@ void startWatchdog() {
         currentActiveThread = After;
         currentActiveThread_mtx.unlock();
 
+        log("Launching thread: After", emitter);
         afterThread = thread(afterSleep);
         afterThread.detach();
       } else if (sleepJob == After) {
@@ -157,6 +167,7 @@ void startWatchdog() {
           bool check = false;
           currentActiveThread_mtx.unlock();
           while (check == false) {
+            log("Waiting for currentActiveThread to became nothing", emitter);
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
             waitMutex(&currentActiveThread_mtx);
             if (currentActiveThread == Nothing) {
@@ -172,6 +183,7 @@ void startWatchdog() {
         currentActiveThread = Prepare;
         currentActiveThread_mtx.unlock();
 
+        log("Launching thread: Prepare", emitter);
         prepareThread = thread(prepareSleep);
         prepareThread.detach();
       } else if (sleepJob == GoingSleep) {
@@ -188,6 +200,7 @@ void startWatchdog() {
             bool check = false;
             currentActiveThread_mtx.unlock();
             while (check == false) {
+              log("Waiting for currentActiveThread to became nothing", emitter);
               std::this_thread::sleep_for(std::chrono::milliseconds(50));
               waitMutex(&currentActiveThread_mtx);
               if (currentActiveThread == Nothing) {
@@ -203,6 +216,7 @@ void startWatchdog() {
           currentActiveThread = After;
           currentActiveThread_mtx.unlock();
 
+          log("Launching thread: After", emitter);
           afterThread = thread(afterSleep);
           afterThread.detach();
         } else {
@@ -248,6 +262,7 @@ void startWatchdog() {
         currentActiveThread = After;
         currentActiveThread_mtx.unlock();
 
+        log("Launching thread: After", emitter);
         afterThread = thread(afterSleep);
         afterThread.detach();
       } else if (watchdogNextStep == GoingSleep) {
@@ -260,6 +275,7 @@ void startWatchdog() {
         currentActiveThread = GoingSleep;
         currentActiveThread_mtx.unlock();
 
+        log("Launching thread: GoSleep", emitter);
         goingThread = thread(goSleep);
         goingThread.detach();
       } else {

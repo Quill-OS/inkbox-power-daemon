@@ -105,7 +105,9 @@ void startIdleSleep() {
                 // If the device is rooted, and a SSH connection is active, don't go to sleep and show a message
                 // this will execute only if the device is rooted, so don't worry
                 if(normalContains(executeCommand("ss | grep -o ssh"), "ssh") == true) {
+                  notifySend("Idle sleep: SSH active");
                   log("Skipping idle sleep call because of an active SSH session", emitter);
+                  currentActiveThread_mtx.unlock(); // Remember that...
                   continue;
                 }
               }
