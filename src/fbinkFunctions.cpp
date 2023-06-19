@@ -139,7 +139,9 @@ void restoreFbink(bool darkMode) {
 
 void closeFbink() { fbink_close(fbfd); }
 
+int fbDepthSaved = -1;
 void restoreFbDepth() {
+  /*
   // Not tested
   // https://github.com/NiLuJe/FBInk/blob/9c1be635137ee5d8db9f8d5516aad1c818abc31d/fbink.h#L1287
   const FBInkConfig fbink_cfg = {0};
@@ -164,4 +166,21 @@ void restoreFbDepth() {
       }
     }
   }
+  */
+  if(fbDepthSaved > 0) {
+    const FBInkConfig fbink_cfg = {0};
+    if(fbink_set_fb_info(fbfd, KEEP_CURRENT_ROTATE, fbDepthSaved, KEEP_CURRENT_GRAYSCALE, &fbink_cfg) < 0) {
+      log("FBInk: Something went wrong when trying to change screen bitdepth to " + to_string(fbDepthSaved) + " bpp", emitter);
+    }
+    else {
+      log("Restoring fbdepth to " + to_string(fbDepthSaved) + " bpp was succesfull", emitter);
+    }
+  }
+  else {
+    log("fbDepthSaved save propably failed", emitter);
+  }
+}
+
+void saveFbDepth() {
+  fbDepthSaved = stoi(executeCommand("/usr/bin/fbdepth -g"));
 }

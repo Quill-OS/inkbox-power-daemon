@@ -121,6 +121,7 @@ void prepareSleep() {
 
   CEP();
   if (diePrepare == false) {
+    saveFbDepth();
     clearScreen(darkMode);
     std::this_thread::sleep_for(std::chrono::milliseconds(150));
     sleepScreen();

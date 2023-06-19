@@ -15,5 +15,6 @@ void screenshotFbink();
 void restoreFbink(bool darkMode);
 void closeFbink();
 void restoreFbDepth();
+void saveFbDepth();
 
 #endif
