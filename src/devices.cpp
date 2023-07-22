@@ -138,7 +138,17 @@ bool getChargerStatus() {
   if (model == "kt") {
     chargerStatus = readFile("/sys/devices/system/yoshi_battery/yoshi_battery0/battery_status");
     return stoi(chargerStatus);
-  } else {
+  }
+  else if (model == "n249") {
+    chargerStatus = readFile("/sys/class/power_supply/rn5t618-battery/status");
+    if(chargerStatus != "Discharging\n") {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  else {
     // Thanks to https://github.com/koreader/KoboUSBMS/blob/2efdf9d920c68752b2933f21c664dc1afb28fc2e/usbms.c#L148-L158
     int ntxfd;
     if((ntxfd = open("/dev/ntx_io", O_RDWR)) == -1) {
@@ -180,7 +190,17 @@ bool getAccurateChargerStatus() {
   if (model == "kt") {
     chargerStatus = readFile("/sys/devices/system/yoshi_battery/yoshi_battery0/battery_status");
     return stoi(chargerStatus);
-  } else {
+  }
+  else if (model == "n249") {
+    chargerStatus = readFile("/sys/class/power_supply/rn5t618-battery/status");
+    if(chargerStatus != "Discharging\n") {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  else {
     chargerStatus = readFile("/sys/devices/platform/pmic_battery.1/power_supply/mc13892_bat/status");
     chargerStatus = normalReplace(chargerStatus, "\n", "");
     if (chargerStatus == "Discharging" or chargerStatus == "Not charging") {
@@ -215,6 +235,9 @@ void getLedPath() {
   }
   else if(model == "n236" or model == "n437") {
     ledPath = "ntx";
+  }
+  else if(model == "n249") {
+    ledPath = "/sys/class/leds/e60k02:white:on/brightness";
   } 
   else {
     ledPath = "/sys/class/leds/pmic_ledsg/brightness";

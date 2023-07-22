@@ -16,7 +16,7 @@ extern int fbfd;
 extern FBInkDump dump;
 extern string model;
 
-// Because of lockscreen at boot it sometimes isin't taken, so avoid dumping random bytes
+// Because of lockscreen at boot it sometimes isn't taken, so avoid dumping random bytes
 // Default value here is very important
 bool dumpSuccess = false;
 
