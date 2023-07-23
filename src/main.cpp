@@ -56,6 +56,7 @@ extern std::string model;
 
 extern bool logEnabled;
 extern int fbfd;
+extern bool isNiaModelC;
 
 using namespace std;
 
@@ -93,6 +94,12 @@ int main() {
   thread watchdogThread(startWatchdog);
   thread watchConfig(startMonitoringConfig);
   thread idleSleep(startIdleSleep);
+  thread monitorDevSecond;
+  if(isNiaModelC == true) {
+    log("Launching second monitorDev", emitter);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Lazy non mutex management - this is really fine
+    monitorDevSecond = thread(startMonitoringDev); // We simply launch another one
+  }
 
   // Something is turning off the LED when starting all the GUI (inkbox.sh). This is fine until we want a charger indicator
   std::this_thread::sleep_for(std::chrono::milliseconds(30000));
@@ -105,6 +112,9 @@ int main() {
   watchdogThread.join();
   watchConfig.join();
   idleSleep.join();
+  if(isNiaModelC == true) {
+    monitorDevSecond.join();
+  }
   
   log("How did this end?", emitter);
   return -1;

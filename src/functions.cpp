@@ -93,6 +93,11 @@ bool xorgRunning = false;
 bool blankNeeded = false;
 bool xorgAppRunning = false;
 
+// Models
+// Model nia C specifics...
+bool isNiaModelC = false;
+bool handleNiaInputs = false;
+
 // Functions
 void log(string toLog, string emitter) {
   if (logEnabled == true) {
@@ -341,6 +346,11 @@ void prepareVariables() {
 
   // Handle turning off the LED usage option
   ledManagerAccurate();
+
+  if(normalContains(executeCommand("uname -r | grep -o '[^-]*$'"), "n306c")) {
+    log("It is the nia model c", emitter);
+    isNiaModelC = true;
+  }
 }
 
 string readConfigString(string path) {

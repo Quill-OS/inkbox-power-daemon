@@ -42,19 +42,28 @@ extern int customCaseCount;
 chrono::milliseconds timespan(200);
 chrono::milliseconds afterEventWait(1000);
 
+extern bool isNiaModelC;
+extern bool handleNiaInputs;
+
 void startMonitoringDev() {
   log("Monitoring events", emitter);
 
+  string devPath = "/dev/input/event0";
+  if(isNiaModelC == true && handleNiaInputs == false) {
+    devPath = "/dev/input/by-path/platform-21f8000.i2c-platform-bd71828-pwrkey-event";
+    handleNiaInputs = true;
+  }
+
   struct libevdev * dev = NULL;
 
-  int fd = open("/dev/input/event0", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+  int fd = open(devPath.c_str(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
   int rc = libevdev_new_from_fd(fd, &dev);
   // Because user apps and X11 apps grab the device for some reason
   if(libevdev_grab(dev, LIBEVDEV_GRAB) == 0) {
-    log("Grabbed /dev/input/event0", emitter);
+    log("Grabbed " + devPath, emitter);
   }
   else {
-    log("ERROR: Failed to grab /dev/input/event0", emitter);
+    log("ERROR: Failed to grab " + devPath, emitter);
   }
 
   if (rc < 0) {

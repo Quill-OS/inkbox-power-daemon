@@ -14,6 +14,8 @@ extern mutex occupyLed;
 extern bool ledState;
 extern string ledPath;
 
+extern bool isNiaModelC;
+
 void manageChangeLedState() {
   if (ledUsage == true) {
     changeLedState();
@@ -198,6 +200,16 @@ bool getAccurateChargerStatus() {
     }
     else {
       return false;
+    }
+  }
+  else if (isNiaModelC == true) {
+    chargerStatus = readFile("/sys/class/power_supply/battery/status");
+    chargerStatus = normalReplace(chargerStatus, "\n", "");
+    if (chargerStatus == "Discharging" or chargerStatus == "Not charging") {
+      return false;
+    }
+    else {
+      return true;
     }
   }
   else {

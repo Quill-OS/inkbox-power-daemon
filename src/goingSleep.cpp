@@ -40,6 +40,9 @@ extern mutex occupyLed;
 // There is no way to stop the thread, so use this bool
 bool dieGoing;
 
+// Models...
+extern bool isNiaModelC;
+
 // Some notes
 /*
 
@@ -149,6 +152,13 @@ void goSleep() {
       continueSleeping = false;
 
       // 4 - chargerWakeUp
+      if (chargerWakeUp == true) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(300)); // To be sure
+        // Stupid model, it behaves like that and delay is needed
+        if(isNiaModelC == true) {
+          std::this_thread::sleep_for(std::chrono::milliseconds(3500));
+        }
+      }
       if (savedChargerState != getAccurateChargerStatus()) {
         if (chargerWakeUp == true) {
           log("4 - chargerWakeUp option is enabled, and the charger state is different. Going to sleep one more time", emitter);

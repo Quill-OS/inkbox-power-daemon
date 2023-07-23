@@ -11,8 +11,9 @@ mkdir build
 cd build
 # https://clangd.llvm.org/installation.html#project-setup
 cmake ../ -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_TOOLCHAIN_FILE=../kobo.cmake
-cmake --build .
+cmake --build . --config Release -- -j 8
 /home/build/inkbox/kernel/toolchain/armv7l-linux-musleabihf-cross/bin/armv7l-linux-musleabihf-strip ipd
+chmod +x ipd
 cd ..
 
 servername="root@10.42.0.28"
