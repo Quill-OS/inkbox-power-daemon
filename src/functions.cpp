@@ -19,6 +19,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <spawn.h>
+#include <sys/utsname.h>
 
 #include "devices.h"
 #include "fbink.h"
@@ -94,7 +95,7 @@ bool blankNeeded = false;
 bool xorgAppRunning = false;
 
 // Models
-// Model nia C specifics...
+// N306C specifics...
 bool isNiaModelC = false;
 bool handleNiaInputs = false;
 
@@ -347,8 +348,10 @@ void prepareVariables() {
   // Handle turning off the LED usage option
   ledManagerAccurate();
 
-  if(normalContains(executeCommand("uname -r | grep -o '[^-]*$'"), "n306c")) {
-    log("It is the nia model c", emitter);
+  struct utsname uname_data;
+  uname(&uname_data);
+  if(normalContains(uname_data.release, "n306c")) {
+    log("Running on n306c", emitter);
     isNiaModelC = true;
   }
 }

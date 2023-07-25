@@ -94,11 +94,11 @@ int main() {
   thread watchdogThread(startWatchdog);
   thread watchConfig(startMonitoringConfig);
   thread idleSleep(startIdleSleep);
-  thread monitorDevSecond;
+  thread secondMonitorDev;
   if(isNiaModelC == true) {
-    log("Launching second monitorDev", emitter);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Lazy non mutex management - this is really fine
-    monitorDevSecond = thread(startMonitoringDev); // We simply launch another one
+    log("Launching second monitoringDev", emitter);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Lazy non-mutex management - this is really fine
+    secondMonitorDev = thread(startMonitoringDev); // We simply launch another one
   }
 
   // Something is turning off the LED when starting all the GUI (inkbox.sh). This is fine until we want a charger indicator
@@ -113,7 +113,7 @@ int main() {
   watchConfig.join();
   idleSleep.join();
   if(isNiaModelC == true) {
-    monitorDevSecond.join();
+    secondMonitorDev.join();
   }
   
   log("How did this end?", emitter);

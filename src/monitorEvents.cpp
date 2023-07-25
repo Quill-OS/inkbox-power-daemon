@@ -50,7 +50,7 @@ void startMonitoringDev() {
 
   string devPath = "/dev/input/event0";
   if(isNiaModelC == true && handleNiaInputs == false) {
-    devPath = "/dev/input/by-path/platform-21f8000.i2c-platform-bd71828-pwrkey-event";
+    devPath = "/dev/input/event2";
     handleNiaInputs = true;
   }
 
