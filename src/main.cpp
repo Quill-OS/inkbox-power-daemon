@@ -96,7 +96,7 @@ int main() {
   thread idleSleep(startIdleSleep);
   thread secondMonitorDev;
   if(isNiaModelC == true) {
-    log("Launching second monitoringDev", emitter);
+    log("Launching second monitorDev", emitter);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000)); // Lazy non-mutex management - this is really fine
     secondMonitorDev = thread(startMonitoringDev); // We simply launch another one
   }
