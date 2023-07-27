@@ -1,6 +1,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -54,9 +55,25 @@ void startMonitoringDev() {
     handleNiaInputs = true;
   }
 
+  // For kobo nia c but other devices also: wait for udev to create the device
+  while(fileExists(devPath) == false) {
+    log("Device file doesn't exists, waiting for: " + devPath, emitter);
+    this_thread::sleep_for(timespan);
+  }
+
   struct libevdev * dev = NULL;
 
-  int fd = open(devPath.c_str(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+  // Open until its fine...
+  int fd = -1;
+  while(fd < 0) {
+    fd = open(devPath.c_str(), O_RDONLY | O_CLOEXEC);
+    if(fd > 0) {
+      break;
+    }
+    log("Device file failed to open, waiting " + devPath, emitter);
+    this_thread::sleep_for(timespan);
+  }
+
   int rc = libevdev_new_from_fd(fd, &dev);
   // Because user apps and X11 apps grab the device for some reason
   if(libevdev_grab(dev, LIBEVDEV_GRAB) == 0) {
