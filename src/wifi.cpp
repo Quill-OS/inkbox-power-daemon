@@ -59,7 +59,7 @@ void turnOffWifi() {
     waitpid(connectToWifiPid, 0, 0);
     log("Collected connect_to_network.sh zombie", emitter);
     connectToWifiPid = 0;
-  } 
+  }
   else {
     log("No need to collect zombie process: connectToWifi", emitter);
   }

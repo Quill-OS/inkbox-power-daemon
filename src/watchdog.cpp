@@ -1,6 +1,8 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 // blank
 #include <sys/ioctl.h>
@@ -13,10 +15,11 @@
 #include "monitorEvents.h"
 #include "prepareSleep.h"
 #include "devices.h"
-
-const std::string emitter = "watchdog";
+#include "appsFreeze.h"
 
 using namespace std;
+
+const string emitter = "watchdog";
 
 // Variables
 extern bool whenChargerSleep;
@@ -39,6 +42,7 @@ extern mutex currentActiveThread_mtx;
 extern bool chargerControllerEnabled;
 extern string chargerControllerPath;
 bool chargerConnected = false; // First boot up the device, then connect the charger, so it will work
+int chargerManagerPid = 0;
 
 // Xorg blank
 extern bool blankNeeded;
@@ -292,15 +296,19 @@ void startWatchdog() {
         if(chargerConnected != chargerStatusTmp) {
           chargerConnected = chargerStatusTmp;
           if(chargerConnected == true) {
-            currentActiveThread_mtx.lock();
-            sleep_mtx.lock();
-            log("Launching charger controller located at: " + chargerControllerPath, emitter);
-            const char *args[] = {chargerControllerPath.c_str(), nullptr};
-            int fakePid = 0;
-            posixSpawnWrapper(chargerControllerPath, args, true, &fakePid);
+            if(getPidByName(chargerControllerPath) == -1) {
+              if (chargerManagerPid != 0) {
+                killProcess("chargerControllerPath");
+                log("Collecting chargerControllerPath zombie", emitter);
+                waitpid(chargerManagerPid, 0, 0);
+                log("Collected chargerControllerPath zombie", emitter);
+                chargerManagerPid = 0;
+              }
+              log("Launching charger controller located at: " + chargerControllerPath, emitter);
+              const char *args[] = {chargerControllerPath.c_str(), nullptr};
+              posixSpawnWrapper(chargerControllerPath, args, false, &chargerManagerPid);
+            }
           }
-          currentActiveThread_mtx.unlock();
-          sleep_mtx.unlock();
         }
       }
     }

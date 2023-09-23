@@ -224,6 +224,27 @@ bool getAccurateChargerStatus() {
   }
 }
 
+// To really get the diffrence in charging status... ;)
+string getStringChargerStatus() {
+  string chargerPath;
+  if (model == "kt") {
+    chargerPath = "/sys/devices/system/yoshi_battery/yoshi_battery0/battery_status";
+  }
+  else if (model == "n249") {
+    chargerPath = "/sys/class/power_supply/rn5t618-battery/status";
+  }
+  else if (isNiaModelC == true) {
+    chargerPath = "/sys/class/power_supply/battery/status";
+  }
+  else {
+    chargerPath = "/sys/devices/platform/pmic_battery.1/power_supply/mc13892_bat/status";
+  }
+
+  string chargerStatus = readFile(chargerPath);
+  chargerStatus = normalReplace(chargerStatus, "\n", "");
+  return chargerStatus;
+}
+
 void setCpuGovernor(string cpuGovernor) {
   log("Setting CPU frequency governor to " + cpuGovernor, emitter);
   int dev = open("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor", O_RDWR);

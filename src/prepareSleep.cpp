@@ -20,6 +20,10 @@
 #include <thread>
 #include <ctime> // For rand bug
 
+// open, write, close
+#include <fcntl.h>
+#include <unistd.h>
+
 const std::string emitter = "prepareSleep";
 
 extern sleepBool sleepJob;
@@ -40,6 +44,10 @@ extern mutex currentActiveThread_mtx;
 extern mutex occupyLed;
 
 extern bool deepSleep;
+
+extern bool chargerControllerEnabled;
+
+extern string model;
 
 bool diePrepare;
 
@@ -159,6 +167,21 @@ void prepareSleep() {
     const char *args[] = {hwclockPath.c_str(), "--systohc", "-u", nullptr};
     int fakePid = 0;
     posixSpawnWrapper(hwclockPath.c_str(), args, true, &fakePid);
+  }
+
+  // Charger controller - revert to gadget
+  // Keeping this in here instead of devices.cpp until any more devices will be added
+  CEP();
+  if (diePrepare == false) {
+    if(model == "n306") {
+      if(chargerControllerEnabled == true) {
+        log("Setting gadget as usb mode", emitter);
+        string strToWrite = "gadget";
+        int dev = open("/sys/kernel/debug/ci_hdrc.0/role", O_RDWR);
+        int writeStatus = write(dev, strToWrite.c_str(), strToWrite.length());
+        close(dev);
+      }
+    }
   }
 
   CEP();

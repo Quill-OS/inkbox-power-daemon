@@ -15,17 +15,17 @@
 #include <sys/klog.h>
 #include <thread>
 
+#include "devices.h"
 #include "fbinkFunctions.h"
 #include "functions.h"
 #include "goingSleep.h"
-#include "devices.h"
 
-const std::string emitter = "goingSleep";
+const string emitter = "goingSleep";
 
 // Variables
 // 4 - chargerWakeUp
 extern bool chargerWakeUp;
-bool savedChargerState;
+string savedChargerState;
 
 extern sleepBool sleepJob;
 extern mutex sleep_mtx;
@@ -42,6 +42,7 @@ bool dieGoing;
 
 // Models...
 extern bool isNiaModelC;
+extern string model;
 
 // Some notes
 /*
@@ -94,8 +95,9 @@ void goSleep() {
   bool continueSleeping = true;
   int count = 0;
   while (continueSleeping == true and dieGoing == false) {
-    // 4 - chargerWakeUp. Actually we need this variable anyway to know whether we need to wakeup the device after it or not
-    savedChargerState = getAccurateChargerStatus();
+    // 4 - chargerWakeUp. Actually we need this variable anyway to know whether
+    // we need to wakeup the device after it or not
+    savedChargerState = getStringChargerStatus();
 
     // https://linux.die.net/man/3/klogctl
     klogctl(5, NULL, 0);
@@ -155,23 +157,32 @@ void goSleep() {
       if (chargerWakeUp == true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(300)); // To be sure
         // Stupid model, it behaves like that and delay is needed
-        if(isNiaModelC == true) {
+        if (isNiaModelC == true) {
           std::this_thread::sleep_for(std::chrono::milliseconds(3500));
         }
-      }
-      if (savedChargerState != getAccurateChargerStatus()) {
-        if (chargerWakeUp == true) {
-          log("4 - chargerWakeUp option is enabled, and the charger state is different. Going to sleep one more time", emitter);
+        // I didn't get any reports that 300 ms didn't worked on other devices,
+        // but the nia sometimes has problems, so + 300
+        if (model == "n306") {
+          std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        }
+
+        string tmpChargerState = getStringChargerStatus();
+        if (savedChargerState != tmpChargerState) {
+          savedChargerState = tmpChargerState;
+          log("4 - chargerWakeUp option is enabled, and the charger state is "
+              "different. Going to sleep one more time",
+              emitter);
           count = 0;
           continueSleeping = true;
-        } else {
-          // Because the charger doesn't trigger anything in monitorEvents
-          log("The device woke up because of a charger, but option '4 - chargerWakeUp' is disabled, so it will continue to wake up", emitter);
         }
+      } else {
+        // Because the charger doesn't trigger anything in monitorEvents
+        log("The device woke up because of a charger, but option '4 - "
+            "chargerWakeUp' is disabled, so it will continue to wake up",
+            emitter);
       }
     }
   }
-
   occupyLed.unlock();
   watchdogNextStep = After;
   waitMutex(&currentActiveThread_mtx);
@@ -180,13 +191,17 @@ void goSleep() {
   log("Exiting goSleep", emitter);
 }
 
-// Sometimes I regret using such a simple multi-threading approach, but then I remember that it is safe
+
+
+// Sometimes I regret using such a simple multi-threading approach, but then I
+// remember that it is safe
 void smartWait(int timeToWait) {
   int time = timeToWait / 20;
   int count = 0;
   while (count < 20 and dieGoing == false) {
     count = count + 1;
-    // Now that I'm thinking, CEG isn't needed that much here, but the LED flickers more, so it's cool
+    // Now that I'm thinking, CEG isn't needed that much here, but the LED
+    // flickers more, so it's cool
     CEG();
     std::this_thread::sleep_for(std::chrono::milliseconds(time));
   }
