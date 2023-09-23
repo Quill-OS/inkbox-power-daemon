@@ -55,15 +55,15 @@ void startMonitoringDev() {
     handleNiaInputs = true;
   }
 
-  // For kobo nia c but other devices also: wait for udev to create the device
+  // Wait for udev to create the device
   while(fileExists(devPath) == false) {
-    log("Device file doesn't exists, waiting for: " + devPath, emitter);
+    log("Device file doesn't exist, waiting for: '" + devPath + "'", emitter);
     this_thread::sleep_for(timespan);
   }
 
   struct libevdev * dev = NULL;
 
-  // Open until its fine...
+  // Open until it's fine...
   int fd = -1;
   while(fd < 0) {
     fd = open(devPath.c_str(), O_RDONLY | O_CLOEXEC);
