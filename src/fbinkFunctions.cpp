@@ -90,7 +90,11 @@ void clearScreen(bool darkModeSet) {
 int printImage(string path) {
   FBInkConfig fbink_cfg = {0};
 
-  // TODO: Rotation management :(
+  // Resize the image ( + adjust for rotation too )
+  // fbink is awesome
+  fbink_cfg.scaled_width = -1;
+  fbink_cfg.scaled_height = -1;
+
   int status = fbink_print_image(fbfd, path.c_str(), 0, 0, &fbink_cfg);
   fbink_wait_for_complete(fbfd, LAST_MARKER);
 

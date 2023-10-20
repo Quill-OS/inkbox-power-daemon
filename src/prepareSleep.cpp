@@ -214,7 +214,7 @@ void prepareSleep() {
 // Writing 'Sleeping' anyway with background
 // TODO: Don't write 'Sleeping' when custom screensaver is active
 void sleepScreen() {
-  string screenSaverPath = "/data/onboard/.screensaver";
+  const string screenSaverPath = "/data/onboard/.screensaver";
   if (dirExists(screenSaverPath) == true) {
     vector<string> imageList;
     for (const auto &entry : experimental::filesystem::directory_iterator(screenSaverPath)) {

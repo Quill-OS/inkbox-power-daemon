@@ -16,7 +16,8 @@ cmake --build . --config Release -- -j 8
 chmod +x ipd
 cd ..
 
-servername="root@10.42.0.28"
+#servername="root@10.42.0.28"
+servername="root@192.168.2.2"
 passwd="root"
 
 sshpass -p $passwd ssh $servername "bash -c \"ifsctl mnt rootfs rw\""
