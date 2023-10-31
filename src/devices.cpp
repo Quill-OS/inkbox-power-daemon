@@ -295,11 +295,10 @@ void niaATouchscreenLoader(bool moduleStatus) {
   // infinite loop - we need this module...
   int counter = 0;
   while(status == false) {
-    if(counter < 60) {
-      counter = counter + 1;
-      if(counter == 50) {
-        notifySend("Touchscreen not working?...");
-      }
+    counter = counter + 1;
+    if(counter == 10) {
+      notifySend("Touchscreen not working?...");
+      return void();
     }
     if(moduleStatus == true) {
       log("Trying to load touchscreen...", emitter);
@@ -313,6 +312,7 @@ void niaATouchscreenLoader(bool moduleStatus) {
         status = true;
       }
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
   log("Touchscreen operation succesfull", emitter);
 }
