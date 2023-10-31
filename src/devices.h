@@ -15,5 +15,6 @@ bool getAccurateChargerStatus();
 void setCpuGovernor(string cpuGovernor);
 void getLedPath();
 string getStringChargerStatus();
+void niaATouchscreenLoader(bool moduleStatus);
 
 #endif

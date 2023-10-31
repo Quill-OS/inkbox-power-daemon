@@ -47,7 +47,7 @@ extern bool isNiaModelC;
 extern bool handleNiaInputs;
 
 void startMonitoringDev() {
-  log("Monitoring events", emitter);
+  log("Starting monitoring events", emitter);
 
   string devPath = "/dev/input/event0";
   if(isNiaModelC == true && handleNiaInputs == false) {
@@ -85,14 +85,13 @@ void startMonitoringDev() {
 
   if (rc < 0) {
     log("Failed to init libevdev: " + (string)strerror(-rc), emitter);
-    // Fatal error
-    exit(EXIT_FAILURE);
-  }
-
-  log("Input device name: " + (string)libevdev_get_name(dev), emitter);
-  log("Input device bus: " + to_string(libevdev_get_id_bustype(dev)) +
+  } 
+  else {
+      log("Input device name: " + (string)libevdev_get_name(dev), emitter);
+      log("Input device bus: " + to_string(libevdev_get_id_bustype(dev)) +
       " vendor: " + to_string(libevdev_get_id_vendor(dev)) +
       " product: " + to_string(libevdev_get_id_product(dev)), emitter);
+  }
 
   do {
     struct input_event ev;

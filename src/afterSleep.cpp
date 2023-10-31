@@ -39,6 +39,8 @@ extern sleepBool currentActiveThread;
 extern mutex currentActiveThread_mtx;
 extern mutex occupyLed;
 
+extern bool isNiaModelA;
+
 // There is no way to stop the thread, so use this bool
 bool dieAfter;
 
@@ -81,6 +83,13 @@ void afterSleep() {
   if(dieAfter == false) {
     writeFileString("/tmp/sleep_mode", "false");
     restoreFbDepth();
+  }
+
+  CEA();
+  if(dieAfter == false) {
+    if(isNiaModelA == true) {
+      niaATouchscreenLoader(true);
+    }
   }
 
   CEA();

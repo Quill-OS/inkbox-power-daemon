@@ -4,8 +4,16 @@
 #include <string>
 #include <mutex>
 #include <thread>
+#include <sys/stat.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 using namespace std;
+
+// https://stackoverflow.com/questions/5947286/how-to-load-linux-kernel-modules-from-c-code
+#define deleteModule(name, flags) syscall(__NR_delete_module, name, flags)
+#define initModule(module_image, len, param_values) syscall(__NR_init_module, module_image, len, param_values)
 
 void log(string message, string emitter = "undefined");
 void waitMutex(mutex* exampleMutex);

@@ -97,6 +97,7 @@ bool xorgAppRunning = false;
 // Models
 // N306C specifics...
 bool isNiaModelC = false;
+bool isNiaModelA = false;
 bool handleNiaInputs = false;
 
 // Functions
@@ -353,6 +354,9 @@ void prepareVariables() {
   if(normalContains(uname_data.release, "n306c")) {
     log("Running on n306c", emitter);
     isNiaModelC = true;
+  } else if(model == "n306") {
+    log("Running on n306a", emitter);
+    isNiaModelA = true;
   }
 }
 

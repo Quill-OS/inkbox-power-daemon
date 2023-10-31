@@ -57,6 +57,7 @@ extern std::string model;
 extern bool logEnabled;
 extern int fbfd;
 extern bool isNiaModelC;
+extern bool isNiaModelA;
 
 using namespace std;
 
@@ -81,6 +82,12 @@ int main() {
   }
 
   prepareVariables();
+
+  // so load the touchscreen module if needed
+  if(isNiaModelA == true) {
+    niaATouchscreenLoader(true);
+  }
+
   initFbink();
   startPipeServer();
 

@@ -17,10 +17,6 @@
 
 const std::string emitter = "wifi";
 
-// https://stackoverflow.com/questions/5947286/how-to-load-linux-kernel-modules-from-c-code
-#define deleteModule(name, flags) syscall(__NR_delete_module, name, flags)
-#define initModule(module_image, len, param_values) syscall(__NR_init_module, module_image, len, param_values)
-
 extern string model;
 extern pid_t connectToWifiPid;
 extern bool reconnectWifi;
@@ -178,7 +174,7 @@ void turnOnWifi() {
   }
 }
 
-void loadModule(string path) {
+bool loadModule(string path) {
   size_t image_size;
   struct stat st;
   void *image;
@@ -191,7 +187,8 @@ void loadModule(string path) {
   close(fd);
   if (initModule(image, image_size, params) != 0) {
     log("Couldn't init module " + path, emitter);
-    // exit(EXIT_FAILURE);
+    return false;
   }
   free(image);
+  return true;
 }

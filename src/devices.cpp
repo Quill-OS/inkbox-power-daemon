@@ -1,5 +1,7 @@
 #include "devices.h"
 #include "functions.h"
+#include "wifi.h" // maybe move the function here ;)...
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -15,6 +17,7 @@ extern bool ledState;
 extern string ledPath;
 
 extern bool isNiaModelC;
+bool touchscreenStatus = false;
 
 void manageChangeLedState() {
   if (ledUsage == true) {
@@ -275,4 +278,41 @@ void getLedPath() {
   else {
     ledPath = "/sys/class/leds/pmic_ledsg/brightness";
   }
+}
+
+void niaATouchscreenLoader(bool moduleStatus) {
+  bool status = false;
+  string modulePath = "/modules/input/touchscreen/elan_touch_i2c.ko";
+  string module = "elan_touch_i2c";
+
+  if(touchscreenStatus == moduleStatus) {
+    log("Touchscreen is already set to the correct status...", emitter);
+    return void();
+  } else {
+    touchscreenStatus = !touchscreenStatus;
+  }
+
+  // infinite loop - we need this module...
+  int counter = 0;
+  while(status == false) {
+    if(counter < 60) {
+      counter = counter + 1;
+      if(counter == 50) {
+        notifySend("Touchscreen not working?...");
+      }
+    }
+    if(moduleStatus == true) {
+      log("Trying to load touchscreen...", emitter);
+      status = loadModule(modulePath);
+    }
+    else {
+      log("Trying to unload touchscreen...", emitter);
+      if (deleteModule(module.c_str(), O_NONBLOCK) != 0) {
+        log("Can't unload module: " + module, emitter);
+      } else {
+        status = true;
+      }
+    }
+  }
+  log("Touchscreen operation succesfull", emitter);
 }

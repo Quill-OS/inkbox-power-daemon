@@ -45,7 +45,9 @@ extern string model;
 
 extern bool deviceRooted;
 
+
 void startIdleSleep() {
+  chrono::milliseconds timespan(1000);
   log("Starting idleSleep", emitter);
 
   log("Waiting for inkbox-bin to start", emitter);
@@ -67,26 +69,37 @@ void startIdleSleep() {
 
   struct libevdev *dev = NULL;
 
-  int fd;
+  int fd = -1;
+  string path;
   if(model != "kt") {
-    fd = open("/dev/input/event1", O_RDONLY | O_NONBLOCK);
+    path = "/dev/input/event1";
   }
   else {
-    fd = open("/dev/input/event2", O_RDONLY | O_NONBLOCK);
+    path = "/dev/input/event2";
   }
+
+  // Open until it's fine...
+  while(fd < 0) {
+    fd = open(path.c_str(), O_RDONLY | O_NONBLOCK);
+    if(fd > 0) {
+      break;
+    }
+    log("Device file failed to open, waiting " + path, emitter);
+    this_thread::sleep_for(timespan);
+  }
+ 
   int rc = libevdev_new_from_fd(fd, &dev);
 
   if (rc < 0) {
     log("Failed to init libevdev: " + (string)strerror(-rc), emitter);
-    exit(1);
-  }
-
-  log("Input device name: " + (string)libevdev_get_name(dev), emitter);
-  log("Input device bus: " + to_string(libevdev_get_id_bustype(dev)) +
+  } 
+  else {
+    log("Input device name: " + (string)libevdev_get_name(dev), emitter);
+    log("Input device bus: " + to_string(libevdev_get_id_bustype(dev)) +
       " vendor: " + to_string(libevdev_get_id_vendor(dev)) +
       " product: " + to_string(libevdev_get_id_product(dev)), emitter);
+  }
 
-  chrono::milliseconds timespan(1000);
   // Add to it every second, and make operations based on this timing
   countIdle = 0;
   struct input_event ev;
@@ -154,5 +167,6 @@ void startIdleSleep() {
     }
 
   } while (rc == 1 || rc == 0 || rc == -EAGAIN);
-  log("Error: Monitoring events in idle sleep died unexpectedly", emitter);
+  log("Error: Monitoring events in idle sleep died unexpectedly, restarting it...", emitter);
+  startIdleSleep();
 }
