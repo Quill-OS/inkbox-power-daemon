@@ -40,6 +40,11 @@ int getPidByName(string taskName) {
     firstLine = repairString(firstLine);
     // https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
     if(normalContains(firstLine, taskName) == true) {
+      if(normalContains(firstLine, "squashfuse") == true) {
+        log("We found a squashfuse, we don't want to do anything to it...", emitter);
+        closedir(dp);
+        return -1;
+      }
       log("Found PID of " + taskName + ": " + entry->d_name + " in line: " + firstLine, emitter);
       // After closing directory, it's impossible to call entry->d_name
       int intToReturn = stoi(entry->d_name);
@@ -77,6 +82,10 @@ vector<int> getPidsByNameAll(string taskName) {
     firstLine = repairString(firstLine);
     // https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
     if(normalContains(firstLine, taskName) == true) {
+      if(normalContains(firstLine, "squashfuse") == true) {
+        log("We found a squashfuse, we don't want to do anything to it...", emitter);
+        continue;
+      }
       log("Found PID of " + taskName + " : " + entry->d_name + " In line: " + firstLine, emitter + ":getPidsByNameAll");
       int appPid = stoi(entry->d_name);
       pidsRet.push_back(appPid);
@@ -103,16 +112,23 @@ vector<string> getBuiltInAppsList(string path) {
   return vectorToReturn;
 }
 
-int getRunningUserApp() {
+vector<int> getRunningUserApp() {
   string name = readConfigString("/kobo/tmp/currentlyRunningUserApplication");
-
+  vector<int> vectorToReturn;
   // Prioritise .bin files
   int fileBin = getPidByName(name + ".bin");
   if(fileBin != -1) {
     log("Found user application binary file, that's good", emitter);
-    return fileBin;
+    vectorToReturn.push_back(fileBin);
   };
-  return getPidByName(name);
+  vectorToReturn.push_back(getPidByName(name));
+
+  // We can also use this way to find apps...
+  vector<int> systemBin = getPidsByNameAll("/system-bin");
+  vector<int> systemLib = getPidsByNameAll("/system-lib");
+  vectorToReturn.insert(vectorToReturn.end(), systemBin.begin(), systemBin.end());  
+  vectorToReturn.insert(vectorToReturn.end(), systemLib.begin(), systemLib.end());  
+  return vectorToReturn;
 }
 
 vector<int> getRunningXorgPrograms() {
@@ -162,10 +178,8 @@ void freezeApps() {
     }
   }
   if (fileExists("/kobo/tmp/currentlyRunningUserApplication") == true) {
-    int userAppPid = getRunningUserApp();
-    if(userAppPid != -1) {
-      pidVector.push_back(userAppPid);
-    }
+    vector<int> userApps = getRunningUserApp();
+    appsPids.insert(appsPids.end(), userApps.begin(), userApps.end());
   }
 
   vector<int> xorgPrograms = getRunningXorgPrograms();
@@ -188,8 +202,10 @@ void freezeApps() {
 
 void killLogger(int pid, int sig)
 {
-  log("Killing process with PID " + to_string(pid) + " with signal " + to_string(sig), emitter);
-  kill(pid, sig);
+  if(pid > 1) {
+    log("Killing process with PID " + to_string(pid) + " with signal " + to_string(sig), emitter);
+    kill(pid, sig);
+  }
 }
 
 void unfreezeApps() {
@@ -207,7 +223,7 @@ void unfreezeApp(int pid) {
 
 void killProcess(string name) {
   int pid = getPidByName(name);
-  if(pid != -1) {
+  if(pid > 1) {
     log("Killing process with PID " + to_string(pid), emitter);
     kill(pid, 9);
   }

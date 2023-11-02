@@ -8,7 +8,7 @@ using namespace std;
 
 vector<string> getBuiltInAppsList(string path);
 void freezeApps();
-int getRunningUserApp();
+vector<int> getRunningUserApp();
 int getPidByName(string taskName);
 void unfreezeApps();
 void unfreezeApp(int pid);
