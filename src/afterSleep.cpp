@@ -62,7 +62,9 @@ void CEA() {
       log("Terminating afterSleep", emitter);
       dieAfter = true;
     }
-    sleep_mtx.unlock();
+    else {
+      sleep_mtx.unlock();
+    }
   }
 }
 

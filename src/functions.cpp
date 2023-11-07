@@ -100,6 +100,12 @@ bool isNiaModelC = false;
 bool isNiaModelA = false;
 bool handleNiaInputs = false;
 
+// Communication between goingSleep and monitorEvents
+// For my sanity and reasons, now we need a reason to actually wake up. Good that i thought about that when designing it ;)
+// This is a bit against the design of IPD, but its better than wasting battery: this controls whether goingSleep thread controls itself, it monitorEvents can kill him
+bool ignoreEvents = false;
+mutex ignoreEvents_mtx;
+
 // Functions
 void log(string toLog, string emitter) {
   if (logEnabled == true) {
@@ -115,6 +121,7 @@ void log(string toLog, string emitter) {
   }
 }
 
+// Woah I was stupid, delete that in the future
 void waitMutex(mutex * exampleMutex) {
   exampleMutex->lock();
 }

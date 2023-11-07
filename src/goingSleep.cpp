@@ -44,6 +44,13 @@ bool dieGoing;
 extern bool isNiaModelC;
 extern string model;
 
+// To prevent weird wakeups
+extern goSleepCondition newSleepCondition;
+extern mutex newSleepCondition_mtx;
+
+extern bool ignoreEvents;
+extern mutex ignoreEvents_mtx;
+
 // Some notes
 /*
 
@@ -67,8 +74,20 @@ void CEG() {
       sleep_mtx.unlock();
       log("Terminating goSleep", emitter);
       dieGoing = true;
+    } 
+    else {
+      sleep_mtx.unlock();
     }
-    sleep_mtx.unlock();
+    
+    newSleepCondition_mtx.lock();
+    if(newSleepCondition != None) {
+      newSleepCondition_mtx.unlock();
+      log("Terminating goSleep because of newSleepCondition", emitter);
+      dieGoing = true;
+    } 
+    else {
+      newSleepCondition_mtx.unlock();
+    }
   }
 }
 
@@ -78,6 +97,15 @@ void goSleep() {
   waitMutex(&occupyLed);
 
   sync();
+
+  // This is needed for CEG()
+  newSleepCondition_mtx.lock();
+  newSleepCondition = None; // To check for change after
+  newSleepCondition_mtx.unlock();
+
+  ignoreEvents_mtx.lock();
+  ignoreEvents = true;
+  ignoreEvents_mtx.unlock();
 
   CEG();
   if (dieGoing == false) {
@@ -144,26 +172,29 @@ void goSleep() {
         smartWait(10000);
       } else if (count == 15) {
         log("15 failed attempts at sleeping ...");
-        // TODO: Display an error splash screen with FBInk
+        notifySend("Problems with suspending?");
       } else {
         smartWait(3000);
       }
     } else {
       // Exiting this sleeping hell
-      log("Stopping suspend attempts after " + to_string(count) + " failed attempts", emitter);
-      continueSleeping = false;
+      log("Stopping (maybe!) suspend attempts after " + to_string(count) + " failed attempts", emitter);
+      // continueSleeping = false; // We don't do that anymore, dieGoing will change if an event spawns
+
+      // Now CEG checks for monitor events too
+      smartWait(100);
 
       // 4 - chargerWakeUp
       if (chargerWakeUp == true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(300)); // To be sure
+        smartWait(300); // To be sure
         // Stupid model, it behaves like that and delay is needed
         if (isNiaModelC == true) {
-          std::this_thread::sleep_for(std::chrono::milliseconds(3500));
+          smartWait(3500);
         }
         // I didn't get any reports that 300 ms didn't worked on other devices,
         // but the nia sometimes has problems, so + 300
         if (model == "n306") {
-          std::this_thread::sleep_for(std::chrono::milliseconds(300));
+          smartWait(300);
         }
 
         string tmpChargerState = getStringChargerStatus();
@@ -176,13 +207,24 @@ void goSleep() {
           continueSleeping = true;
         }
       } else {
-        // Because the charger doesn't trigger anything in monitorEvents
-        log("The device woke up because of a charger, but option '4 - "
-            "chargerWakeUp' is disabled, so it will continue to wake up",
-            emitter);
+        // This could fail because the charger needed delay is not used?
+        string tmpChargerState = getStringChargerStatus();
+        if (savedChargerState == tmpChargerState) {
+          log("The device woke up because of a charger, but option '4 - "
+              "chargerWakeUp' is disabled, so it will continue to wake up",
+              emitter);
+          
+          // Not tested?
+          continueSleeping = false;
+        }
       }
     }
   }
+
+  ignoreEvents_mtx.lock();
+  ignoreEvents = false;
+  ignoreEvents_mtx.unlock();
+
   occupyLed.unlock();
   watchdogNextStep = After;
   waitMutex(&currentActiveThread_mtx);

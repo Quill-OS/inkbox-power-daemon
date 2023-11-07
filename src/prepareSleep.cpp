@@ -65,7 +65,9 @@ void CEP() {
       log("Terminating prepareSleep", emitter);
       diePrepare = true;
     }
-    sleep_mtx.unlock();
+    else {
+      sleep_mtx.unlock();
+    }
   }
 }
 

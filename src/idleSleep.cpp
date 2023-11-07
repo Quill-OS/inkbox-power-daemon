@@ -150,7 +150,7 @@ void startIdleSleep() {
     }
 
     if (libevdev_has_event_pending(dev) == 1) {
-      // log("Received touch input, resetting timer", emitter);
+      //log("Received touch input, resetting timer", emitter);
       countIdle = 0;
       while (libevdev_has_event_pending(dev) == 1) {
         rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
@@ -159,6 +159,7 @@ void startIdleSleep() {
 
     this_thread::sleep_for(timespan);
     countIdle = countIdle + 1;
+    //log("Count idle time:" + to_string(countIdle), emitter);
 
     while(fileExists("/kobo/tmp/in_usbms")) {
       log("USB mass storage session is active. Delaying idle sleep for additional 5 minutes", emitter);

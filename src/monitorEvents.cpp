@@ -46,6 +46,21 @@ chrono::milliseconds afterEventWait(1000);
 extern bool isNiaModelC;
 extern bool handleNiaInputs;
 
+extern bool ignoreEvents;
+extern mutex ignoreEvents_mtx;
+
+void eventHandler() {
+  log("Entered eventHandler", emitter);
+  ignoreEvents_mtx.lock();
+  if(ignoreEvents == false) {
+    log("Making watchdogStartJob to true", emitter);
+    waitMutex(&watchdogStartJob_mtx);
+    watchdogStartJob = true;
+    watchdogStartJob_mtx.unlock();
+  }
+  ignoreEvents_mtx.unlock();
+}
+
 void startMonitoringDev() {
   log("Starting monitoring events", emitter);
 
@@ -102,11 +117,10 @@ void startMonitoringDev() {
           (string)libevdev_event_type_get_name(ev.type) +
           " codename: " + codeName + " value: " + to_string(ev.value), emitter);
       if (codeName == "KEY_POWER" and ev.value == 1) {
-        log("monitorEvents: Received power button trigger, attempting device suspend", emitter);
+        // Watchdog manages this part so we dont always go to sleep
+        log("monitorEvents: Received power button trigger, attempting device suspend, propably", emitter);
 
-        waitMutex(&watchdogStartJob_mtx);
-        watchdogStartJob = true;
-        watchdogStartJob_mtx.unlock();
+        eventHandler();
 
         waitMutex(&newSleepCondition_mtx);
         newSleepCondition = powerButton;
@@ -123,9 +137,8 @@ void startMonitoringDev() {
             customCaseCount = 0;
             log("Second hall sensor trigger, attempting device suspend", emitter);
             notifySend("Case on front detected");
-            waitMutex(&watchdogStartJob_mtx);
-            watchdogStartJob = true;
-            watchdogStartJob_mtx.unlock();
+            
+            eventHandler();
 
             waitMutex(&newSleepCondition_mtx);
             newSleepCondition = halSensor;
@@ -135,9 +148,7 @@ void startMonitoringDev() {
           log("Option '8 - customCase' is false:", emitter);
           log("monitorEvents: Received hall sensor trigger, attempting device suspend", emitter);
 
-          waitMutex(&watchdogStartJob_mtx);
-          watchdogStartJob = true;
-          watchdogStartJob_mtx.unlock();
+          eventHandler();
 
           waitMutex(&newSleepCondition_mtx);
           newSleepCondition = halSensor;
@@ -209,9 +220,7 @@ void startMonitoringDevKT() {
         }
         else {
           log("monitorEvents: Received power button trigger, attempting device suspend", emitter);
-          waitMutex(&watchdogStartJob_mtx);
-          watchdogStartJob = true;
-          watchdogStartJob_mtx.unlock();
+          eventHandler();
 
           waitMutex(&newSleepCondition_mtx);
           newSleepCondition = powerButton;
