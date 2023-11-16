@@ -55,6 +55,8 @@ bool diePrepare;
 // To show warning
 extern bool xorgAppRunning;
 
+extern bool deviceRooted;
+
 // void checkExitPrepare()
 void CEP() {
   if (diePrepare == false) {
@@ -156,6 +158,15 @@ void prepareSleep() {
   if (diePrepare == false) {
     saveBrightness(getBrightness());
     setBrightnessCin(0, getBrightness());
+  }
+
+  // kill inactive ssh sessions
+  // ps -ef | grep sshd | grep -v -e grep -e /usr/sbin/sshd | awk '{print $1}' | xargs kill -9 &
+  CEP();
+  if (diePrepare == false) {
+    if(deviceRooted) {
+      executeCommand("ps -ef | grep sshd | grep -v -e grep -e /usr/sbin/sshd | awk '{print $1}' | xargs kill -9 &");
+    }
   }
 
   CEP();

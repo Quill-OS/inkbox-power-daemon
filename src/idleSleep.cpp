@@ -17,6 +17,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include "libevdev/libevdev.h"
 
@@ -45,6 +46,7 @@ extern string model;
 
 extern bool deviceRooted;
 
+#define DEBUG_IDLE_SLEEP 0 // Show more logs. for release builds it should be 0
 
 void startIdleSleep() {
   chrono::milliseconds timespan(1000);
@@ -64,8 +66,10 @@ void startIdleSleep() {
       break;
     }
   }
-  if (waitForInkbox == false) log("inkbox-bin started. Waiting additional 30 seconds", emitter);
-  std::this_thread::sleep_for(std::chrono::milliseconds(30000));
+  if (waitForInkbox == false) {
+    log("inkbox-bin started. Waiting additional 30 seconds", emitter);
+    std::this_thread::sleep_for(std::chrono::milliseconds(30000));
+  }
 
   struct libevdev *dev = NULL;
 
@@ -150,16 +154,34 @@ void startIdleSleep() {
     }
 
     if (libevdev_has_event_pending(dev) == 1) {
-      //log("Received touch input, resetting timer", emitter);
+      #if DEBUG_IDLE_SLEEP
+        log("Received touch input, resetting timer", emitter);
+      #endif
       countIdle = 0;
+      if(fileExists(path) == false) {
+        log(path + " Doesn't exist, exiting idleSleep", emitter);
+        break;
+      }
       while (libevdev_has_event_pending(dev) == 1) {
+        #if DEBUG_IDLE_SLEEP
+          log("Libevdev event loop iteration", emitter);
+        #endif
+        // This part iterates to infinite if the device dissapears, baad
+        // Further more, the file exists but it's not working
+        if(fd < 0 || rc < 0) {
+          log(path + " broke, exiting", emitter);
+          break;
+        }
+
         rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
       }
     }
 
     this_thread::sleep_for(timespan);
     countIdle = countIdle + 1;
-    //log("Count idle time:" + to_string(countIdle), emitter);
+    #if DEBUG_IDLE_SLEEP
+      log("Count idle time:" + to_string(countIdle), emitter);
+    #endif
 
     while(fileExists("/kobo/tmp/in_usbms")) {
       log("USB mass storage session is active. Delaying idle sleep for additional 5 minutes", emitter);
@@ -168,6 +190,9 @@ void startIdleSleep() {
     }
 
   } while (rc == 1 || rc == 0 || rc == -EAGAIN);
+  // We don't want a memory leak, but is that everything?
+  libevdev_free(dev);
+  close(fd);
   log("Error: Monitoring events in idle sleep died unexpectedly, restarting it...", emitter);
   startIdleSleep();
 }

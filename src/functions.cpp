@@ -423,6 +423,7 @@ bool dirExists(string path) {
 }
 
 string executeCommand(string command) {
+  log("Executing command: " + command, emitter);
   char buffer[128];
   string result = "";
 

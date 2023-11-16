@@ -13,4 +13,4 @@
 # Error Lens
 # Include Autocomplete
 
-CPLUS_INCLUDE_PATH=/home/build/inkbox/kernel/toolchain/armv7l-linux-musleabihf-cross/armv7l-linux-musleabihf/include/c++/10.2.1 code
+CPLUS_INCLUDE_PATH=/home/build/inkbox/kernel/toolchain/armv7l-linux-musleabihf-cross/armv7l-linux-musleabihf/include/c++/10.2.1 code /home/build/inkbox/inkbox-power-daemon
