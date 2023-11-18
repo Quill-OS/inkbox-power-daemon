@@ -168,7 +168,7 @@ void startIdleSleep() {
         #endif
         // This part iterates to infinite if the device dissapears, baad
         // Further more, the file exists but it's not working
-        if(fd < 0 || rc < 0) {
+        if(isFdValid(fd) == false) {
           log(path + " broke, exiting", emitter);
           break;
         }
@@ -189,7 +189,7 @@ void startIdleSleep() {
       this_thread::sleep_for(timespan);
     }
 
-  } while ((rc == 1 || rc == 0 || rc == -EAGAIN) && fd > 0);
+  } while ((rc == 1 || rc == 0 || rc == -EAGAIN) && isFdValid(fd) == true);
   // We don't want a memory leak, but is that everything?
   libevdev_free(dev);
   close(fd);

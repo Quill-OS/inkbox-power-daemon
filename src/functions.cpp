@@ -563,3 +563,9 @@ bool stringContainsUSBMSModule(string fileContent) {
   */
   return(normalContains(fileContent, "g_mass_storage"));
 } 
+
+// https://stackoverflow.com/questions/12340695/how-to-check-if-a-given-file-descriptor-stored-in-a-variable-is-still-valid
+bool isFdValid(int fd)
+{
+    return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
+}

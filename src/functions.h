@@ -37,6 +37,7 @@ void launchLockscreen();
 bool stringContainsUSBMSModule(string fileContent);
 string repairString(string word);
 string removeSpaces(string word);
+bool isFdValid(int fd);
 
 enum goSleepCondition
 {
