@@ -189,7 +189,7 @@ void startIdleSleep() {
       this_thread::sleep_for(timespan);
     }
 
-  } while (rc == 1 || rc == 0 || rc == -EAGAIN);
+  } while ((rc == 1 || rc == 0 || rc == -EAGAIN) && fd > 0);
   // We don't want a memory leak, but is that everything?
   libevdev_free(dev);
   close(fd);
