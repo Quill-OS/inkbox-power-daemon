@@ -41,7 +41,7 @@ int getPidByName(string taskName) {
     // https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
     if(normalContains(firstLine, taskName) == true) {
       if(normalContains(firstLine, "squashfuse") == true) {
-        log("We found a squashfuse, we don't want to do anything to it...", emitter);
+        log("Found a squashfuse; not doing anything to it...", emitter);
         closedir(dp);
         return -1;
       }
@@ -83,7 +83,7 @@ vector<int> getPidsByNameAll(string taskName) {
     // https://stackoverflow.com/questions/2340281/check-if-a-string-contains-a-string-in-c
     if(normalContains(firstLine, taskName) == true) {
       if(normalContains(firstLine, "squashfuse") == true) {
-        log("We found a squashfuse, we don't want to do anything to it...", emitter);
+        log("Found a squashfuse; not doing anything to it...", emitter);
         continue;
       }
       log("Found PID of " + taskName + " : " + entry->d_name + " In line: " + firstLine, emitter + ":getPidsByNameAll");

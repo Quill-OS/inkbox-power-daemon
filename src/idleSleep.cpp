@@ -159,7 +159,7 @@ void startIdleSleep() {
       #endif
       countIdle = 0;
       if(fileExists(path) == false) {
-        log(path + " Doesn't exist, exiting idleSleep", emitter);
+        log(path + " doesn't exist, exiting idleSleep", emitter);
         break;
       }
       while (libevdev_has_event_pending(dev) == 1) {

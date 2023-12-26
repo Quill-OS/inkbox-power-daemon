@@ -172,7 +172,7 @@ void goSleep() {
         smartWait(10000);
       } else if (count == 15) {
         log("15 failed attempts at sleeping ...");
-        notifySend("Problems with suspending?");
+        notifySend("Problems with suspend?");
       } else {
         smartWait(3000);
       }
@@ -191,7 +191,7 @@ void goSleep() {
         if (isNiaModelC == true) {
           smartWait(3500);
         }
-        // I didn't get any reports that 300 ms didn't worked on other devices,
+        // I didn't get any reports that 300 ms didn't work on other devices,
         // but the nia sometimes has problems, so + 300
         if (model == "n306") {
           smartWait(300);

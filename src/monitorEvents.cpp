@@ -117,7 +117,7 @@ void startMonitoringDev() {
           (string)libevdev_event_type_get_name(ev.type) +
           " codename: " + codeName + " value: " + to_string(ev.value), emitter);
       if (codeName == "KEY_POWER" and ev.value == 1) {
-        // Watchdog manages this part so we dont always go to sleep
+        // Watchdog manages this part so we don't go to sleep every time
         log("monitorEvents: Received power button trigger, attempting device suspend, propably", emitter);
 
         eventHandler();

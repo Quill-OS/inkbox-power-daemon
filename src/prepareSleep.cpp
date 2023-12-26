@@ -184,12 +184,12 @@ void prepareSleep() {
   }
 
   // Charger controller - revert to gadget
-  // Keeping this in here instead of devices.cpp until any more devices will be added
+  // Keeping this in here instead of devices.cpp until more devices are added
   CEP();
   if (diePrepare == false) {
     if(model == "n306") {
       if(chargerControllerEnabled == true) {
-        log("Setting gadget as usb mode", emitter);
+        log("Setting gadget as USB mode", emitter);
         string strToWrite = "gadget";
         int dev = open("/sys/kernel/debug/ci_hdrc.0/role", O_RDWR);
         int writeStatus = write(dev, strToWrite.c_str(), strToWrite.length());

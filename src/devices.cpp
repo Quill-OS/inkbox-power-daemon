@@ -227,7 +227,7 @@ bool getAccurateChargerStatus() {
   }
 }
 
-// To really get the diffrence in charging status... ;)
+// To really get the difference in charging status... ;)
 string getStringChargerStatus() {
   string chargerPath;
   if (model == "kt") {
@@ -297,7 +297,7 @@ void niaATouchscreenLoader(bool moduleStatus) {
   while(status == false) {
     counter = counter + 1;
     if(counter == 10) {
-      notifySend("Touchscreen not working?...");
+      notifySend("Touchscreen not working?");
       return void();
     }
     if(moduleStatus == true) {
