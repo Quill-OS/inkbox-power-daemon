@@ -137,6 +137,9 @@ void prepareSleep() {
       killProcess("lockscreen-bin");
       killProcess("lockscreen");
     }
+    if(isNiaModelA == true) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
     freezeApps();
   }
 
