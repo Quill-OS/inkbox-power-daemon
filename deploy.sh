@@ -5,14 +5,17 @@
 # /mnt/HDD/Project/qt-kobo/x-tools/arm-kobo-linux-gnueabihf/bin/arm-kobo-linux-gnueabihf-g++ -o ../inkbox-power-deamon main.cpp
 
 # Compile with this script. Do it.
-export PATH=$PATH:/home/build/inkbox/kernel/toolchain/armv7l-linux-musleabihf-cross/bin
+
+# Edit it for scripts repo...
+
+export PATH=$PATH:/home/build/qos/toolchains/armv7l-linux-musleabihf-cross/bin
 rm -rf build
 mkdir build
 cd build
 # https://clangd.llvm.org/installation.html#project-setup
 cmake ../ -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -DCMAKE_TOOLCHAIN_FILE=../kobo.cmake
 cmake --build . --config Release -- -j 8
-/home/build/inkbox/kernel/toolchain/armv7l-linux-musleabihf-cross/bin/armv7l-linux-musleabihf-strip ipd
+/home/build/qos/toolchains/armv7l-linux-musleabihf-cross/bin/armv7l-linux-musleabihf-strip ipd
 chmod +x ipd
 cd ..
 

@@ -5,6 +5,8 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <sys/types.h>
+#include <dirent.h>
 
 #include "functions.h"
 #include "monitorEvents.h"
@@ -61,14 +63,42 @@ void eventHandler() {
   ignoreEvents_mtx.unlock();
 }
 
+string getPowerButton() {
+  uint8_t bit[KEY_MAX / 8];
+
+  DIR* dir = opendir("/dev/input/");
+  if (dir == nullptr) {
+      log("Could not open /dev/input/ directory");
+      return "";
+  }
+
+  struct dirent* entry;
+  while ((entry = readdir(dir)) != nullptr) {
+    int fd = open(entry->d_name, O_RDONLY);
+    if (fd < 0) {
+      return "";
+    }
+
+    if (0 < ioctl(fd, EVIOCGBIT(EV_KEY, KEY_MAX), bit) && (bit[KEY_POWER/8] & (1<< (KEY_POWER & 7)))) {
+      log(string(entry->d_name) + " has a power button");
+      return entry->d_name;
+    }
+  }
+  return "";
+}
+
 void startMonitoringDev() {
   log("Starting monitoring events", emitter);
 
   string devPath = "/dev/input/event0";
+  /*
   if(isNiaModelC == true && handleNiaInputs == false) {
     devPath = "/dev/input/by-path/platform-21f8000.i2c-platform-bd71828-pwrkey-event";
     handleNiaInputs = true;
   }
+  */
+  // so handleNiaInputs is not needed anymore?
+  // This code was supplied by Andi, should work on all devices, untested
 
   // Wait for udev to create the device
   while(fileExists(devPath) == false) {

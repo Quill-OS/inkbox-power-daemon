@@ -11,7 +11,14 @@ set(CMAKE_C_COMPILER   armv7l-linux-musleabihf-gcc)
 set(CMAKE_CXX_COMPILER armv7l-linux-musleabihf-g++)
 
 # where is the target environment located
-set(CMAKE_FIND_ROOT_PATH /home/build/inkbox/kernel/toolchain/armv7l-linux-musleabihf-cross/)
+# Used with scripts repo
+# This should be moved to scripts repo
+if(DEFINED ENV{MUSL_TOOLCHAIN_PATH})
+    set(CMAKE_FIND_ROOT_PATH $ENV{MY_ENV_VAR})
+else()
+    set(CMAKE_FIND_ROOT_PATH /home/build/qos/toolchains/armv7l-linux-musleabihf-cross/)
+endif()
+message("Your musl toolchain is at: ${CMAKE_FIND_ROOT_PATH}")
 
 # adjust the default behavior of the FIND_XXX() commands:
 # search programs in the host environment
