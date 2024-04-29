@@ -66,34 +66,37 @@ void eventHandler() {
 // This code was supplied by Andi, should work on all devices, untested
 string getPowerButton() {
   uint8_t bit[KEY_MAX / 8];
+  const string inputDirectory = "/dev/input/";
 
-  DIR* dir = opendir("/dev/input/");
+  DIR* dir = opendir(inputDirectory.c_str()); // This potentially changes the directory?
   if (dir == nullptr) {
-      log("Could not open /dev/input/ directory");
+      log("Could not open directory: " + inputDirectory, emitter);
       return "";
   }
 
   struct dirent* entry;
   while ((entry = readdir(dir)) != nullptr) {
     string fileName = string(entry->d_name);
-    // We need this because
+    // We need this because it segment faults on open? or maybe /.. is not a good idea? whatever
     if(fileName == "." || fileName == ".." || fileName == "by-path" || fileName == "by-id") {
       continue;
     }
-    log("Checking for power button: " + fileName);
+    string filePath = inputDirectory + fileName;
 
-    int fd = open(fileName.c_str(), O_RDONLY);
+    log("Checking for power button: " + filePath, emitter);
+
+    int fd = open(filePath.c_str(), O_RDONLY);
     log("After opening file log...");
     if(fd < 0) {
-      log("This device? cannot be openned. skipping");
+      log("This device? cannot be openned. skipping", emitter);
       continue;
     }
 
-    log("before ioctl...");
+    log("before ioctl...", emitter);
     if (0 < ioctl(fd, EVIOCGBIT(EV_KEY, KEY_MAX), bit) && (bit[KEY_POWER/8] & (1<< (KEY_POWER & 7)))) {
-      log(fileName + " has a power button");
+      log(filePath + " is a power button", emitter);
       close(fd);
-      return fileName;
+      return filePath;
     }
     close(fd);
   }
