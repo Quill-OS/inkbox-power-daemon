@@ -89,13 +89,6 @@ void afterSleep() {
 
   CEA();
   if(dieAfter == false) {
-    if(isNiaModelA == true) {
-      niaATouchscreenLoader(true);
-    }
-  }
-
-  CEA();
-  if(dieAfter == false) {
     string hwclockPath = "/sbin/hwclock";
     const char *args[] = {hwclockPath.c_str(), "--hctosys", "-u", nullptr};
     int fakePid = 0;
@@ -181,6 +174,14 @@ void afterSleep() {
   CEA();
   if(dieAfter == false) {
     startUsbNet();
+  }
+
+  // This is later because of how the platform plugin touchscreen load works
+  CEA();
+  if(dieAfter == false) {
+    if(isNiaModelA == true) {
+      niaATouchscreenLoader(true);
+    }
   }
 
   // Finish...

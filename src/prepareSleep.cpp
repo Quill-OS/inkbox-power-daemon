@@ -78,6 +78,14 @@ void prepareSleep() {
   log("Launching prepareSleep", emitter);
   diePrepare = false;
 
+  if(isNiaModelA == true) {
+    if(getPidByName("luajit") == -1) {
+      niaATouchscreenLoader(false);
+    } else {
+      log("Not putting touchscreen off because of koreader and lua friends", emitter);
+    }
+  }
+
   CEP();
   if (diePrepare == false) {
     // To avoid screen shooting the previous lockscreen
@@ -194,13 +202,6 @@ void prepareSleep() {
         int dev = open("/sys/kernel/debug/ci_hdrc.0/role", O_RDWR);
         int writeStatus = write(dev, strToWrite.c_str(), strToWrite.length());
         close(dev);
-      }
-      if(isNiaModelA == true) {
-        if(getPidByName("luajit") == -1) {
-          niaATouchscreenLoader(false);
-        } else {
-          log("Not putting touchscreen off because of koreader and lua friends", emitter);
-        }
       }
     }
   }

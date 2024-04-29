@@ -296,7 +296,7 @@ void niaATouchscreenLoader(bool moduleStatus) {
   int counter = 0;
   while(status == false) {
     counter = counter + 1;
-    if(counter == 10) {
+    if(counter == 5) {
       notifySend("Touchscreen not working?");
       return void();
     }

@@ -63,6 +63,7 @@ void eventHandler() {
   ignoreEvents_mtx.unlock();
 }
 
+// This code was supplied by Andi, should work on all devices, untested
 string getPowerButton() {
   uint8_t bit[KEY_MAX / 8];
 
@@ -74,15 +75,27 @@ string getPowerButton() {
 
   struct dirent* entry;
   while ((entry = readdir(dir)) != nullptr) {
-    int fd = open(entry->d_name, O_RDONLY);
-    if (fd < 0) {
-      return "";
+    string fileName = string(entry->d_name);
+    // We need this because
+    if(fileName == "." || fileName == ".." || fileName == "by-path" || fileName == "by-id") {
+      continue;
+    }
+    log("Checking for power button: " + fileName);
+
+    int fd = open(fileName.c_str(), O_RDONLY);
+    log("After opening file log...");
+    if(fd < 0) {
+      log("This device? cannot be openned. skipping");
+      continue;
     }
 
+    log("before ioctl...");
     if (0 < ioctl(fd, EVIOCGBIT(EV_KEY, KEY_MAX), bit) && (bit[KEY_POWER/8] & (1<< (KEY_POWER & 7)))) {
-      log(string(entry->d_name) + " has a power button");
-      return entry->d_name;
+      log(fileName + " has a power button");
+      close(fd);
+      return fileName;
     }
+    close(fd);
   }
   return "";
 }
@@ -90,7 +103,11 @@ string getPowerButton() {
 void startMonitoringDev() {
   log("Starting monitoring events", emitter);
 
-  string devPath = "/dev/input/event0";
+  string devPath = getPowerButton();
+  if(devPath == "") {
+    log("Dev path is empty, using the default old value");
+    devPath = "/dev/input/event0";
+  }
   /*
   if(isNiaModelC == true && handleNiaInputs == false) {
     devPath = "/dev/input/by-path/platform-21f8000.i2c-platform-bd71828-pwrkey-event";
@@ -98,17 +115,17 @@ void startMonitoringDev() {
   }
   */
   // so handleNiaInputs is not needed anymore?
-  // This code was supplied by Andi, should work on all devices, untested
 
   // Wait for udev to create the device
+  /*
   while(fileExists(devPath) == false) {
     log("Device file doesn't exist, waiting for: '" + devPath + "'", emitter);
     this_thread::sleep_for(timespan);
   }
+  */
 
   struct libevdev * dev = NULL;
-
-  // Open until it's fine...
+  log("Opening final device: " + devPath, emitter);
   int fd = -1;
   while(fd < 0) {
     fd = open(devPath.c_str(), O_RDONLY | O_CLOEXEC);
