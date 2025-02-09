@@ -6,6 +6,7 @@
 #include <thread>
 
 #include <cstdlib>
+#include <cmath>
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
@@ -54,9 +55,13 @@ int restoreBrightness() {
 
 void setBrightness(int device, int level) {
   // TODO: Make this smarter
-  if(model == "n249") {
+  if (model == "n249") {
     writeFileString("/sys/class/backlight/backlight_cold/brightness", std::to_string(level));
     writeFileString("/sys/class/backlight/backlight_warm/brightness", std::to_string(level));
+  } else if (model == "n418") {
+    level = round(float(level)/100*2047);
+    writeFileString("/sys/class/leds/aw99703-bl_FL2/brightness", std::to_string(level));
+    writeFileString("/sys/class/leds/aw99703-bl_FL1/brightness", std::to_string(level));
   }
   else {
     ioctl(device, 241, level);
@@ -71,6 +76,15 @@ int getBrightness() {
     return stoi(readConfigString("/sys/class/backlight/mxc_msp430_fl.0/brightness"));
   } else if (model == "n249") {
     return stoi(readConfigString("/sys/class/backlight/backlight_cold/actual_brightness"));
+  } else if (model == "n418") {
+    int normalBrightness = round(float(stoi(readConfigString("/sys/class/leds/aw99703-bl_FL2/brightness")))/2047*100);
+    int warmthBrightness = round(float(stoi(readConfigString("/sys/class/leds/aw99703-bl_FL1/brightness")))/2047*100);
+    if(normalBrightness <= warmthBrightness) {
+      return warmthBrightness;
+    }
+    else {
+      return normalBrightness;
+    }
   } else {
     if(model != "n705" && model != "n905b" && model != "n905c" && model != "kt") {
       return stoi(readConfigString("/sys/class/backlight/mxc_msp430.0/actual_brightness"));

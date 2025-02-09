@@ -22,8 +22,8 @@ file(GLOB fileSrc
 link_directories(${CMAKE_SOURCE_DIR}/lib/libevdev/install/lib/)
 
 # To be made better when integrated with scripts repo
-link_directories(/home/build/qos/FBInk/Release/static/)
-link_directories(/home/build/qos/FBInk/libi2c-staged/lib/)
+link_directories(${CMAKE_SOURCE_DIR}/lib/FBInk/Release/)
+link_directories(${CMAKE_SOURCE_DIR}/lib/FBInk/libi2c-staged/lib/)
 
 add_executable(ipd ${fileSrc})
 
