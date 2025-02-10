@@ -144,8 +144,13 @@ bool getChargerStatus() {
     chargerStatus = readFile("/sys/devices/system/yoshi_battery/yoshi_battery0/battery_status");
     return stoi(chargerStatus);
   }
-  else if (model == "n249") {
-    chargerStatus = readFile("/sys/class/power_supply/rn5t618-battery/status");
+  else if (model == "n249" or model == "n418") {
+    if(model == "n249") {
+      chargerStatus = readFile("/sys/class/power_supply/rn5t618-battery/status");
+    }
+    else if(model == "n418") {
+      chargerStatus = readFile("/sys/class/power_supply/battery/status");
+    }
     if(chargerStatus != "Discharging\n") {
       return true;
     }
@@ -196,8 +201,13 @@ bool getAccurateChargerStatus() {
     chargerStatus = readFile("/sys/devices/system/yoshi_battery/yoshi_battery0/battery_status");
     return stoi(chargerStatus);
   }
-  else if (model == "n249") {
-    chargerStatus = readFile("/sys/class/power_supply/rn5t618-battery/status");
+  else if (model == "n249" or model == "n418") {
+    if(model == "n249") {
+      chargerStatus = readFile("/sys/class/power_supply/rn5t618-battery/status");
+    }
+    else if(model == "n418") {
+      chargerStatus = readFile("/sys/class/power_supply/battery/status");
+    }
     if(chargerStatus != "Discharging\n") {
       return true;
     }
@@ -236,6 +246,9 @@ string getStringChargerStatus() {
   else if (model == "n249") {
     chargerPath = "/sys/class/power_supply/rn5t618-battery/status";
   }
+  else if (model == "n418") {
+    chargerPath = "/sys/class/power_supply/battery/status";
+  }
   else if (isNiaModelC == true) {
     chargerPath = "/sys/class/power_supply/battery/status";
   }
@@ -260,7 +273,7 @@ void getLedPath() {
   if(model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
     ledPath = "/sys/class/leds/pmic_ledsg/brightness";
   }
-  else if(model == "n306" or model == "n873") {
+  else if(model == "n306" or model == "n873" or model == "n418") {
     ledPath = "/sys/class/leds/GLED/brightness";
   }
   else if(model == "bpi") {
@@ -314,5 +327,5 @@ void niaATouchscreenLoader(bool moduleStatus) {
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
-  log("Touchscreen operation succesfull", emitter);
+  log("Touchscreen operation successful", emitter);
 }

@@ -133,8 +133,10 @@ void afterSleep() {
   if(dieAfter == false) {
     // Needed by lockscreen but takes time if lockscreen is off
     if(lockscreen == true) {
-      setBrightnessCin(restoreBrightness(), 0);
+      setBrightnessCin(restoreBrightness(0), 0, 0);
+      setBrightnessCin(restoreBrightness(1), 0, 1);
       remove("/tmp/savedBrightness");
+      remove("/tmp/savedWarmth");
     }
   }
 
@@ -165,8 +167,10 @@ void afterSleep() {
   CEA();
   if(dieAfter == false) {
     if(lockscreen == false) {
-      setBrightnessCin(restoreBrightness(), 0);
+      setBrightnessCin(restoreBrightness(0), 0, 0);
+      setBrightnessCin(restoreBrightness(1), 0, 1);
       remove("/tmp/savedBrightness");
+      remove("/tmp/savedWarmth");
     }
   }
 

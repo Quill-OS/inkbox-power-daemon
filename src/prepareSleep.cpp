@@ -167,8 +167,10 @@ void prepareSleep() {
 
   CEP();
   if (diePrepare == false) {
-    saveBrightness(getBrightness());
-    setBrightnessCin(0, getBrightness());
+    saveBrightness(getBrightness(0), 0);
+    saveBrightness(getBrightness(1), 1);
+    setBrightnessCin(0, getBrightness(0), 0);
+    setBrightnessCin(0, getBrightness(1), 1);
   }
 
   // kill inactive ssh sessions
