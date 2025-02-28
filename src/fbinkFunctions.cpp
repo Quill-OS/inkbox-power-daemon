@@ -177,7 +177,7 @@ void restoreFbDepth() {
       log("FBInk: Something went wrong when trying to change screen bitdepth to " + to_string(fbDepthSaved) + " bpp", emitter);
     }
     else {
-      log("Restoring fbdepth to " + to_string(fbDepthSaved) + " bpp was succesfull", emitter);
+      log("Restoring fbdepth to " + to_string(fbDepthSaved) + " bpp was successful", emitter);
     }
   }
   else {

@@ -30,7 +30,12 @@ void turnOffWifi() {
     WIFI_MODULE = "8189fs";
     SDIO_WIFI_PWR_MODULE = "sdio_wifi_pwr";
     WIFI_DEV = "eth0";
-  } 
+  }
+  else if (model == "n418") {
+    WIFI_MODULE = "8723ds";
+    SDIO_WIFI_PWR_MODULE = "sdio_wifi_pwr";
+    WIFI_DEV = "wlan0";
+  }
   else if (model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
     WIFI_MODULE = "dhd";
     SDIO_WIFI_PWR_MODULE = "sdio_wifi_pwr";
@@ -122,7 +127,12 @@ void turnOnWifi() {
     WIFI_MODULE = "/modules/wifi/8189fs.ko";
     SDIO_WIFI_PWR_MODULE = "/modules/drivers/mmc/card/sdio_wifi_pwr.ko";
     WIFI_DEV = "eth0";
-  } 
+  }
+  else if (model == "n418") {
+    WIFI_MODULE = "/modules/4.1.15-inkbox/kernel/8723ds.ko";
+    SDIO_WIFI_PWR_MODULE = "/modules/4.1.15-inkbox/kernel/drivers/mmc/card/sdio_wifi_pwr.ko";
+    WIFI_DEV = "wlan0";
+  }
   else if (model == "n705" or model == "n905b" or model == "n905c" or model == "n613") {
     WIFI_MODULE = "/modules/dhd.ko";
     SDIO_WIFI_PWR_MODULE = "/modules/sdio_wifi_pwr.ko";
