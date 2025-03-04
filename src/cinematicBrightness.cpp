@@ -100,7 +100,12 @@ int getBrightness(int type) {
   } else if (model == "n236" or model == "n437") {
     return stoi(readConfigString("/sys/class/backlight/mxc_msp430_fl.0/brightness"));
   } else if (model == "n249") {
-    return stoi(readConfigString("/sys/class/backlight/backlight_cold/actual_brightness"));
+    if(type == 0) {
+      return stoi(readConfigString("/sys/class/backlight/backlight_cold/actual_brightness"));
+    }
+    else {
+      return stoi(readConfigString("/sys/class/backlight/backlight_warm/actual_brightness"));
+    }
   } else if (model == "n418") {
     if(type == 0) {
       return round(float(stoi(readConfigString("/sys/class/leds/aw99703-bl_FL2/brightness")))/2047*100);
