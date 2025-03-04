@@ -17,27 +17,11 @@ extern string model;
 
 extern int cinematicBrightnessDelayMs;
 
-void setBrightnessCin(int levelToSet, int currentLevel, int type) {
-  if(model != "n705" && model != "n905b" && model != "n905c" && model != "kt") {
-    int device = -1;
-    if(model != "n249") {
-      if ((device = open("/dev/ntx_io", O_RDWR)) == -1) {
-        log("Error on opening ntx device", emitter);
-      }
-    }
-    chrono::milliseconds timespan(cinematicBrightnessDelayMs);
-    while (currentLevel != levelToSet) {
-      if (currentLevel < levelToSet) {
-        currentLevel = currentLevel + 1;
-      } else {
-        currentLevel = currentLevel - 1;
-      }
-
-      setBrightness(device, currentLevel, type);
-      this_thread::sleep_for(timespan);
-    }
-    close(device);
-  }
+void setBrightnessCin(int levelToSetCold, int levelToSetWarm, int currentLevelCold, int currentLevelWarm) {
+  string cbPath = "/opt/bin/cinematic_brightness";
+  const char * cbArgs[] = { cbPath.c_str(), std::to_string(levelToSetCold).c_str(), std::to_string(levelToSetWarm).c_str(), std::to_string(currentLevelCold).c_str(), std::to_string(currentLevelWarm).c_str(), std::to_string(cinematicBrightnessDelayMs * 100).c_str(), nullptr };
+  int fakePid = 0;
+  posixSpawnWrapper(cbPath.c_str(), cbArgs, true, &fakePid);
 }
 
 void saveBrightness(int level, int type) {
@@ -69,7 +53,11 @@ int restoreBrightness(int type) {
 }
 
 void setBrightness(int device, int level, int type) {
-  // TODO: Make this smarter
+  if(type != 0) {
+    if(model == "n873" || model == "n418") {
+      level = 10 - 0.1 * level;
+    }
+  }
   if (model == "n249") {
     if(type == 0) {
       writeFileString("/sys/class/backlight/backlight_cold/brightness", std::to_string(level));
@@ -78,12 +66,18 @@ void setBrightness(int device, int level, int type) {
       writeFileString("/sys/class/backlight/backlight_warm/brightness", std::to_string(level));
     }
   } else if (model == "n418") {
-    level = round(float(level)/100*2047);
     if(type == 0) {
-      writeFileString("/sys/class/leds/aw99703-bl_FL2/brightness", std::to_string(level));
+      writeFileString("/sys/class/backlight/mxc_msp430.0/brightness", std::to_string(level));
     }
     else {
       writeFileString("/sys/class/leds/aw99703-bl_FL1/brightness", std::to_string(level));
+    }
+  } else if (model == "n873") {
+    if(type == 0) {
+      writeFileString("/sys/class/backlight/mxc_msp430.0/brightness", std::to_string(level));
+    }
+    else {
+      writeFileString("/sys/class/backlight/lm3630a_led/color", std::to_string(level));
     }
   }
   else {
@@ -108,10 +102,17 @@ int getBrightness(int type) {
     }
   } else if (model == "n418") {
     if(type == 0) {
-      return round(float(stoi(readConfigString("/sys/class/leds/aw99703-bl_FL2/brightness")))/2047*100);
+      return stoi(readConfigString("/sys/class/backlight/mxc_msp430.0/actual_brightness"));
     }
     else {
-      return round(float(stoi(readConfigString("/sys/class/leds/aw99703-bl_FL1/brightness")))/2047*100);
+      return 10 * (10 - stoi(readConfigString("/sys/class/leds/aw99703-bl_FL1/color")));
+    }
+  } else if (model == "n873") {
+    if(type == 0) {
+      return stoi(readConfigString("/sys/class/backlight/mxc_msp430.0/brightness"));
+    }
+    else {
+      return 10 * (10 - stoi(readConfigString("/sys/class/backlight/lm3630a_led/color")));
     }
   } else {
     if(model != "n705" && model != "n905b" && model != "n905c" && model != "kt") {
