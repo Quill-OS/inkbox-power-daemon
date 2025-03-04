@@ -19,7 +19,7 @@ extern int cinematicBrightnessDelayMs;
 
 void setBrightnessCin(int levelToSetCold, int levelToSetWarm, int currentLevelCold, int currentLevelWarm) {
   string cbPath = "/opt/bin/cinematic_brightness";
-  const char * cbArgs[] = { cbPath.c_str(), std::to_string(levelToSetCold).c_str(), std::to_string(levelToSetWarm).c_str(), std::to_string(currentLevelCold).c_str(), std::to_string(currentLevelWarm).c_str(), std::to_string(cinematicBrightnessDelayMs * 100).c_str(), nullptr };
+  const char * cbArgs[] = { cbPath.c_str(), std::to_string(levelToSetCold).c_str(), std::to_string(levelToSetWarm).c_str(), std::to_string(currentLevelCold).c_str(), std::to_string(currentLevelWarm).c_str(), std::to_string(cinematicBrightnessDelayMs * 100).c_str(), "0", nullptr };
   int fakePid = 0;
   posixSpawnWrapper(cbPath.c_str(), cbArgs, true, &fakePid);
 }
